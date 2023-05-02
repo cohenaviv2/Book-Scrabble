@@ -8,7 +8,7 @@ import java.util.BitSet;
 
 /* 
  * Space efficient probabilistic algorithm based on hashing
- * the algorithm maintains BitSet and K different hash functions
+ * Maintains BitSet and K different hash functions
  * knows with absolute certainty if a word is not found in the book dictionary
  * and with a high probability as desired whether a word is found.
  * 
