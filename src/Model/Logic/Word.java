@@ -1,4 +1,4 @@
-package Model.core;
+package Model.Logic;
 
 import java.util.Arrays;
 

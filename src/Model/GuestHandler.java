@@ -1,10 +1,12 @@
-package Model.Server;
+package Model;
 
 import java.io.*;
 
-public class BookScrabbleHandler implements ClientHandler {
-    private BufferedReader in;
-    private PrintWriter out;
+import Model.Server.ClientHandler;
+
+public class GuestHandler implements ClientHandler {
+    BufferedReader in;
+    PrintWriter out;
 
     @Override
     public void handleClient(InputStream inFromclient, OutputStream outToClient) {
@@ -17,6 +19,8 @@ public class BookScrabbleHandler implements ClientHandler {
          * Using DictionaryManager will return the answer as a string "true" or
          * "false" followed by a line break character.
          * The conversation with the client will end after one query.
+         * 
+         * "1234, func(), word"
          */
 
         String[] userLine = null;
@@ -28,26 +32,26 @@ public class BookScrabbleHandler implements ClientHandler {
             e.printStackTrace();
         }
         String operator = userLine[0];
-        String[] books = new String[userLine.length - 1];
-        System.arraycopy(userLine, 1, books, 0, (userLine.length - 1));
+        String[] args = new String[userLine.length - 1];
+        System.arraycopy(userLine, 1, args, 0, (userLine.length - 1));
 
-        DictionaryManager dm = DictionaryManager.get();
+        //DictionaryManager dm = DictionaryManager.get();
 
-        if (operator.equals("Q")) {
-            if (dm.query(books)) {
-                out.println("true");
-            } else {
-                out.println("false");
-            }
-        } else if (operator.equals("C")) {
-            if (dm.challenge(books)) {
-                out.println("true");
-            } else {
-                out.println("false");
-            }
-        } else {
-            out.println("wrong operator");
-        }
+        // if (operator.equals("Q")) {
+        //     if (dm.query(args)) {
+        //         out.println("true");
+        //     } else {
+        //         out.println("false");
+        //     }
+        // } else if (operator.equals("C")) {
+        //     if (dm.challenge(args)) {
+        //         out.println("true");
+        //     } else {
+        //         out.println("false");
+        //     }
+        // } else {
+        //     out.println("wrong operator");
+        // }
 
     }
 

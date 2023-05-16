@@ -1,7 +1,6 @@
-package Model.server;
+package Model.Server;
 
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 
 public interface ClientHandler {
 	void handleClient(InputStream inFromclient, OutputStream outToClient);

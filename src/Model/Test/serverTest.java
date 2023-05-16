@@ -1,4 +1,4 @@
-package Model.server;
+package Model.Test;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -9,7 +9,9 @@ import java.net.Socket;
 import java.util.Random;
 import java.util.Scanner;
 
-public class MainTrain3 {
+import Model.Server.*;
+
+public class serverTest {
 	
 	public static class ClientHandler1 implements ClientHandler{
 		PrintWriter out;
@@ -54,7 +56,7 @@ public class MainTrain3 {
 		boolean ok=true;
 		Random r=new Random();
 		int port=6000+r.nextInt(1000);
-		MyServer s=new MyServer(port, new ClientHandler1());
+		GameServer s=new GameServer(port, new ClientHandler1());
 		int c = Thread.activeCount();
 		s.start(); // runs in the background
 		try {
@@ -142,7 +144,7 @@ public class MainTrain3 {
 		
 		Random r=new Random();
 		int port=6000+r.nextInt(1000);
-		MyServer s=new MyServer(port, new BookScrabbleHandler());
+		GameServer s=new GameServer(port, new BookScrabbleHandler());
 		s.start();
 		runClient(port, "Q,s1.txt,s2.txt,"+s1[1], true); //
 		runClient(port, "Q,s1.txt,s2.txt,"+s2[4], true); //

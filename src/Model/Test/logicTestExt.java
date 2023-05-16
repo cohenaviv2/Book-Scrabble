@@ -1,8 +1,9 @@
-package Model.core;
+package Model.Test;
 
-import Model.core.Tile.Bag;
+import Model.Logic.*;
+import Model.Logic.Tile.Bag;
 
-public class MainTrain1Ext {
+public class logicTestExt {
 
     public static void testBag() {
         Bag b = Tile.Bag.getBag();

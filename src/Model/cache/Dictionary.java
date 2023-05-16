@@ -1,4 +1,4 @@
-package Model.cache;
+package Model.Cache;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;

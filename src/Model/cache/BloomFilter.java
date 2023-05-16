@@ -1,4 +1,4 @@
-package Model.cache;
+package Model.Cache;
 
 import java.math.BigInteger;
 import java.security.MessageDigest;

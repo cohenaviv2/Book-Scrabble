@@ -1,9 +1,9 @@
-package Model.server;
+package Model.Server;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import Model.cache.Dictionary;
+import Model.Cache.Dictionary;
 
 /*
  * The dictionary manager creates new dictionaries only as needed
@@ -69,8 +69,10 @@ public class DictionaryManager {
         return size;
     }
 
-    // Static:
+    
     public static DictionaryManager get() {
+        /*  Singletone get: */
+
         if (dictManInstance == null)
             dictManInstance = new DictionaryManager();
         return dictManInstance;

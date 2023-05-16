@@ -1,12 +1,13 @@
-package Model.core;
+package Model.Logic;
 
 import java.util.ArrayList;
 
 /*
  * Represents the Game Board
- * Contains 15x15 matrix of Squares[][] 
- * can operate on the board by placing a word
- * The placement is done after checking whether the word is legal in terms of the board and the dictionary, and then calculates the score accordingly.
+ * Contains 15x15 matrix of Squares
+ * Can operate on the board by placing a word
+ * Placement is done after checking whether the word is legal in terms of the board and the dictionary
+ * Calculates the score accordingly.
  * 
  * @author: Aviv Cohen
  *

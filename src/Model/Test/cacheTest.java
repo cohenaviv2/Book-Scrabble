@@ -1,17 +1,11 @@
-package Model.server;
+package Model.Test;
 
 import java.io.FileWriter;
 import java.io.PrintWriter;
 
-import Model.cache.BloomFilter;
-import Model.cache.CacheManager;
-import Model.cache.CacheReplacementPolicy;
-import Model.cache.Dictionary;
-import Model.cache.IOSearcher;
-import Model.cache.LFU;
-import Model.cache.LRU;
+import Model.Cache.*;
 
-public class MainTrain2 {
+public class cacheTest {
 	
 	public static void testLRU() {
 		CacheReplacementPolicy lru=new LRU();

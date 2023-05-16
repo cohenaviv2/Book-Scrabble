@@ -1,8 +1,11 @@
-package Model.core;
+package Model.Test;
 
-import Model.core.Tile.Bag;
+import Model.Logic.Board;
+import Model.Logic.Tile;
+import Model.Logic.Word;
+import Model.Logic.Tile.Bag;
 
-public class MainTrain1 {
+public class logicTest {
 
 	public static void testBag() {
 		Bag b = Tile.Bag.getBag();
