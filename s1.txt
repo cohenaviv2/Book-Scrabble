@@ -1,2 +1,6 @@
 14801 18056 14957 19574 16666 15197 13037 17208 18621 14411 
+<<<<<<< HEAD
 sdffsdaddassdffsd
+=======
+sdffsd
+>>>>>>> origin/master
