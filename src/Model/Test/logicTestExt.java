@@ -1,7 +1,7 @@
-package Model.Test;
+package model.test;
 
-import Model.Logic.*;
-import Model.Logic.Tile.Bag;
+import model.logic.*;
+import model.logic.Tile.Bag;
 
 public class logicTestExt {
 

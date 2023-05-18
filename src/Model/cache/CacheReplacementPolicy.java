@@ -1,4 +1,4 @@
-package Model.Cache;
+package model.cache;
 
 public interface CacheReplacementPolicy{
 	void add(String word);

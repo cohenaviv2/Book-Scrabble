@@ -1,8 +1,8 @@
-package Model;
+package model;
 
 import java.io.*;
 
-import Model.Server.ClientHandler;
+import model.Server.ClientHandler;
 
 public class GuestHandler implements ClientHandler {
     BufferedReader in;

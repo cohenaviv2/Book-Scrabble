@@ -80,6 +80,6 @@ A legal word must meet all the following conditions:
 <img src="https://github.com/Matan-Eliyahu/BookScrabble/blob/master/Readme%20images/GANTT.png" alt="GRANTT" width="1100px" height="300px">
 
 ## Credits
+- [Aviv Cohen](https://github.com/cohenaviv2)
 - [Matan Eliyahu](https://github.com/Matan-Eliyahu)
 - [Moshe Azachi](https://github.com/MosheAzachi)
-- [Aviv Cohen](https://github.com/cohenaviv2)

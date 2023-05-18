@@ -1,9 +1,9 @@
-package Model.Server;
+package model.Server;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import Model.Cache.Dictionary;
+import model.cache.Dictionary;
 
 /*
  * The dictionary manager creates new dictionaries only as needed

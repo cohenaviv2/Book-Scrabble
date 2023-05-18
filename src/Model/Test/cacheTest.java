@@ -1,9 +1,9 @@
-package Model.Test;
+package model.test;
 
 import java.io.FileWriter;
 import java.io.PrintWriter;
 
-import Model.Cache.*;
+import model.cache.*;
 
 public class cacheTest {
 	

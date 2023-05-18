@@ -1,9 +1,9 @@
-package Model.Test;
+package model.test;
 
-import Model.Logic.Board;
-import Model.Logic.Tile;
-import Model.Logic.Word;
-import Model.Logic.Tile.Bag;
+import model.logic.Board;
+import model.logic.Tile;
+import model.logic.Word;
+import model.logic.Tile.Bag;
 
 public class logicTest {
 
