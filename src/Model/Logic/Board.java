@@ -1,4 +1,4 @@
-package Model.Logic;
+package model.logic;
 
 import java.util.ArrayList;
 
@@ -543,19 +543,6 @@ public class Board {
             return score;
         }
         return 0;
-    }
-
-    public void printArrayList(ArrayList<Word> words) {
-        for (Word w : words) {
-            for (int i = 0; i < w.getTiles().length; i++) {
-                if (w.getTiles()[i] == null)
-                    System.out.print("_");
-                else
-                    System.out.print(w.getTiles()[i].letter);
-            }
-            System.out.print(", ");
-        }
-        System.out.println();
     }
 
     public void printPlacedWords() {

@@ -1,4 +1,4 @@
-package Model.Logic;
+package model.logic;
 
 import java.util.Random;
 
@@ -89,7 +89,7 @@ public class Tile {
             if (this.quantities[rand] > 0) {
                 this.quantities[rand]--;
                 return this.bagTiles[rand];
-            } else { // Round modulo loop
+            } else { // Modulo loop
                 int i = rand;
                 while ((i + 1) % 26 != rand) {
                     if (this.quantities[(i + 1) % 26] > 0) {

@@ -1,8 +1,8 @@
-package Model;
+package model;
 
 import java.io.*;
 
-import Model.Server.ClientHandler;
+import model.Server.ClientHandler;
 
 public class GuestHandler implements ClientHandler {
     BufferedReader in;
@@ -11,16 +11,23 @@ public class GuestHandler implements ClientHandler {
     @Override
     public void handleClient(InputStream inFromclient, OutputStream outToClient) {
         /*
-         * Reads a string from the client until line-break character.
-         * string starts with "Q," for query or "C," for challenge.
-         * the rest of the string (seperated by ",")
-         * indicate the names of the books, except for the last word that indicates the
-         * query itself.
-         * Using DictionaryManager will return the answer as a string "true" or
-         * "false" followed by a line break character.
-         * The conversation with the client will end after one query.
+         * Reads a string from the guest until line-break character.
+         * String starts with the Player ID
+         * seperated by ","
+         * The method the Player want to use
+         * seperated by ","
+         * The word for this query
          * 
-         * "1234, func(), word"
+         * e.g. - "1548, tryPlaceWord(), Hello"
+         * 
+         * Host respondes a string starting with HOST
+         * seperated by ","
+         * The type of return data
+         * seperated by ","
+         * The data itself
+         * 
+         * e.g. - "HOST,int,12" , "HOST,boolean,true"
+         * 
          */
 
         String[] userLine = null;

@@ -1,4 +1,4 @@
-package Model.Test;
+package model.test;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -9,7 +9,7 @@ import java.net.Socket;
 import java.util.Random;
 import java.util.Scanner;
 
-import Model.Server.*;
+import model.Server.*;
 
 public class serverTest {
 	

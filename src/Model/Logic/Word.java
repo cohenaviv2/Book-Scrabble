@@ -1,4 +1,4 @@
-package Model.Logic;
+package model.logic;
 
 import java.util.Arrays;
 
@@ -25,13 +25,11 @@ public class Word {
     }
 
     public Word(Word other) {
-        if (this != other) {
-            if (other != null) {
+        if (this != other && other != null) {
                 this.tiles = other.getTiles();
                 this.row = other.getRow();
                 this.col = other.getCol();
                 this.vertical = other.isVertical();
-            }
         }
     }
 

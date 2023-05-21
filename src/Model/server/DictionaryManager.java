@@ -1,9 +1,9 @@
-package Model.Server;
+package model.Server;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import Model.Cache.Dictionary;
+import model.cache.*;
 
 /*
  * The dictionary manager creates new dictionaries only as needed
@@ -27,9 +27,9 @@ public class DictionaryManager {
 
     public boolean query(String... args) {
         /*
-         * by given a list of books(args), checks for each book if its in the pool
+         * By given a list of books(args), checks for each book if its in the pool
          * if not, create new Dictionary for this book.
-         * Each query, which is the last word in arg ([n-1]),
+         * Each query, which is the last word in arg [n-1],
          * will be searched in each book separately to update the cache of each relevant
          * dictionary. this saves time for future queries.
          */

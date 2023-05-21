@@ -1,11 +1,11 @@
-package Model;
+package model;
 
 import java.io.*;
 import java.net.*;
 import java.util.*;
 
-import Model.Server.ClientHandler;
-import Model.Server.GameServer;
+import model.Server.ClientHandler;
+import model.Server.GameServer;
 
 /*
  * The host server responsible for the communication between the guests and the host.
