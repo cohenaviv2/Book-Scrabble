@@ -96,23 +96,23 @@ public class serverTest {
 	}
 	
 	public static void testDM() {
-		String t1[]=writeFile("t1.txt");
-		String t2[]=writeFile("t2.txt");
-		String t3[]=writeFile("t3.txt");
+		String t1[]=writeFile("src/model/test/t1.txt");
+		String t2[]=writeFile("src/model/test/t2.txt");
+		String t3[]=writeFile("src/model/test/t3.txt");
 		
 		DictionaryManager dm=DictionaryManager.get();
 		
-		if(!dm.query("t1.txt","t2.txt",t2[4]))
+		if(!dm.query("src/model/test/t1.txt","src/model/test/t2.txt",t2[4]))
 			System.out.println("problem for Dictionary Manager query (-5)");
-		if(!dm.query("t1.txt","t2.txt",t1[9]))
+		if(!dm.query("src/model/test/t1.txt","src/model/test/t2.txt",t1[9]))
 			System.out.println("problem for Dictionary Manager query (-5)");
-		if(dm.query("t1.txt","t3.txt","2"+t3[2]))
+		if(dm.query("src/model/test/t1.txt","src/model/test/t3.txt","2"+t3[2]))
 			System.out.println("problem for Dictionary Manager query (-5)");
-		if(dm.query("t2.txt","t3.txt","3"+t2[5]))
+		if(dm.query("src/model/test/t2.txt","src/model/test/t3.txt","3"+t2[5]))
 			System.out.println("problem for Dictionary Manager query (-5)");
-		if(!dm.challenge("t1.txt","t2.txt","t3.txt",t3[2]))
+		if(!dm.challenge("src/model/test/t1.txt","src/model/test/t2.txt","src/model/test/t3.txt",t3[2]))
 			System.out.println("problem for Dictionary Manager challenge (-5)");
-		if(dm.challenge("t2.txt","t3.txt","t1.txt","3"+t2[5]))
+		if(dm.challenge("src/model/test/t2.txt","src/model/test/t3.txt","src/model/test/t1.txt","3"+t2[5]))
 			System.out.println("problem for Dictionary Manager challenge (-5)");
 		
 		if(dm.getSize()!=3)
