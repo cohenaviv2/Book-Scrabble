@@ -9,7 +9,7 @@ import java.net.Socket;
 import java.util.Random;
 import java.util.Scanner;
 
-import model.Server.*;
+import model.server.*;
 
 public class serverTest {
 	

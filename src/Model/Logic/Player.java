@@ -1,7 +1,6 @@
-package model;
+package model.logic;
 
 import java.util.*;
-import model.logic.*;
 
 /*
  * ...........
@@ -14,22 +13,27 @@ public class Player {
     private String name;
     private final int id;
     int score;
-    private Tile[] tiles;
-    private ArrayList<Word> words;
+    private ArrayList<Tile> myTiles;
+    private ArrayList<Word> myWords;
     private boolean myTurn;
 
     public Player(String name) {
         this.name = name;
         this. id = generateID();
         this.score = 0;
-        this.tiles = new Tile[7];
-        this.words = new ArrayList<>();
+        this.myTiles = new ArrayList<>();
+        this.myWords = new ArrayList<>();
         this.myTurn = false;
     }
 
 
     private int generateID() {
-        return 0;
+        UUID idOne = UUID.randomUUID();
+        String str=""+idOne;        
+        int uid=str.hashCode();
+        String filterStr=""+uid;
+        str=filterStr.replaceAll("-", "");
+        return Integer.parseInt(str);
     }
 
     public String getName() {
@@ -44,12 +48,12 @@ public class Player {
         return score;
     }
 
-    public Tile[] getTiles() {
-        return tiles;
+    public ArrayList<Tile> getTiles() {
+        return myTiles;
     }
 
     public ArrayList<Word> getWords() {
-        return words;
+        return myWords;
     }
 
     public boolean isMyTurn() {
@@ -61,13 +65,22 @@ public class Player {
         this.score = score;
     }
 
-    public void setTiles(Tile[] tiles) {
-        this.tiles = tiles;
+    public void setTiles(ArrayList<Tile> tiles) {
+        this.myTiles = tiles;
     }
 
     public void setMyTurn(boolean myTurn) {
         this.myTurn = myTurn;
     }
 
-    
+ public static void main(String[] args) {
+    Player a = new Player("aviv");
+    Player b = new Player("jacob");
+    Player c = new Player("tomer");
+
+    System.out.println(a.getId());
+    System.out.println(b.getId());
+    System.out.println(c.getId());
+
+ }   
 }

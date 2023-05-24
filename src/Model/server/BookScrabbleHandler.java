@@ -1,4 +1,4 @@
-package model.Server;
+package model.server;
 
 import java.io.*;
 

@@ -4,8 +4,9 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 
-import model.Server.ClientHandler;
-import model.Server.GameServer;
+import model.logic.Player;
+import model.server.ClientHandler;
+import model.server.GameServer;
 
 /*
  * The host server responsible for the communication between the guests and the host.
@@ -18,19 +19,19 @@ import model.Server.GameServer;
  */
 
 public class HostServer extends GameServer {
-    private Player hostPlayer;
+    private ServerSocket theHostServer;
     private Socket gameServer;
     private Map<Socket, Player> clients;
     private PrintWriter gameServerOut;
     private Scanner gameServerIn;
     private boolean ready = false;
 
-    public HostServer(Player host, int port, ClientHandler ch) {
+    public HostServer(int port, ClientHandler ch) {
         super(port, ch);
         this.clients = new HashMap<>();
-        this.hostPlayer = host;
         Connect(); // to the game server
     }
+
 
     private void Connect() {
         /*
@@ -39,9 +40,9 @@ public class HostServer extends GameServer {
          */
 
         try {
-            gameServer = new Socket("localhost", 12345);
-            gameServerOut = new PrintWriter(gameServer.getOutputStream());
-            gameServerIn = new Scanner(gameServer.getInputStream());
+            this.gameServer = new Socket("localhost", 12345);
+            this.gameServerOut = new PrintWriter(gameServer.getOutputStream());
+            this.gameServerIn = new Scanner(gameServer.getInputStream());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -60,18 +61,17 @@ public class HostServer extends GameServer {
 
     private void runServer() throws Exception {
         try {
-            ServerSocket theServer = new ServerSocket(this.port);
-            theServer.setSoTimeout(1000); // 1sec
+            theHostServer.setSoTimeout(1000); // 1sec
             while (!ready) {
                 try {
-                    Socket aClient = theServer.accept(); // blocking call
+                    Socket aClient = theHostServer.accept(); // blocking call
                     // this.ch.handleClient(aClient.getInputStream(), aClient.getOutputStream());
                     // this.ch.close();
                     aClient.close();
                 } catch (SocketTimeoutException e) {
                 }
             }
-            theServer.close();
+            theHostServer.close();
         } catch (IOException e) {
             e.printStackTrace();
         }

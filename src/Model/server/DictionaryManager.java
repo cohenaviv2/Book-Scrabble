@@ -1,4 +1,4 @@
-package model.Server;
+package model.server;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -53,7 +53,11 @@ public class DictionaryManager {
     }
 
     public boolean challenge(String...args){
-        /*.... */
+        /*
+         * The Player chooses to challenge the game dictionary
+         * thinking that the dictionary was wrong and the word exist in one of the books.
+         * This will perform an I/O search in the books.
+         */
 
         String word = args[args.length - 1];
         boolean result = false;
@@ -72,7 +76,7 @@ public class DictionaryManager {
 
     
     public static DictionaryManager get() {
-        /*  Singletone get: */
+        /*  Singletone */
 
         if (dictManInstance == null)
             dictManInstance = new DictionaryManager();

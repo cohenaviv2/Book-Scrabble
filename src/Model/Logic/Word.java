@@ -3,7 +3,7 @@ package model.logic;
 import java.util.Arrays;
 
 /*
- * Represents a possible placement of the word on the game board
+ * Represents a possible placement of a word on the game board
  * each Word contains starting index on the board(row,col)
  * and a vertical boolean which is false if the Word is horizontal.
  * 

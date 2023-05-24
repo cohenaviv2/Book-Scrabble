@@ -2,11 +2,15 @@ package model;
 
 import java.io.*;
 
-import model.Server.ClientHandler;
+import model.server.ClientHandler;
 
 public class GuestHandler implements ClientHandler {
     BufferedReader in;
     PrintWriter out;
+
+    public void setClient(InputStream inFromclient, OutputStream outToClient) {
+        
+    }
 
     @Override
     public void handleClient(InputStream inFromclient, OutputStream outToClient) {
@@ -18,7 +22,7 @@ public class GuestHandler implements ClientHandler {
          * seperated by ","
          * The word for this query
          * 
-         * e.g. - "1548, tryPlaceWord(), Hello"
+         * e.g. - "1548, query(), Hello"
          * 
          * Host respondes a string starting with HOST
          * seperated by ","
@@ -38,27 +42,11 @@ public class GuestHandler implements ClientHandler {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        String operator = userLine[0];
+        String playerID = userLine[0];
+        String func = userLine[1];
+        String queryWord = userLine[2];
         String[] args = new String[userLine.length - 1];
         System.arraycopy(userLine, 1, args, 0, (userLine.length - 1));
-
-        //DictionaryManager dm = DictionaryManager.get();
-
-        // if (operator.equals("Q")) {
-        //     if (dm.query(args)) {
-        //         out.println("true");
-        //     } else {
-        //         out.println("false");
-        //     }
-        // } else if (operator.equals("C")) {
-        //     if (dm.challenge(args)) {
-        //         out.println("true");
-        //     } else {
-        //         out.println("false");
-        //     }
-        // } else {
-        //     out.println("wrong operator");
-        // }
 
     }
 

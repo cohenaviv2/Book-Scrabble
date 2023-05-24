@@ -1,4 +1,4 @@
-package model.Server;
+package model.server;
 
 import java.io.*;
 import java.net.*;
@@ -15,7 +15,7 @@ import java.net.*;
 public class GameServer {
     protected final int port;
     private final ClientHandler ch;
-    private volatile boolean ready;
+    private volatile boolean stop;
 
     public GameServer(int port, ClientHandler ch) {
         this.port = port;
@@ -23,7 +23,7 @@ public class GameServer {
     }
 
     public void start() {
-        this.ready = false;
+        this.stop = false;
         new Thread(() -> {
             try {
                 runServer();
@@ -37,7 +37,7 @@ public class GameServer {
         try {
             ServerSocket theServer = new ServerSocket(this.port);
             theServer.setSoTimeout(1000); // 1sec
-            while (!ready) {
+            while (!stop) {
                 try {
                     Socket aClient = theServer.accept(); // blocking call
                     this.ch.handleClient(aClient.getInputStream(), aClient.getOutputStream());
@@ -53,7 +53,7 @@ public class GameServer {
     }
 
     public void close() {
-        this.ready = true;
+        this.stop = true;
     }
 
 }

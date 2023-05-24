@@ -89,21 +89,21 @@ public class cacheTest {
 	public static void testIOSearch() throws Exception{
 		String words1 = "the quick brown fox \n jumps over the lazy dog";		
 		String words2 = "A Bloom filter is a space efficient probabilistic data structure, \n conceived by Burton Howard Bloom in 1970";
-		PrintWriter out = new PrintWriter(new FileWriter("text1.txt"));
+		PrintWriter out = new PrintWriter(new FileWriter("src/model/test/text1.txt"));
 		out.println(words1);
 		out.close();
-		out = new PrintWriter(new FileWriter("text2.txt"));
+		out = new PrintWriter(new FileWriter("src/model/test/text2.txt"));
 		out.println(words2);
 		out.close();
 		
-		if(!IOSearcher.search("is", "text1.txt","text2.txt"))
+		if(!IOSearcher.search("is", "src/model/test/text1.txt","src/model/test/text2.txt"))
 			System.out.println("your IOsearch did not found a word (-5)");
-		if(IOSearcher.search("cat", "text1.txt","text2.txt"))
+		if(IOSearcher.search("cat", "src/model/test/text1.txt","src/model/test/text2.txt"))
 			System.out.println("your IOsearch found a word that does not exist (-5)");		
 	}
 	
 	public static void testDictionary() {
-		Dictionary d = new Dictionary("text1.txt","text2.txt");
+		Dictionary d = new Dictionary("src/model/test/text1.txt","src/model/test/text2.txt");
 		if(!d.query("is"))
 			System.out.println("problem with dictionarry in query (-5)");
 		if(!d.challenge("lazy"))
