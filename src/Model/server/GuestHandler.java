@@ -1,36 +1,34 @@
-package model;
+package model.server;
 
 import java.io.*;
-
-import model.server.ClientHandler;
 
 public class GuestHandler implements ClientHandler {
     BufferedReader in;
     PrintWriter out;
 
     public void setClient(InputStream inFromclient, OutputStream outToClient) {
-        
+
     }
 
     @Override
     public void handleClient(InputStream inFromclient, OutputStream outToClient) {
         /*
-         * Reads a string from the guest until line-break character.
-         * String starts with the Player ID
-         * seperated by ","
-         * The method the Player want to use
-         * seperated by ","
-         * The word for this query
+         * HOST RECEIVES:
+         * a string from the guest
+         * string starts with the geust ID,
+         * then the Model method,
+         * and then the Value (like word).
          * 
-         * e.g. - "1548, query(), Hello"
+         * (ID is 0 for initializaition)
+         * e.g. - "0,connectMe,true" , "0,getMyID,true" , "2146376,query,Hello"
          * 
-         * Host respondes a string starting with HOST
-         * seperated by ","
-         * The type of return data
-         * seperated by ","
-         * The data itself
+         * HOST RESPONDS :
+         * a string to the guest
+         * string starts with the geust ID,
+         * then the Model method,
+         * and then the return value.
          * 
-         * e.g. - "HOST,int,12" , "HOST,boolean,true"
+         * e.g. - "0,connectMe,true" , "0,getMyID,2146376" , "2146376,query,32"
          * 
          */
 
@@ -39,6 +37,7 @@ public class GuestHandler implements ClientHandler {
             in = new BufferedReader(new InputStreamReader(inFromclient));
             out = new PrintWriter(outToClient, true);
             userLine = in.readLine().split(",");
+
         } catch (IOException e) {
             e.printStackTrace();
         }

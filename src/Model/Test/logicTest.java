@@ -1,11 +1,12 @@
 package model.test;
 
-import model.logic.Board;
-import model.logic.Tile;
-import model.logic.Word;
+import java.util.ArrayList;
+
+import model.HostModel;
+import model.logic.*;
 import model.logic.Tile.Bag;
 
-public class logicTest {
+public class LogicTest {
 
 	public static void testBag() {
 		Bag b = Tile.Bag.getBag();
@@ -96,7 +97,7 @@ public class logicTest {
 		if (b.tryPlaceWord(bit) != 22)
 			System.out.println("problem in placeWord for 5th word (-15)");
 
-		/******************* TEST 1 ******************/
+		/******************* EXTENTION ******************/
 
 		Word bit2 = new Word(get("S_TA"), 9, 4, true);
 		if (b.tryPlaceWord(bit2) != 28)
@@ -110,89 +111,45 @@ public class logicTest {
 		if (b.tryPlaceWord(bit4) != 0)
 			System.out.println("XE should be 0 (-15)");
 
-		/******************************** */
-
-		// Word bit4 = new Word(get("AKA"), 0, 12, false);
-		// if (b.tryPlaceWord(bit4) != 0)
-		// System.out.println("ABA should be 0 (-15)");
-
-		// Word b2 = new Word(get("ADEL"), 3, 11, false);
-		// if (b.tryPlaceWord(b2) != 0)
-		// System.out.println("ADEL should be 0 (-15)");
-
-		// Word b3 = new Word(get("ADE"), 12, 5, true);
-		// if (b.tryPlaceWord(b3) != 21)
-		// System.out.println("ADE should be 21 (-15)");
-
-		// Word bit4 = new Word(get("XX"), 10, 7, false);
-		// if (b.tryPlaceWord(bit4) != 0)
-		// System.out.println("XE should be 0 (-15)");
-
 		b.printBoard();
-		System.out.println();
 		b.printPlacedWords();
 
-		/******************* TEST-2 ******************/
+	}
 
-		// Word bit4 = new Word(get("__TTER"), 8, 9, true);
-		// if (b.tryPlaceWord(bit4) != 12)
-		// System.out.println("BETTER should be 12 (-15)");
+	private static void testPlayer() {
+		ArrayList<Player> players = new ArrayList<>();
+		char letter = 'A';
 
-		// Word bit5 = new Word(get("HO___"), 8, 5, false);
-		// if (b.tryPlaceWord(bit5) != 39)
-		// System.out.println("HOMOB should be 39 (-15)");
+		// Generate 10 players
+		for (int i = 0; i < 10; i++) {
+			String name = String.valueOf(letter);
+			Player p = new Player(name, HostModel.generateID(), false);
+			players.add(p);
+			System.out.println(p);
+			letter++;
+		}
 
-		// Word bit6 = new Word(get("_ANTAS"), 5, 7, false);
-		// if (b.tryPlaceWord(bit6) != 11)
-		// System.out.println("FANTAST should be 11 (-15)");
+		// Check ID's
+		for (Player i : players){
+			for (Player j : players){
+				if (i!=j && i.getID() == j.getID()){
+					System.out.println("There is some players with the same ID");
+				}
+			}
+		}
 
-		// b.printBoard();
 
-		/******************* TEST-3 ******************/
+		/* ............ */
 
-		// Word ahi = new Word(get("A_I"), 6, 5, true);
-		// if (b.tryPlaceWord(ahi) != 16)
-		// System.out.println("problem in placeWord for AHI word (-15)");
-
-		// Word al = new Word(get("AL"), 6, 9, true);
-		// if (b.tryPlaceWord(al) != 16)
-		// System.out.println("problem in placeWord for AL word (-15)");
-
-		// b.printBoard();
-
-		// Word ran = new Word(get("R_N"), 6, 6, false);
-		// if (b.tryPlaceWord(ran) != 16)
-		// System.out.println("problem in placeWord for RAN word (-15)");
-
-		// b.printBoard();
-
-		/******************* TEST-4 ******************/
-
-		// Word farm = new Word(get("FARM"), 5, 7, true);
-		// int r = b.tryPlaceWord(farm);
-		// b.printBoard();
-		// System.out.println("FARM score: " + r);
-
-		// Word guy = new Word(get("GUY"),4,0,true);
-		// int res = b.tryPlaceWord(guy);
-		// System.out.println("GUY score: " + res);
-
-		// Word dude = new Word(get("DUDE"),12,9,false);
-		// int res2 = b.tryPlaceWord(dude);
-		// System.out.println("DUDE score: " + res2);
-
-		// Word mother = new Word(get("_OTHER"),8,7,false);
-		// int res3 = b.tryPlaceWord(mother);
-		// System.out.println(res3);
-		// b.printBoard();
 
 	}
 
 	public static void main(String[] args) {
-		testBag(); // 30 points
-		testBoard(); // 70 points
+		testPlayer();
+		testBag();
+		testBoard();
 
-		System.out.println("done");
+		System.out.println("\ndone");
 	}
 
 }

@@ -3,7 +3,7 @@ package model.test;
 import model.logic.*;
 import model.logic.Tile.Bag;
 
-public class logicTestExt {
+public class LogicTestExt {
 
     public static void testBag() {
         Bag b = Tile.Bag.getBag();

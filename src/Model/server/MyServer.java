@@ -12,12 +12,12 @@ import java.net.*;
  * 
  */
 
-public class GameServer {
+public class MyServer {
     protected final int port;
-    private final ClientHandler ch;
-    private volatile boolean stop;
+    protected final ClientHandler ch;
+    protected volatile boolean stop;
 
-    public GameServer(int port, ClientHandler ch) {
+    public MyServer(int port, ClientHandler ch) {
         this.port = port;
         this.ch = ch;
     }

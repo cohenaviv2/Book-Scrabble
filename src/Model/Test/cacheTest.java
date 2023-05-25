@@ -5,7 +5,7 @@ import java.io.PrintWriter;
 
 import model.cache.*;
 
-public class cacheTest {
+public class CacheTest {
 	
 	public static void testLRU() {
 		CacheReplacementPolicy lru=new LRU();

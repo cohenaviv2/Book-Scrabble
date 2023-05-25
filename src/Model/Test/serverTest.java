@@ -11,7 +11,7 @@ import java.util.Scanner;
 
 import model.server.*;
 
-public class serverTest {
+public class ServerTest {
 	
 	public static class ClientHandler1 implements ClientHandler{
 		PrintWriter out;
@@ -56,7 +56,7 @@ public class serverTest {
 		boolean ok=true;
 		Random r=new Random();
 		int port=6000+r.nextInt(1000);
-		GameServer s=new GameServer(port, new ClientHandler1());
+		MyServer s=new MyServer(port, new ClientHandler1());
 		int c = Thread.activeCount();
 		s.start(); // runs in the background
 		try {
@@ -144,7 +144,7 @@ public class serverTest {
 		
 		Random r=new Random();
 		int port=6000+r.nextInt(1000);
-		GameServer s=new GameServer(port, new BookScrabbleHandler());
+		MyServer s=new MyServer(port, new BookScrabbleHandler());
 		s.start();
 		runClient(port, "Q,s1.txt,s2.txt,"+s1[1], true); //
 		runClient(port, "Q,s1.txt,s2.txt,"+s2[4], true); //

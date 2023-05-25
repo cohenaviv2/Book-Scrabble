@@ -3,7 +3,10 @@ package model.logic;
 import java.util.*;
 
 /*
- * ...........
+ * A Player profile
+ * includes name, ID, isHost, score
+ * also contains list of current tiles and currnet words
+ * and boolean my Turn
  * 
  * @authors: Aviv Cohen, Moshe Azachi, Matan Eliyahu
  * 
@@ -12,35 +15,27 @@ import java.util.*;
 public class Player {
     private String name;
     private final int id;
-    int score;
+    private final boolean isHost;
+    private int score;
     private ArrayList<Tile> myTiles;
     private ArrayList<Word> myWords;
     private boolean myTurn;
 
-    public Player(String name) {
+    public Player(String name,int id, boolean host) {
+        this.isHost = host;
         this.name = name;
-        this. id = generateID();
+        this. id = id;
         this.score = 0;
         this.myTiles = new ArrayList<>();
         this.myWords = new ArrayList<>();
         this.myTurn = false;
     }
 
-
-    private int generateID() {
-        UUID idOne = UUID.randomUUID();
-        String str=""+idOne;        
-        int uid=str.hashCode();
-        String filterStr=""+uid;
-        str=filterStr.replaceAll("-", "");
-        return Integer.parseInt(str);
-    }
-
     public String getName() {
         return name;
     }
 
-    public int getId() {
+    public int getID() {
         return id;
     }
 
@@ -60,6 +55,9 @@ public class Player {
         return myTurn;
     }
 
+    public void addPoints(int points) {
+        this.score += points;
+    }
 
     public void setScore(int score) {
         this.score = score;
@@ -73,14 +71,20 @@ public class Player {
         this.myTurn = myTurn;
     }
 
- public static void main(String[] args) {
-    Player a = new Player("aviv");
-    Player b = new Player("jacob");
-    Player c = new Player("tomer");
+    @Override
+    public String toString() {
+        return "Player name: "+name+"\nId: "+id+"\nIs host: "+isHost+"\nScore: "+score+"\n";
+    }
 
-    System.out.println(a.getId());
-    System.out.println(b.getId());
-    System.out.println(c.getId());
+    /* LOCAL TEST */
+ public static void main(String[] args) {
+    Player a = new Player("aviv",1234,true);
+    Player b = new Player("jacob",5678,false);
+    Player c = new Player("tomer",9513,false);
+
+    System.out.println(a);
+    System.out.println(b);
+    System.out.println(c);
 
  }   
 }
