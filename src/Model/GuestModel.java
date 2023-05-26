@@ -38,7 +38,7 @@ public class GuestModel extends Observable implements GameModel {
          */
         try {
             this.hostSocket = new Socket(ip, port);
-            if (connectionTest()) { // Successfully completed
+            if (connectionTest(name)) { // Successfully completed
                 this.myPlayer = new Player(name, getMyID(), false); // Sets player with given ID from the host
             }
         } catch (IOException e) {
@@ -47,10 +47,10 @@ public class GuestModel extends Observable implements GameModel {
 
     }
 
-    private boolean connectionTest() {
+    private boolean connectionTest(String name) {
 
         // Acknowledge test :
-        out.println("0,connectMe,true");
+        out.println("0,connectMe,"+name);
         String answer = in.nextLine();
 
         if (isValid(answer, "connectMe")) {

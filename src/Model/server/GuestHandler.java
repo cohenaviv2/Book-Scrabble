@@ -2,12 +2,46 @@ package model.server;
 
 import java.io.*;
 
+import model.HostModel;
+
 public class GuestHandler implements ClientHandler {
+    HostModel hm = HostModel.getHostModel();
     BufferedReader in;
     PrintWriter out;
 
-    public void setClient(InputStream inFromclient, OutputStream outToClient) {
+    private boolean isValid(String request) {
+        /*
+         * Checks if the guest reqest is valid
+         */
 
+        String[] params = request.split(",");
+
+        if (params.length != 3) {
+            // PRINT DEBUG
+            System.out.println("HOST : Protocol error - invalid");
+            return false;
+        }
+
+        int id = Integer.parseInt(params[0]);
+        String modifier = params[1];
+
+        if (id == 0 && modifier == "connectMe") { // id == 0 for initializaition
+            return true;
+        }
+
+        if (HostModel.getHostModel().getPlayersByID().get(id) == null) { // No player exist
+            // PRINT DEBUG
+            System.out.println("HOST : Protocol error - No player exist");
+            return false;
+        }
+
+        if (HostModel.getHostModel().getPlayersByID().get(id).getID() != id) { // No ID
+            // PRINT DEBUG
+            System.out.println("HOST : Protocol error - No matching ID");
+            return false;
+        }
+
+        return true;
     }
 
     @Override
@@ -32,21 +66,95 @@ public class GuestHandler implements ClientHandler {
          * 
          */
 
-        String[] userLine = null;
         try {
             in = new BufferedReader(new InputStreamReader(inFromclient));
             out = new PrintWriter(outToClient, true);
-            userLine = in.readLine().split(",");
+            String request = in.readLine();
+
+            if (isValid(request)) {
+                String modifier = request.split(",")[1];
+                String value = request.split(",")[2];
+
+                switch (modifier) {
+
+                    // All model cases
+                    case "connectMe":
+                        connectHandler();
+                    case "myBookChoice":
+                        addBookHandler();
+                    case "query":
+                        queryHandler();
+                    case "challenge":
+                        challengeHandler();
+                    case "pullTiles":
+                        pullTilesHandler();
+                    case "skipTurn":
+                        skipTurnHandler();
+                    case "quitGame":
+                        quitHandler();
+                    case "getMyName":
+                        getNameHandler();
+                    case "getMyID":
+                        getIdHandler();
+                    case "getMyScore":
+                        scoreHandler();
+                    case "isMyTurn":
+                        myTurnHandler();
+                    case "getCurrentBoard":
+                        boardHandler();
+                    case "getMyTiles":
+                        tilesHandler();
+                    case "getMyWords":
+                        wordsHandler();
+                }
+            }
 
         } catch (IOException e) {
             e.printStackTrace();
         }
-        String playerID = userLine[0];
-        String func = userLine[1];
-        String queryWord = userLine[2];
-        String[] args = new String[userLine.length - 1];
-        System.arraycopy(userLine, 1, args, 0, (userLine.length - 1));
 
+    }
+
+    private void connectHandler() {
+    }
+
+    private void addBookHandler() {
+    }
+
+    private void queryHandler() {
+    }
+
+    private void challengeHandler() {
+    }
+
+    private void pullTilesHandler() {
+    }
+
+    private void skipTurnHandler() {
+    }
+
+    private void quitHandler() {
+    }
+
+    private void getNameHandler() {
+    }
+
+    private void getIdHandler() {
+    }
+
+    private void scoreHandler() {
+    }
+
+    private void myTurnHandler() {
+    }
+
+    private void boardHandler() {
+    }
+
+    private void tilesHandler() {
+    }
+
+    private void wordsHandler() {
     }
 
     @Override
