@@ -65,10 +65,10 @@ public class GuestModel extends Observable implements GameModel {
 
         // Acknowledge test :
         out.println("0,connectMe," + name);
-        String answer = in.nextLine();
+        String[] answer = in.nextLine().split(",");
 
-        if (isValid(answer, "connectMe")) {
-            String value = answer.split(",")[2];
+        if (answer[0] == "0" && answer[1] == "connectMe") {
+            String value = answer[2];
             if (value == "true") {
                 // PRINT DEBUG
                 System.out.println("GUEST: Connections test passed successfully");
