@@ -3,42 +3,17 @@ package model;
 import java.io.*;
 
 import model.logic.Player;
-
-/*
- * The Guest handler is used by the Host server to communicate with the guests
- * the host server is responsible for passing information between the participants
- * 
- * HOST RECEIVES:
- * a string from the guest
- * starting with the geust ID,
- * then the requested Model method,
- * and then the Value (like word).
- * string parmaters seperated by ","
- * 
- * e.g. - "0,connectMe,Moshe" , "0,getMyID,true" , "2146376,tryPlaceWord,Hello"
- * (ID is 0 for initializaition)
- * 
- * HOST RESPONDS :
- * a string to the guest
- * starting with the geust ID,
- * then the activated Model method,
- * and then the return value.
- * string parmaters seperated by ","
- * 
- * e.g. - "0,connectMe,true" , "0,getMyID,2146376" , "2146376,tryPlaceWord,32"
- * 
- * @author: Aviv Cohen
- */
-
 import model.server.ClientHandler;
 
 public class GuestHandler implements ClientHandler {
+    private HostModel hm;
     private BufferedReader in;
     private PrintWriter out;
 
     
 
     public GuestHandler() {
+        this.hm = HostModel.getHM();
     }
 
     private boolean isValid(String request) {
@@ -142,7 +117,7 @@ public class GuestHandler implements ClientHandler {
             System.out.println("HOST: id of guest is not 0");
         }
         if (guestID == "0") {
-            HostModel.getHM().getPlayersByName().put(guestName, new Player(guestName, HostModel.generateID(), false));
+            this.hm.getPlayersByName().put(guestName, new Player(guestName, HostModel.generateID(), false));
             out.println("0,connectMe,true");
             // PRINT DEBUG
             System.out.println("HOST: " + guestName + " is Connected!");
@@ -179,7 +154,7 @@ public class GuestHandler implements ClientHandler {
             System.out.println("HOST: id of guest is not 0 - request ID failed");
         }
         if (guestID == "0") {
-            String id = String.valueOf(HostModel.getHM().getPlayersByName().get(guestName).getID());
+            String id = String.valueOf(this.hm.getPlayersByName().get(guestName).getID());
             out.println("0,getMyID,"+id);
             // PRINT DEBUG
             System.out.println("HOST: " + guestName + " gets is ID - "+id);

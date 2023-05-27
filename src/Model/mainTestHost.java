@@ -11,12 +11,12 @@ public class mainTestHost {
 
         // Create Game server:
 
-        MyServer gs = new MyServer(10540, new BookScrabbleHandler());
+        MyServer gs = new MyServer(11224, new BookScrabbleHandler());
         gs.start();
 
         // Create Host model:
 
-        HostModel hm = HostModel.getHM(); // creates host server on port 10255
+       HostModel hm = HostModel.getHM(); // creates host server on port 10255
 
         // Connect to the game server:
 
@@ -28,15 +28,19 @@ public class mainTestHost {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        hm.connectMe(name, null, 10540);
+
+        // connect to the game server and starts the host server:
+        hm.connectMe(name, null, 11224);
         
         System.out.println();
-        // try {
-        //     System.out.println("My IP is: "+InetAddress.getLocalHost());
-        // } catch (UnknownHostException e) {
-        //     e.printStackTrace();
-        // }
-
+        try {
+            System.out.println("wait ");
+            name = in.readLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        
+        
         System.out.println();
 
         gs.close();

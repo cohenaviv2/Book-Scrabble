@@ -33,7 +33,6 @@ public class MyServer {
         }).start();
     }
 
-    
 
     private void runServer() throws Exception {
         try {
@@ -42,7 +41,9 @@ public class MyServer {
             while (!stop) {
                 try {
                     Socket aClient = theServer.accept(); // blocking call
+                    System.out.println("someone connected");
                     this.ch.handleClient(aClient.getInputStream(), aClient.getOutputStream());
+                    System.out.println("handled client");
                     this.ch.close();
                     aClient.close();
                 } catch (SocketTimeoutException e) {
