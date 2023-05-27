@@ -5,6 +5,7 @@ Immerse yourself in the world of Book Scrabble with this Java-based desktop appl
 - [Overview](#overview)
 - [Rules And Gameplay](#Rules-and-gameplay)
 - [Credits](#credits)
+- [Team Division & GANNT](#team-division--gantt)
 
 ## Video Links
 - [Demo]()
@@ -76,8 +77,9 @@ A legal word must meet all the following conditions:
 - Leans on one of the existing tiles on the board.
 - Does not produce other illegal words on the board.
 
-## GRANTT
-<img src="https://github.com/Matan-Eliyahu/BookScrabble/blob/master/Readme%20images/GANTT.png" alt="GRANTT" width="1100px" height="300px">
+## Team Division & GANTT
+<img src="https://github.com/cohenaviv2/Book-Scrabble/blob/master/resources/workDivision.png" alt="WorkDivision" width="1100px" height="400px">
+<img src="https://github.com/Matan-Eliyahu/BookScrabble/blob/master/Readme%20images/GANTT.png" alt="GANTT" width="1100px" height="400px">
 
 ## Credits
 - [Aviv Cohen](https://github.com/cohenaviv2)

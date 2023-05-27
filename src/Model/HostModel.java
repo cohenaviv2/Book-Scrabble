@@ -9,6 +9,8 @@ import model.server.*;
 
 public class HostModel extends Observable implements GameModel {
 
+    private static HostModel hm = null; // Singleton
+
     // Connectivity :
     private Socket gameServer;
     private MyServer hostServer; // Will support connection of up to 3 guests
@@ -21,7 +23,7 @@ public class HostModel extends Observable implements GameModel {
     // Game :
     Board gameBoard;
     Bag gameBag;
-    String bookList;
+    StringBuilder bookList;
 
     public HostModel() {
         this.hostServer = new MyServer(8040, new GuestHandler());
@@ -30,6 +32,14 @@ public class HostModel extends Observable implements GameModel {
         playersByID = new HashMap<>();
         playersByName = new HashMap<>();
     }
+
+    public static HostModel getHostModel() {
+        if (hm == null)
+            hm = new HostModel();
+        return hm;
+    }
+
+    
 
     public static int generateID() {
         UUID idOne = UUID.randomUUID();
@@ -83,12 +93,12 @@ public class HostModel extends Observable implements GameModel {
 
     @Override
     public void skipTurn() {
-
+        this.hostPlayer.setMyTurn(false);
     }
 
     @Override
     public void myBookChoice(String bookName) {
-
+        this.bookList.append("/resources/books/" + bookName + ",");
     }
 
     @Override
@@ -129,6 +139,30 @@ public class HostModel extends Observable implements GameModel {
     @Override
     public ArrayList<Word> getMyWords() {
         return this.hostPlayer.getWords();
+    }
+
+    public Player getHostPlayer() {
+        return hostPlayer;
+    }
+
+    public Map<Integer, Player> getPlayersByID() {
+        return playersByID;
+    }
+
+    public Map<String, Player> getPlayersByName() {
+        return playersByName;
+    }
+
+    public Board getGameBoard() {
+        return gameBoard;
+    }
+
+    public Bag getGameBag() {
+        return gameBag;
+    }
+
+    public StringBuilder getBookList() {
+        return bookList;
     }
 
 }
