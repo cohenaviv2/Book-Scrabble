@@ -7,7 +7,7 @@ import model.logic.*;
 public interface GameModel {
 
     // Send data :
-    void connectMe(String name,InetAddress ip, int port);
+    void connectMe(String name,String ip, int port);
     void myBookChoice(String bookName);
     void tryPlaceWord(String word,int row,int col, boolean vertical);
     void challenge(String word,int row,int col, boolean vertical);

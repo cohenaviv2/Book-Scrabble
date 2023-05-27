@@ -26,7 +26,7 @@ public class HostModel extends Observable implements GameModel {
     StringBuilder bookList;
 
     private HostModel() {
-        this.hostServer = new MyServer(8040, new GuestHandler());
+        this.hostServer = new MyServer(10255, new BookScrabbleHandler());
         this.gameBoard = Board.getBoard();
         this.gameBag = Tile.Bag.getBag();
         playersByID = new HashMap<>();
@@ -49,7 +49,7 @@ public class HostModel extends Observable implements GameModel {
     }
 
     @Override
-    public void connectMe(String name, InetAddress ip, int port) {
+    public void connectMe(String name, String ip, int port) {
         /*
          * Connects the host to the game server via socket
          * game server is local for now, hence the ip field should be null.
@@ -58,6 +58,7 @@ public class HostModel extends Observable implements GameModel {
 
         if (ip == null) {
             try {
+                this.hostServer.start();
                 this.gameServer = new Socket("localhost", port);
             } catch (UnknownHostException e) {
                 e.printStackTrace();
@@ -67,6 +68,7 @@ public class HostModel extends Observable implements GameModel {
             if (connectionTest()) { // Successfully completed
                 this.hostPlayer = new Player(name, generateID(), true); // Sets host to true
                 // PRINT DEBUG
+                System.out.println(hostPlayer);
                 System.out.println("HOST: " + name + " is Connected to the game server!");
             }
         }
@@ -103,7 +105,7 @@ public class HostModel extends Observable implements GameModel {
 
     @Override
     public void quitGame() {
-
+        this.hostServer.close();
     }
 
     @Override
