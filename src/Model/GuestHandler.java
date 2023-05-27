@@ -1,6 +1,8 @@
-package model.server;
+package model;
 
 import java.io.*;
+
+import model.logic.Player;
 
 /*
  * The Guest handler is used by the Host server to communicate with the guests
@@ -28,13 +30,16 @@ import java.io.*;
  * @author: Aviv Cohen
  */
 
-import model.HostModel;
-import model.logic.Player;
+import model.server.ClientHandler;
 
 public class GuestHandler implements ClientHandler {
-    private HostModel hm = HostModel.getHM();
     private BufferedReader in;
     private PrintWriter out;
+
+    
+
+    public GuestHandler() {
+    }
 
     private boolean isValid(String request) {
         /*
@@ -137,7 +142,7 @@ public class GuestHandler implements ClientHandler {
             System.out.println("HOST: id of guest is not 0");
         }
         if (guestID == "0") {
-            this.hm.getPlayersByName().put(guestName, new Player(guestName, HostModel.generateID(), false));
+            HostModel.getHM().getPlayersByName().put(guestName, new Player(guestName, HostModel.generateID(), false));
             out.println("0,connectMe,true");
             // PRINT DEBUG
             System.out.println("HOST: " + guestName + " is Connected!");
@@ -174,7 +179,7 @@ public class GuestHandler implements ClientHandler {
             System.out.println("HOST: id of guest is not 0 - request ID failed");
         }
         if (guestID == "0") {
-            String id = String.valueOf(this.hm.getPlayersByName().get(guestName).getID());
+            String id = String.valueOf(HostModel.getHM().getPlayersByName().get(guestName).getID());
             out.println("0,getMyID,"+id);
             // PRINT DEBUG
             System.out.println("HOST: " + guestName + " gets is ID - "+id);

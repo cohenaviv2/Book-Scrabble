@@ -20,12 +20,6 @@ public class GuestModel extends Observable implements GameModel {
     private Tile[][] myBoard;
 
     public GuestModel() {
-        try {
-            out = new PrintWriter(hostSocket.getOutputStream(), true);
-            in = new Scanner(hostSocket.getInputStream());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
     }
 
@@ -41,7 +35,7 @@ public class GuestModel extends Observable implements GameModel {
     }
 
     @Override
-    public void connectMe(String myName, InetAddress ip, int port) {
+    public void connectMe(String myName, String ip, int port) {
         /*
          * Connects to the host server via socket
          * sets the guest player profile
@@ -49,8 +43,17 @@ public class GuestModel extends Observable implements GameModel {
          */
         try {
             this.hostSocket = new Socket(ip, port);
+            try {
+                out = new PrintWriter(hostSocket.getOutputStream(), true);
+                in = new Scanner(hostSocket.getInputStream());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             if (connect(myName)) { // Successfully completed
                 this.myPlayer = new Player(myName, getMyID(), false); // Sets player with given ID from the host
+                //PRINT DEBUG
+                System.out.println("GUSET "+myName+": my Player -");
+                System.out.println(this.myPlayer);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -67,7 +70,7 @@ public class GuestModel extends Observable implements GameModel {
         if (isValid(answer, "connectMe")) {
             String value = answer.split(",")[2];
             if (value == "true") {
-                //PRINT DEBUG
+                // PRINT DEBUG
                 System.out.println("GUEST: Connections test passed successfully");
                 return true;
             }
