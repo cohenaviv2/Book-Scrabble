@@ -2,22 +2,28 @@ package model.server;
 
 import java.io.*;
 
+/*
+ * The Book scrabble handler is used to communicate with the game server
+ * the game server is responsible for checking if the word is dictionary legal
+ * Server reads a string from the client until line-break character,
+ * string starts with "Q," for query or "C," for challenge.
+ * the rest of the string (seperated by ",")
+ * indicate the names of the books, except for the last word that indicates the
+ * query itself.
+ * Using DictionaryManager will return the answer as a string "true" or
+ * "false" followed by a line break character.
+ * The conversation with the client will end after one query.
+ * 
+ * @author: Aviv Cohen
+ * 
+ */
+
 public class BookScrabbleHandler implements ClientHandler {
     private BufferedReader in;
     private PrintWriter out;
 
     @Override
     public void handleClient(InputStream inFromclient, OutputStream outToClient) {
-        /*
-         * Reads a string from the client until line-break character.
-         * string starts with "Q," for query or "C," for challenge.
-         * the rest of the string (seperated by ",")
-         * indicate the names of the books, except for the last word that indicates the
-         * query itself.
-         * Using DictionaryManager will return the answer as a string "true" or
-         * "false" followed by a line break character.
-         * The conversation with the client will end after one query.
-         */
 
         String[] userLine = null;
         try {

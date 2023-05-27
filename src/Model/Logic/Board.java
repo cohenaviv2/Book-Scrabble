@@ -7,7 +7,7 @@ import java.util.ArrayList;
  * Contains 15x15 matrix of Squares
  * Can operate on the board by placing a word
  * Placement is done after checking whether the word is legal in terms of the board and the dictionary
- * Calculates the score accordingly.
+ * and calculates the score accordingly.
  * 
  * @author: Aviv Cohen
  *
@@ -542,7 +542,7 @@ public class Board {
 
             return score;
         }
-        return 0;
+        return -1;
     }
 
     public void printPlacedWords() {

@@ -25,7 +25,7 @@ public class HostModel extends Observable implements GameModel {
     Bag gameBag;
     StringBuilder bookList;
 
-    public HostModel() {
+    private HostModel() {
         this.hostServer = new MyServer(8040, new GuestHandler());
         this.gameBoard = Board.getBoard();
         this.gameBag = Tile.Bag.getBag();
@@ -33,13 +33,11 @@ public class HostModel extends Observable implements GameModel {
         playersByName = new HashMap<>();
     }
 
-    public static HostModel getHostModel() {
+    public static HostModel getHM() {
         if (hm == null)
             hm = new HostModel();
         return hm;
     }
-
-    
 
     public static int generateID() {
         UUID idOne = UUID.randomUUID();
@@ -68,6 +66,8 @@ public class HostModel extends Observable implements GameModel {
             }
             if (connectionTest()) { // Successfully completed
                 this.hostPlayer = new Player(name, generateID(), true); // Sets host to true
+                // PRINT DEBUG
+                System.out.println("HOST: " + name + " is Connected to the game server!");
             }
         }
     }
@@ -77,17 +77,17 @@ public class HostModel extends Observable implements GameModel {
     }
 
     @Override
-    public void query(String word) {
+    public void tryPlaceWord(String word, int row, int col, boolean vertical) {
 
     }
 
     @Override
-    public void challenge(String word) {
+    public void challenge(String word, int row, int col, boolean vertical) {
 
     }
 
     @Override
-    public void pullTiles() {
+    public void pullTiles(int count) {
 
     }
 
