@@ -2,16 +2,44 @@ package model.server;
 
 import java.io.*;
 
+/*
+ * The Guest handler is used by the Host server to communicate with the guests
+ * the host server is responsible for passing information between the participants
+ * 
+ * HOST RECEIVES:
+ * a string from the guest
+ * starting with the geust ID,
+ * then the requested Model method,
+ * and then the Value (like word).
+ * string parmaters seperated by ","
+ * 
+ * e.g. - "0,connectMe,Moshe" , "0,getMyID,true" , "2146376,tryPlaceWord,Hello"
+ * (ID is 0 for initializaition)
+ * 
+ * HOST RESPONDS :
+ * a string to the guest
+ * starting with the geust ID,
+ * then the activated Model method,
+ * and then the return value.
+ * string parmaters seperated by ","
+ * 
+ * e.g. - "0,connectMe,true" , "0,getMyID,2146376" , "2146376,tryPlaceWord,32"
+ * 
+ * @author: Aviv Cohen
+ */
+
 import model.HostModel;
+import model.logic.Player;
 
 public class GuestHandler implements ClientHandler {
-    HostModel hm = HostModel.getHostModel();
-    BufferedReader in;
-    PrintWriter out;
+    private HostModel hm = HostModel.getHM();
+    private BufferedReader in;
+    private PrintWriter out;
 
     private boolean isValid(String request) {
         /*
          * Checks if the guest reqest is valid
+         * if the guest id is 0 - he is trying to connect and get his id
          */
 
         String[] params = request.split(",");
@@ -29,13 +57,13 @@ public class GuestHandler implements ClientHandler {
             return true;
         }
 
-        if (HostModel.getHostModel().getPlayersByID().get(id) == null) { // No player exist
+        if (HostModel.getHM().getPlayersByID().get(id) == null) { // No player exist
             // PRINT DEBUG
             System.out.println("HOST : Protocol error - No player exist");
             return false;
         }
 
-        if (HostModel.getHostModel().getPlayersByID().get(id).getID() != id) { // No ID
+        if (HostModel.getHM().getPlayersByID().get(id).getID() != id) { // No ID
             // PRINT DEBUG
             System.out.println("HOST : Protocol error - No matching ID");
             return false;
@@ -47,23 +75,9 @@ public class GuestHandler implements ClientHandler {
     @Override
     public void handleClient(InputStream inFromclient, OutputStream outToClient) {
         /*
-         * HOST RECEIVES:
-         * a string from the guest
-         * string starts with the geust ID,
-         * then the Model method,
-         * and then the Value (like word).
-         * 
-         * (ID is 0 for initializaition)
-         * e.g. - "0,connectMe,true" , "0,getMyID,true" , "2146376,query,Hello"
-         * 
-         * HOST RESPONDS :
-         * a string to the guest
-         * string starts with the geust ID,
-         * then the Model method,
-         * and then the return value.
-         * 
-         * e.g. - "0,connectMe,true" , "0,getMyID,2146376" , "2146376,query,32"
-         * 
+         * handles a client
+         * one conversation
+         * one request & answer
          */
 
         try {
@@ -72,40 +86,42 @@ public class GuestHandler implements ClientHandler {
             String request = in.readLine();
 
             if (isValid(request)) {
-                String modifier = request.split(",")[1];
-                String value = request.split(",")[2];
+                String[] req = request.split(",");
+                String guestID = req[0];
+                String modifier = req[1];
+                String guestValue = req[2];
 
                 switch (modifier) {
 
                     // All model cases
                     case "connectMe":
-                        connectHandler();
+                        connectHandler(guestID, guestValue);
                     case "myBookChoice":
-                        addBookHandler();
-                    case "query":
-                        queryHandler();
+                        addBookHandler(guestID, guestValue);
+                    case "tryPlaceWord":
+                        queryHandler(guestID, guestValue);
                     case "challenge":
-                        challengeHandler();
+                        challengeHandler(guestID, guestValue);
                     case "pullTiles":
-                        pullTilesHandler();
+                        pullTilesHandler(guestID, guestValue);
                     case "skipTurn":
-                        skipTurnHandler();
+                        skipTurnHandler(guestID, guestValue);
                     case "quitGame":
-                        quitHandler();
+                        quitHandler(guestID, guestValue);
                     case "getMyName":
-                        getNameHandler();
+                        getNameHandler(guestID, guestValue);
                     case "getMyID":
-                        getIdHandler();
+                        getIdHandler(guestID, guestValue);
                     case "getMyScore":
-                        scoreHandler();
+                        scoreHandler(guestID, guestValue);
                     case "isMyTurn":
-                        myTurnHandler();
+                        myTurnHandler(guestID, guestValue);
                     case "getCurrentBoard":
-                        boardHandler();
+                        boardHandler(guestID, guestValue);
                     case "getMyTiles":
-                        tilesHandler();
+                        tilesHandler(guestID, guestValue);
                     case "getMyWords":
-                        wordsHandler();
+                        wordsHandler(guestID, guestValue);
                 }
             }
 
@@ -115,46 +131,72 @@ public class GuestHandler implements ClientHandler {
 
     }
 
-    private void connectHandler() {
+    private void connectHandler(String guestID, String guestName) {
+        if (guestID != "0") {
+            // PRINT DEBUG
+            System.out.println("HOST: id of guest is not 0");
+        }
+        if (guestID == "0") {
+            this.hm.getPlayersByName().put(guestName, new Player(guestName, HostModel.generateID(), false));
+            out.println("0,connectMe,true");
+            // PRINT DEBUG
+            System.out.println("HOST: " + guestName + " is Connected!");
+        } else {
+            // PRINT DEBUG
+            System.out.println("HOST: failed to connect guest - " + guestName);
+        }
     }
 
-    private void addBookHandler() {
+    private void addBookHandler(String guestID, String guestBook) {
     }
 
-    private void queryHandler() {
+    private void queryHandler(String guestID, String wordParams) {
     }
 
-    private void challengeHandler() {
+    private void challengeHandler(String guestID, String challengeParams) {
     }
 
-    private void pullTilesHandler() {
+    private void pullTilesHandler(String guestID, String count) {
     }
 
-    private void skipTurnHandler() {
+    private void skipTurnHandler(String guestID, String bool) {
     }
 
-    private void quitHandler() {
+    private void quitHandler(String guestID, String bool) {
     }
 
-    private void getNameHandler() {
+    private void getNameHandler(String guestID, String bool) {
     }
 
-    private void getIdHandler() {
+    private void getIdHandler(String guestID, String guestName) {
+        if (guestID != "0") {
+            // PRINT DEBUG
+            System.out.println("HOST: id of guest is not 0 - request ID failed");
+        }
+        if (guestID == "0") {
+            String id = String.valueOf(this.hm.getPlayersByName().get(guestName).getID());
+            out.println("0,getMyID,"+id);
+            // PRINT DEBUG
+            System.out.println("HOST: " + guestName + " gets is ID - "+id);
+        } else {
+            // PRINT DEBUG
+            System.out.println("HOST: failed to guest " + guestName+" ID");
+        }
     }
 
-    private void scoreHandler() {
+    private void scoreHandler(String guestID, String bool) {
     }
 
-    private void myTurnHandler() {
+    private void myTurnHandler(String guestID, String bool) {
     }
 
-    private void boardHandler() {
+    private void boardHandler(String guestID, String bool) {
     }
 
-    private void tilesHandler() {
+    private void tilesHandler(String guestID, String bool) {
     }
 
-    private void wordsHandler() {
+    private void wordsHandler(String guestID, String bool) {
     }
 
     @Override
