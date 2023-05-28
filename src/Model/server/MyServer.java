@@ -13,6 +13,7 @@ import java.net.*;
  */
 
 public class MyServer {
+    private ServerSocket theServer;
     protected final int port;
     protected final ClientHandler ch;
     protected volatile boolean stop;
@@ -33,17 +34,16 @@ public class MyServer {
         }).start();
     }
 
-
     private void runServer() throws Exception {
         try {
-            ServerSocket theServer = new ServerSocket(this.port);
+            theServer = new ServerSocket(this.port);
             theServer.setSoTimeout(1000); // 1sec
             while (!stop) {
                 try {
                     Socket aClient = theServer.accept(); // blocking call
-                    System.out.println("someone connected");
+                    System.out.println("** client connected **\n");
                     this.ch.handleClient(aClient.getInputStream(), aClient.getOutputStream());
-                    System.out.println("handled client");
+                    System.out.println("** end handle client **\n");
                     this.ch.close();
                     aClient.close();
                 } catch (SocketTimeoutException e) {

@@ -1,28 +1,20 @@
 package model;
 
 import java.io.*;
-
-import model.logic.Player;
-import model.server.ClientHandler;
+import model.logic.*;
+import model.server.*;
 
 public class GuestHandler implements ClientHandler {
-    private HostModel hm;
     private BufferedReader in;
     private PrintWriter out;
 
-    
-
-    public GuestHandler() {
-        this.hm = HostModel.getHM();
-    }
-
-    private boolean isValid(String request) {
+    private boolean isValid(String req) {
         /*
          * Checks if the guest reqest is valid
-         * if the guest id is 0 - he is trying to connect and get his id
+         * if ID is 0 the guest trying to connect and get his ID
          */
 
-        String[] params = request.split(",");
+        String[] params = req.split(",");
 
         if (params.length != 3) {
             // PRINT DEBUG
@@ -33,7 +25,7 @@ public class GuestHandler implements ClientHandler {
         int id = Integer.parseInt(params[0]);
         String modifier = params[1];
 
-        if (id == 0 && modifier == "connectMe") { // id == 0 for initializaition
+        if (id == 0 && modifier.equalsIgnoreCase("connectMe")) { // id == 0 for initializaition
             return true;
         }
 
@@ -112,12 +104,8 @@ public class GuestHandler implements ClientHandler {
     }
 
     private void connectHandler(String guestID, String guestName) {
-        if (guestID != "0") {
-            // PRINT DEBUG
-            System.out.println("HOST: id of guest is not 0");
-        }
-        if (guestID == "0") {
-            this.hm.getPlayersByName().put(guestName, new Player(guestName, HostModel.generateID(), false));
+        if (guestID.equalsIgnoreCase("0")) {
+            HostModel.getHM().getPlayersByName().put(guestName, new Player(guestName, HostModel.generateID(), false));
             out.println("0,connectMe,true");
             // PRINT DEBUG
             System.out.println("HOST: " + guestName + " is Connected!");
@@ -149,18 +137,14 @@ public class GuestHandler implements ClientHandler {
     }
 
     private void getIdHandler(String guestID, String guestName) {
-        if (guestID != "0") {
+        if (guestID.equalsIgnoreCase("0")) {
+            String id = String.valueOf(HostModel.getHM().getPlayersByName().get(guestName).getID());
+            out.println("0,getMyID," + id);
             // PRINT DEBUG
-            System.out.println("HOST: id of guest is not 0 - request ID failed");
-        }
-        if (guestID == "0") {
-            String id = String.valueOf(this.hm.getPlayersByName().get(guestName).getID());
-            out.println("0,getMyID,"+id);
-            // PRINT DEBUG
-            System.out.println("HOST: " + guestName + " gets is ID - "+id);
+            System.out.println("HOST: " + guestName + " requested is ID (" + id + ")");
         } else {
             // PRINT DEBUG
-            System.out.println("HOST: failed to guest " + guestName+" ID");
+            System.out.println("HOST: failed to pass guest " + guestName + " his ID");
         }
     }
 

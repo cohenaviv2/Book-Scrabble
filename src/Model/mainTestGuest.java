@@ -6,32 +6,56 @@ import java.io.InputStreamReader;
 
 public class mainTestGuest {
     public static void main(String[] args) {
+        BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+        System.out.println("\n*** GUEST MODE ***\n");
 
         // Create Guest model:
         GuestModel gs = new GuestModel();
 
-        // Connect to the host server:
-        BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-        //PrintWriter out = new PrintWriter(System.out, true);
+        // Wait...
+        System.out.println();
+        try {
+            System.out.println("PRESS ENTER TO START ");
+            String enter = in.readLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        System.out.println();
+
+        // Set ip and port:
         String name = null;
         String ip = null;
         int port = 0;
         try {
-            System.out.println("Enter your name,then press enter: ");
+            System.out.println("Enter your name, and then press enter: ");
             name = in.readLine();
-            System.out.println("Enter ip,then press enter: ");
+            System.out.println();
+            System.out.println("Enter ip, and then press enter: ");
             ip = in.readLine();
-            if (ip == null) {
-                System.out.println("inValid ip");
-            }
-            System.out.println("Enter port,then press enter: ");
+            System.out.println();
+            System.out.println("Enter port, and then press enter: ");
             port = Integer.parseInt(in.readLine());
+            System.out.println();
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        gs.connectMe(name ,ip, port);
+        // Connect to the host server:
+        gs.connectMe(name, ip, port);
 
+        // Wait...
+        System.out.println();
+        try {
+            System.out.println("waiting... ");
+            String ent = in.readLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        System.out.println();
+
+        // Disconnect the host server and quit the game:
+        gs.quitGame();
+        System.out.println("done");
     }
 
 }

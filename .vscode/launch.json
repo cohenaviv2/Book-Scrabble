@@ -1,0 +1,63 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Current File",
+            "request": "launch",
+            "mainClass": "${file}"
+        },
+        {
+            "type": "java",
+            "name": "Player",
+            "request": "launch",
+            "mainClass": "model.logic.Player",
+            "projectName": "Book Scrabble_c0c2c55d"
+        },
+        {
+            "type": "java",
+            "name": "mainTestGuest",
+            "request": "launch",
+            "mainClass": "model.mainTestGuest",
+            "projectName": "Book Scrabble_c0c2c55d"
+        },
+        {
+            "type": "java",
+            "name": "mainTestHost",
+            "request": "launch",
+            "mainClass": "model.mainTestHost",
+            "projectName": "Book Scrabble_c0c2c55d"
+        },
+        {
+            "type": "java",
+            "name": "CacheTest",
+            "request": "launch",
+            "mainClass": "model.test.CacheTest",
+            "projectName": "Book Scrabble_c0c2c55d"
+        },
+        {
+            "type": "java",
+            "name": "LogicTest",
+            "request": "launch",
+            "mainClass": "model.test.LogicTest",
+            "projectName": "Book Scrabble_c0c2c55d"
+        },
+        {
+            "type": "java",
+            "name": "LogicTestExt",
+            "request": "launch",
+            "mainClass": "model.test.LogicTestExt",
+            "projectName": "Book Scrabble_c0c2c55d"
+        },
+        {
+            "type": "java",
+            "name": "ServerTest",
+            "request": "launch",
+            "mainClass": "model.test.ServerTest",
+            "projectName": "Book Scrabble_c0c2c55d"
+        }
+    ]
+}
