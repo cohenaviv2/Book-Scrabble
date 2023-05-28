@@ -1,8 +1,35 @@
-package model;
+package model.server;
 
 import java.io.*;
+import model.HostModel;
 import model.logic.*;
-import model.server.*;
+
+/*
+ * The Guest handler used to communicate the host and the guests
+ * Communication is done using strings
+ * 
+ * HOST:
+ * receives a string from the guest
+ * starting with the guests ID,
+ * then the Model method to active,
+ * and then the value (like query word)
+ * All 3 parameters seperated by ","
+ * 
+ * e.g. - "0,connectMe,Moshe" , "0,getMyID,Moshe" , "259874,tryPlaceWord,Hello"
+ * (ID is 0 for initialization)
+ * 
+ * GUEST:
+ * gets a string from the host
+ * starting with his ID,
+ * then the Model methos that was activated
+ * and then the returned value
+ * All 3 parameters seperated by ","
+ * 
+ * e.g. - "0,connectMe,true" , "0,getMyID,256874" , "259874,tryPlaceWord,32"
+ * 
+ * @author: Aviv Cohen
+ * 
+ */
 
 public class GuestHandler implements ClientHandler {
     private BufferedReader in;
@@ -137,15 +164,14 @@ public class GuestHandler implements ClientHandler {
     }
 
     private void getIdHandler(String guestID, String guestName) {
-        System.out.println("hi");
         if (guestID.equalsIgnoreCase("0")) {
             String id = String.valueOf(HostModel.getHM().getPlayersByName().get(guestName).getID());
             out.println("0,getMyID," + id);
             // PRINT DEBUG
-            System.out.println("HOST: " + guestName + " requested is ID (" + id + ")");
+            System.out.println("HOST: " + guestName + " requested is ID (" + id + ")\n");
         } else {
             // PRINT DEBUG
-            System.out.println("HOST: failed to pass guest " + guestName + " his ID");
+            System.out.println("HOST: failed to pass guest " + guestName + " his ID\n");
         }
     }
 
