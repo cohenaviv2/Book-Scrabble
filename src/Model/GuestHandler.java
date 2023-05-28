@@ -137,6 +137,7 @@ public class GuestHandler implements ClientHandler {
     }
 
     private void getIdHandler(String guestID, String guestName) {
+        System.out.println("hi");
         if (guestID.equalsIgnoreCase("0")) {
             String id = String.valueOf(HostModel.getHM().getPlayersByName().get(guestName).getID());
             out.println("0,getMyID," + id);
