@@ -12,7 +12,7 @@ public class HostModel extends Observable implements GameModel {
     private static HostModel hm = null; // Singleton
 
     // Connectivity :
-    private Socket gameServer; //connects you to the game server
+    private Socket gameServer; // connects you to the game server
     private MyServer hostServer; // my Host server - Will support connection of up to 3 guests
 
     // Profiles :
@@ -26,7 +26,9 @@ public class HostModel extends Observable implements GameModel {
     StringBuilder bookList;
 
     private HostModel() {
-        this.hostServer = new MyServer(8040, new BookScrabbleHandler());
+        /* starts the host server on port 8040 */
+        this.hostServer = new MyServer(8040, new GuestHandler());
+        this.hostServer.start();
         this.gameBoard = Board.getBoard();
         this.gameBag = Tile.Bag.getBag();
         playersByID = new HashMap<>();
@@ -51,15 +53,14 @@ public class HostModel extends Observable implements GameModel {
     @Override
     public void connectMe(String name, String ip, int port) {
         /*
-         * Connects the host to the game server via socket
-         * game server is local for now, hence the ip field should be null.
-         * Also sets the host player profile
+         * Connect the host to the game server via socket
+         * game server is local for now, hence the ip field should be "localhost".
+         * also set the host player profile
          */
 
-        if (ip == null) {
+        if (ip.equalsIgnoreCase("localhost")) {
             try {
-                this.hostServer.start();
-                this.gameServer = new Socket("localhost", port); //game server
+                this.gameServer = new Socket(ip, port); // game server
             } catch (UnknownHostException e) {
                 e.printStackTrace();
             } catch (IOException e) {

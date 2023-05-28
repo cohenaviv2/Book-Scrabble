@@ -52,6 +52,7 @@ public class BookScrabbleHandler implements ClientHandler {
                 out.println("false");
             }
         } else {
+            System.out.println(userLine[0]+","+userLine[1]+","+userLine[2]);
             out.println("wrong operator");
         }
 

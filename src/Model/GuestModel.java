@@ -15,6 +15,7 @@ public class GuestModel extends Observable implements GameModel {
 
     // Profiles :
     private Player myPlayer;
+    String myName;
 
     // Game :
     private Tile[][] myBoard;
@@ -28,7 +29,7 @@ public class GuestModel extends Observable implements GameModel {
         String myID = String.valueOf(getMyID());
         if (params.length != 3 || params[0] != myID || params[1] != indicator) {
             // PRINT DEBUG
-            System.out.println("GUEST " + myPlayer.getName() + ": Protocol error");
+            System.out.println("GUEST " + myPlayer.getName() + ": Protocol error\n");
             return false;
         }
         return true;
@@ -49,31 +50,35 @@ public class GuestModel extends Observable implements GameModel {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            if (connect(myName)) { // Successfully completed
-                this.myPlayer = new Player(myName, getMyID(), false); // Sets player with given ID from the host
-                //PRINT DEBUG
-                System.out.println("GUSET "+myName+": my Player -");
-                System.out.println(this.myPlayer);
-            }
         } catch (IOException e) {
             e.printStackTrace();
+        }
+        this.myName = myName;
+        if (connectTest()) { // Successfully completed
+            int id = getMyID();
+            this.myPlayer = new Player(myName, id, false); // Sets player with given ID from the host
+            // PRINT DEBUG
+            System.out.println("GUSET " + myName + ": my Player profile is set up\n");
+            System.out.println(this.myPlayer);
         }
 
     }
 
-    private boolean connect(String name) {
+    private boolean connectTest() {
 
         // Acknowledge test :
-        out.println("0,connectMe," + name);
+        out.println("0,connectMe," + this.myName);
         String[] answer = in.nextLine().split(",");
 
-        if (answer[0] == "0" && answer[1] == "connectMe") {
-            String value = answer[2];
-            if (value == "true") {
-                // PRINT DEBUG
-                System.out.println("GUEST: Connections test passed successfully");
-                return true;
-            }
+        // if (answer[0] == "0" && answer[1] == "connectMe") {
+        // String value = answer[2];
+
+        // }
+        // }
+        if (answer[2].equalsIgnoreCase("true")) {
+            // PRINT DEBUG
+            System.out.println("GUEST: Connections test passed successfully\n");
+            return true;
         }
         // PRINT DEBUG
         System.out.println("GUEST: Connections test failed - Unrecognized error");
@@ -99,13 +104,14 @@ public class GuestModel extends Observable implements GameModel {
                     /* Not board legal */
 
                     // PRINT DEBUG
-                    System.out.println("GUEST " + myPlayer.getName() + ": your word is not board legal");
+                    System.out.println("GUEST " + myPlayer.getName() + ": your word is not board legal\n");
 
                 case 0:
                     /* Some word is not dictionary legal */
 
                     // PRINT DEBUG
-                    System.out.println("GUEST " + myPlayer.getName() + ": some word placement is not dictionay legal ");
+                    System.out
+                            .println("GUEST " + myPlayer.getName() + ": some word placement is not dictionay legal\n");
                 default:
 
                     /*
@@ -151,7 +157,7 @@ public class GuestModel extends Observable implements GameModel {
                 notifyObservers();
 
                 // PRINT DEBUG
-                System.out.println("GUEST " + myPlayer.getName() + ": The challenge was successful!");
+                System.out.println("GUEST " + myPlayer.getName() + ": The challenge was successful!\n");
 
             } else if (score < 0) {
 
@@ -162,13 +168,13 @@ public class GuestModel extends Observable implements GameModel {
 
                 this.myPlayer.addPoints(score);
                 // PRINT DEBUG
-                System.out.println("GUEST " + myPlayer.getName() + ": The challenge failed, you lose points");
+                System.out.println("GUEST " + myPlayer.getName() + ": The challenge failed, you lose points\n");
             } else {
 
                 /* Some error occurred */
 
                 // PRINT DEBUG
-                System.out.println("GUEST " + myPlayer.getName() + ": problem with challenge (maybe returned 0)");
+                System.out.println("GUEST " + myPlayer.getName() + ": problem with challenge (maybe returned 0)\n");
             }
         }
     }
@@ -195,10 +201,10 @@ public class GuestModel extends Observable implements GameModel {
             if (value == "true") {
                 this.myPlayer.setMyTurn(false);
                 // PRINT DEBUG
-                System.out.println("GUEST " + myPlayer.getName() + ": Skip my turn");
+                System.out.println("GUEST " + myPlayer.getName() + ": Skip my turn\n");
             } else {
                 // PRINT DEBUG
-                System.out.println("GUEST " + myPlayer.getName() + ": Some error occurred while skipTurn");
+                System.out.println("GUEST " + myPlayer.getName() + ": Some error occurred while skipTurn\n");
             }
 
         }
@@ -227,6 +233,11 @@ public class GuestModel extends Observable implements GameModel {
          * need to close all streams ....
          * close the communication with host ...
          */
+        try {
+            this.hostSocket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
     }
 
@@ -240,16 +251,16 @@ public class GuestModel extends Observable implements GameModel {
 
     @Override
     public int getMyID() {
-        if (this.myPlayer.getID() == 0) {
+        if (this.myPlayer == null) {
 
             // Send request for my ID :
-            out.println("0,getMyID," + getMyName());
+            out.println("0,getMyID," + myName);
             String answer = in.nextLine();
             // Validation :
-            if (isValid(answer, "getMyID")) {
-                int id = Integer.parseInt(answer.split(",")[2]);
-                return id;
-            }
+            // if (isValid(answer, "getMyID")) {
+            // }
+            int id = Integer.parseInt(answer.split(",")[2]);
+            return id;
         }
         return this.myPlayer.getID();
     }
@@ -267,7 +278,7 @@ public class GuestModel extends Observable implements GameModel {
             return score;
         } else {
             // PRINT DEBUG
-            System.out.println("GUEST " + myPlayer.getName() + ": problem with getMyScore");
+            System.out.println("GUEST " + myPlayer.getName() + ": problem with getMyScore\n");
             return -1;
         }
     }
@@ -286,13 +297,13 @@ public class GuestModel extends Observable implements GameModel {
                 return true;
             } else {
                 // PRINT DEBUG
-                System.out.println("GUEST " + myPlayer.getName() + ": it is not my turn");
+                System.out.println("GUEST " + myPlayer.getName() + ": it is not my turn\n");
                 return false;
             }
 
         } else {
             // PRINT DEBUG
-            System.out.println("GUEST " + myPlayer.getName() + ": problem with isMyTurn");
+            System.out.println("GUEST " + myPlayer.getName() + ": problem with isMyTurn\n");
             return false;
         }
     }
