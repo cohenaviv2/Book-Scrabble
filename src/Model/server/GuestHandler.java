@@ -35,39 +35,25 @@ public class GuestHandler implements ClientHandler {
     private BufferedReader in;
     private PrintWriter out;
 
-    private boolean isValid(String req) {
+    private boolean idExist(String request) {
         /*
          * Checks if the guest reqest is valid
          * if ID is 0 the guest trying to connect and get his ID
          */
 
-        String[] params = req.split(",");
-
-        if (params.length != 3) {
-            // PRINT DEBUG
-            System.out.println("HOST : Protocol error - invalid");
-            return false;
-        }
+        String[] params = request.split(",");
 
         int id = Integer.parseInt(params[0]);
-        String modifier = params[1];
 
-        if (id == 0 && modifier.equalsIgnoreCase("connectMe")) { // id == 0 for initializaition
+        if (id == 0)
             return true;
-        }
 
-        if (HostModel.getHM().getPlayersByID().get(id) == null) { // No player exist
+        if (params.length != 3 || HostModel.getHM().getPlayersByID().get(id) == null
+                || HostModel.getHM().getPlayersByID().get(id).getID() != id) { // No player exist
             // PRINT DEBUG
-            System.out.println("HOST : Protocol error - No player exist");
+            System.out.println("HOST : Protocol error - invalid/no player exist\n");
             return false;
         }
-
-        if (HostModel.getHM().getPlayersByID().get(id).getID() != id) { // No ID
-            // PRINT DEBUG
-            System.out.println("HOST : Protocol error - No matching ID");
-            return false;
-        }
-
         return true;
     }
 
@@ -84,7 +70,7 @@ public class GuestHandler implements ClientHandler {
             out = new PrintWriter(outToClient, true);
             String request = in.readLine();
 
-            if (isValid(request)) {
+            if (idExist(request)) {
                 String[] req = request.split(",");
                 String guestID = req[0];
                 String modifier = req[1];
@@ -122,6 +108,9 @@ public class GuestHandler implements ClientHandler {
                     case "getMyWords":
                         wordsHandler(guestID, guestValue);
                 }
+            } else {
+                // PRINT DEBUG
+                System.out.println("HOST: wrong model operator\n");
             }
 
         } catch (IOException e) {
@@ -135,7 +124,7 @@ public class GuestHandler implements ClientHandler {
             HostModel.getHM().getPlayersByName().put(guestName, new Player(guestName, HostModel.generateID(), false));
             out.println("0,connectMe,true");
             // PRINT DEBUG
-            System.out.println("HOST: " + guestName + " is Connected!");
+            System.out.println("HOST: " + guestName + " is Connected!\n");
         } else {
             // PRINT DEBUG
             System.out.println("HOST: failed to connect guest - " + guestName);
@@ -146,6 +135,18 @@ public class GuestHandler implements ClientHandler {
     }
 
     private void queryHandler(String guestID, String wordParams) {
+        String[] wordData = wordParams.split(":");
+        String query = wordData[0];
+        int row = Integer.parseInt(wordData[1]);
+        int col = Integer.parseInt(wordData[2]);
+        boolean vertical;
+        if (wordData[3].equalsIgnoreCase("true")) {
+            vertical = true;
+        }
+        else vertical = false;
+
+        /********/
+        Word word = new Word(null, row, col, vertical);
     }
 
     private void challengeHandler(String guestID, String challengeParams) {

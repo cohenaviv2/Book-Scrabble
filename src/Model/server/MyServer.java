@@ -36,7 +36,7 @@ public class MyServer {
 
     private void runServer() throws Exception {
         try {
-            theServer = new ServerSocket(this.port);
+            theServer = new ServerSocket(port, 0, InetAddress.getByName("0.0.0.0"));
             theServer.setSoTimeout(1000); // 1sec
             while (!stop) {
                 try {

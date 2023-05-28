@@ -20,6 +20,7 @@ public class Board {
     private final int size;
     private boolean starBonusAct;
     private ArrayList<Word> placedWords;
+    private ArrayList<Word> currentWords;
     private Tile[][] boardTiles;
 
     public Board() {
@@ -28,6 +29,7 @@ public class Board {
         this.size = 15;
         this.starBonusAct = false;
         this.placedWords = new ArrayList<>(); // all the placed words on the board (Added in tryPlaceWord)
+        this.currentWords = new ArrayList<>(); //all the words that was made for this turn - flush in tryPlaceWord
         this.boardTiles = new Tile[size][size]; // for getTiles
 
         board = new Square[size][size];
@@ -507,6 +509,7 @@ public class Board {
          */
 
         int score = 0;
+        this.currentWords.clear();
 
         /* word placement contains null - leans on a tile */
         Word thisWord = null;
@@ -539,6 +542,7 @@ public class Board {
                 return 0;
             else
                 placeWord(word);
+                this.currentWords.addAll(words);
 
             return score;
         }
