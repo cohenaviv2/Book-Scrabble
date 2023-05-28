@@ -29,6 +29,7 @@ public class HostModel extends Observable implements GameModel {
         /* starts the host server on port 8040 */
         this.hostServer = new MyServer(8040, new GuestHandler());
         this.hostServer.start();
+        System.out.println();
         this.gameBoard = Board.getBoard();
         this.gameBag = Tile.Bag.getBag();
         playersByID = new HashMap<>();
@@ -80,6 +81,11 @@ public class HostModel extends Observable implements GameModel {
     }
 
     @Override
+    public void myBookChoice(String bookName) {
+        this.bookList.append("/resources/books/" + bookName + ",");
+    }
+
+    @Override
     public void tryPlaceWord(String word, int row, int col, boolean vertical) {
 
     }
@@ -100,11 +106,6 @@ public class HostModel extends Observable implements GameModel {
     }
 
     @Override
-    public void myBookChoice(String bookName) {
-        this.bookList.append("/resources/books/" + bookName + ",");
-    }
-
-    @Override
     public void quitGame() {
         try {
             this.gameServer.close();
@@ -113,6 +114,7 @@ public class HostModel extends Observable implements GameModel {
             e.printStackTrace();
         }
     }
+
 
     @Override
     public String getMyName() {

@@ -36,14 +36,14 @@ public class MyServer {
 
     private void runServer() throws Exception {
         try {
-            theServer = new ServerSocket(this.port);
+            theServer = new ServerSocket(port, 0, InetAddress.getByName("0.0.0.0"));
             theServer.setSoTimeout(1000); // 1sec
             while (!stop) {
                 try {
                     Socket aClient = theServer.accept(); // blocking call
-                    System.out.println("** client connected **\n");
+                    System.out.println("\n** client connected **\n");
                     this.ch.handleClient(aClient.getInputStream(), aClient.getOutputStream());
-                    System.out.println("** end handle client **\n");
+                    System.out.println("\n** end handle client **\n");
                     this.ch.close();
                     aClient.close();
                 } catch (SocketTimeoutException e) {
