@@ -1,7 +1,8 @@
 package model;
 
 import java.util.*;
-import model.logic.*;
+
+import model.game.*;
 
 public interface GameModel {
 

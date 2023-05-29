@@ -2,9 +2,9 @@ package model.test;
 
 import java.util.ArrayList;
 
-import model.HostModel;
-import model.logic.*;
-import model.logic.Tile.Bag;
+import model.game.*;
+import model.game.Tile.Bag;
+import model.host.HostModel;
 
 public class LogicTest {
 
