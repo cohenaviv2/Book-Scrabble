@@ -6,6 +6,7 @@ import java.net.*;
 import java.util.*;
 import model.logic.*;
 
+
 public class GuestModel extends Observable implements GameModel {
 
     // Connectivity :
@@ -18,7 +19,19 @@ public class GuestModel extends Observable implements GameModel {
     String myName;
 
     // Game :
-    private Tile[][] myBoard;
+    private Character[][] myBoard;
+    /*
+     * 
+     */
+    private Character[][] fillBoard(String board){
+        /*
+         * 
+         * "1234,getBoard,-----X---G---GHJ:----GBH---"
+            
+         */
+        return null;
+
+    }
 
     public GuestModel() {
 

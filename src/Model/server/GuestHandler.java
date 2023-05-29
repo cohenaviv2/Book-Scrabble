@@ -237,8 +237,12 @@ public class GuestHandler implements ClientHandler {
             System.out.println("HOST: error in is my turn \n");
         }
     }
-
+    
     private void boardHandler(String guestID, String bool) {
+        /* 
+         * 1234,getCurrentBoard,true
+         * 1234,getCurrentBoard,-----XGHB:
+         */
     }
 
     private void tilesHandler(String guestID, String bool) {
