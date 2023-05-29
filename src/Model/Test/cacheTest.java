@@ -3,7 +3,7 @@ package model.test;
 import java.io.FileWriter;
 import java.io.PrintWriter;
 
-import model.cache.*;
+import model.server.cache.*;
 
 public class CacheTest {
 	

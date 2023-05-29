@@ -3,8 +3,7 @@ package model.server;
 import java.util.HashMap;
 import java.util.Map;
 
-
-import model.cache.Dictionary;
+import model.server.cache.Dictionary;
 
 /*
  * The dictionary manager creates new dictionaries only as needed
