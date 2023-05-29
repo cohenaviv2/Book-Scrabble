@@ -26,8 +26,8 @@ public class GuestModel extends Observable implements GameModel {
 
     private boolean isMyRequest(String answer, String indicator) {
         /*
-         * Checks if the host server response was Valid - intended for this ID
-         * and the indicator is the same
+         * Checks if the host respond intended for this ID
+         * and has the same method indicator
          */
 
         String[] params = answer.split(",");
@@ -206,7 +206,7 @@ public class GuestModel extends Observable implements GameModel {
     }
 
     @Override
-    public void pullTiles(int count) {
+    public void pullTiles() {
 
         /* how we do it ??? */
     }
@@ -339,13 +339,13 @@ public class GuestModel extends Observable implements GameModel {
     }
 
     @Override
-    public ArrayList<Tile> getMyTiles() {
-        return this.myPlayer.getTiles();
+    public Map<Character,Tile> getMyTiles() {
+        return this.myPlayer.getMyTiles();
     }
 
     @Override
     public ArrayList<Word> getMyWords() {
-        return this.myPlayer.getWords();
+        return this.myPlayer.getMyWords();
     }
 
 }

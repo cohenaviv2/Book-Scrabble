@@ -1,6 +1,6 @@
 package model;
 
-import java.util.ArrayList;
+import java.util.*;
 import model.logic.*;
 
 public interface GameModel {
@@ -10,7 +10,7 @@ public interface GameModel {
     void myBookChoice(String bookName);
     void tryPlaceWord(String word,int row,int col, boolean vertical);
     void challenge(String word,int row,int col, boolean vertical);
-    void pullTiles(int count);
+    void pullTiles();
     void skipTurn();
     void quitGame();
 
@@ -20,7 +20,7 @@ public interface GameModel {
     int getMyScore();
     boolean isMyTurn();
     Tile[][] getCurrentBoard();
-    ArrayList<Tile> getMyTiles();
+    Map<Character,Tile> getMyTiles();
     ArrayList<Word> getMyWords();
 
 }

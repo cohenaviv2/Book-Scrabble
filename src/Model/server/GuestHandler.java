@@ -93,8 +93,6 @@ public class GuestHandler implements ClientHandler {
                         skipTurnHandler(guestID, guestValue);
                     case "quitGame":
                         quitHandler(guestID, guestValue);
-                    case "getMyName":
-                        getNameHandler(guestID, guestValue);
                     case "getMyID":
                         getIdHandler(guestID, guestValue);
                     case "getMyScore":
@@ -132,6 +130,11 @@ public class GuestHandler implements ClientHandler {
     }
 
     private void addBookHandler(String guestID, String guestBook) {
+        HostModel.getHM().getBookList().append("/resources/books/" + guestBook);
+        out.println(guestID + ",myBookChoice,true");
+        // PRINT DEBUG
+        System.out.println("HOST: " + HostModel.getHM().getPlayersByID().get(Integer.parseInt(guestID)).getName()
+                + " chose the book - " + guestBook + "\n");
     }
 
     private void queryHandler(String guestID, String wordParams) {
@@ -142,11 +145,13 @@ public class GuestHandler implements ClientHandler {
         boolean vertical;
         if (wordData[3].equalsIgnoreCase("true")) {
             vertical = true;
-        }
-        else vertical = false;
+        } else
+            vertical = false;
 
         /********/
         Word word = new Word(null, row, col, vertical);
+
+        /*** tryPlaceWord, get score, set score, send score, update all ... */
     }
 
     private void challengeHandler(String guestID, String challengeParams) {
@@ -156,12 +161,33 @@ public class GuestHandler implements ClientHandler {
     }
 
     private void skipTurnHandler(String guestID, String bool) {
+        if (bool.equals("true")) {
+
+            Player guest = HostModel.getHM().getPlayersByID().get(Integer.parseInt(guestID));
+            guest.setMyTurn(false);
+            out.println(guestID + ",skipTurn,true");
+
+            // PRINT DEBUG
+            System.out.println("HOST: " + guest.getName() + " skipped turn\n");
+        } else {
+            // PRINT DEBUG
+            System.out.println("HOST: " + guestID + " Skip turn failed\n");
+        }
     }
 
     private void quitHandler(String guestID, String bool) {
-    }
+        if (bool.equals("true")) {
 
-    private void getNameHandler(String guestID, String bool) {
+            String guestName = HostModel.getHM().getPlayersByID().get(Integer.parseInt(guestID)).getName();
+            HostModel.getHM().getPlayersByID().remove(Integer.parseInt(guestID));
+            out.println(guestID + ",quitGame,true");
+
+            // PRINT DEBUG
+            System.out.println("HOST: " + guestName + " just quit the game\n");
+        } else {
+            // PRINT DEBUG
+            System.out.println("HOST: " + guestID + " error quiting the game \n");
+        }
     }
 
     private void getIdHandler(String guestID, String guestName) {
@@ -177,9 +203,39 @@ public class GuestHandler implements ClientHandler {
     }
 
     private void scoreHandler(String guestID, String bool) {
+        if (bool.equals("true")) {
+
+            Player guest = HostModel.getHM().getPlayersByID().get(Integer.parseInt(guestID));
+            if (guest != null) {
+                String score = Integer.toString(guest.getScore());
+                out.println(guestID + ",getMyScore," + score);
+                // PRINT DEBUG
+                System.out.println("HOST: " + guest.getName() + " got " + score + " points \n");
+            } else {
+                // PRINT DEBUG
+                System.out.println("HOST: no such player exist \n");
+            }
+        } else {
+            // PRINT DEBUG
+            System.out.println("HOST: error in getting score \n");
+        }
     }
 
     private void myTurnHandler(String guestID, String bool) {
+        if (bool.equals("true")) {
+            Player guest = HostModel.getHM().getPlayersByID().get(Integer.parseInt(guestID));
+            if (guest != null) {
+                out.println(guestID + ",isMyTurn," + guest.isMyTurn());
+                // PRINT DEBUG
+                System.out.println("HOST: " + guest.getName() + " turn: " + guest.isMyTurn() + " \n");
+            } else {
+                // PRINT DEBUG
+                System.out.println("HOST: no such player exist \n");
+            }
+        } else {
+            // PRINT DEBUG
+            System.out.println("HOST: error in is my turn \n");
+        }
     }
 
     private void boardHandler(String guestID, String bool) {

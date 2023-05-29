@@ -1,6 +1,6 @@
 package model;
 
-import java.io.IOException;
+import java.io.*;
 import java.net.*;
 import java.util.*;
 import model.logic.*;
@@ -12,7 +12,7 @@ public class HostModel extends Observable implements GameModel {
     private static HostModel hm = null; // Singleton
 
     // Connectivity :
-    private Socket gameServer; // connects you to the game server
+    private Socket gameServer; // socket to the game server
     private MyServer hostServer; // my Host server - Will support connection of up to 3 guests
 
     // Profiles :
@@ -87,6 +87,23 @@ public class HostModel extends Observable implements GameModel {
 
     @Override
     public void tryPlaceWord(String word, int row, int col, boolean vertical) {
+        Tile[] wordTiles = createTiles(word);
+        Word queryWord = new Word(wordTiles, row, col, vertical);
+        int score = gameBoard.tryPlaceWord(queryWord);
+
+        if (score == -1){
+            // PRINT DEBUG
+            System.out.println("HOST: your word is not board legal");
+        }
+        else if (score ==0){
+            // PRINT DEBUG
+            System.out.println("HOST: some word that was made is not dictionary legal");
+        }
+        else {
+            this.hostPlayer.addPoints(score);
+            this.hostPlayer.getMyWords().addAll(gameBoard.getCurrentWords());
+            pullTiles();
+        }
 
     }
 
@@ -96,8 +113,12 @@ public class HostModel extends Observable implements GameModel {
     }
 
     @Override
-    public void pullTiles(int count) {
+    public void pullTiles() {
 
+        while(hostPlayer.getMyTiles().size() < 7) {
+            Tile tile = gameBag.getRand();
+            hostPlayer.getMyTiles().put(tile.getLetter(), tile);
+        }
     }
 
     @Override
@@ -115,6 +136,21 @@ public class HostModel extends Observable implements GameModel {
         }
     }
 
+    private Tile[] createTiles(String word){
+        Tile[] ts = new Tile[word.length()];
+		int i = 0;
+		for (char c : word.toCharArray()) {
+			ts[i] = hostPlayer.getMyTiles().get(c);
+            i++;
+		}
+		return ts;
+    }
+
+    public boolean dictionaryLegal(Word word) {
+        /* TODO: need to ask the game server */
+
+        return true;
+    }
 
     @Override
     public String getMyName() {
@@ -142,13 +178,13 @@ public class HostModel extends Observable implements GameModel {
     }
 
     @Override
-    public ArrayList<Tile> getMyTiles() {
-        return this.hostPlayer.getTiles();
+    public Map<Character,Tile> getMyTiles() {
+        return this.hostPlayer.getMyTiles();
     }
 
     @Override
     public ArrayList<Word> getMyWords() {
-        return this.hostPlayer.getWords();
+        return this.hostPlayer.getMyWords();
     }
 
     public Player getHostPlayer() {

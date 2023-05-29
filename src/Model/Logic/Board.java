@@ -2,6 +2,8 @@ package model.logic;
 
 import java.util.ArrayList;
 
+import model.HostModel;
+
 /*
  * Represents the Game Board
  * Contains 15x15 matrix of Squares
@@ -29,7 +31,7 @@ public class Board {
         this.size = 15;
         this.starBonusAct = false;
         this.placedWords = new ArrayList<>(); // all the placed words on the board (Added in tryPlaceWord)
-        this.currentWords = new ArrayList<>(); //all the words that was made for this turn - flush in tryPlaceWord
+        this.currentWords = new ArrayList<>(); // all the words that was made for this turn - flush in tryPlaceWord
         this.boardTiles = new Tile[size][size]; // for getTiles
 
         board = new Square[size][size];
@@ -137,7 +139,7 @@ public class Board {
             return (isLeanOnExistTile(word) && !isReplaceExistTile(word));
     }
 
-    public boolean isOnBoard(Word word) {
+    private boolean isOnBoard(Word word) {
         /* returns true if the word has valid index */
 
         // starting index check:
@@ -158,7 +160,7 @@ public class Board {
 
     }
 
-    public boolean isLeanOnExistTile(Word word) {
+    private boolean isLeanOnExistTile(Word word) {
         /*
          * returns true if the word leans on one of the existing tiles on the board
          * (adjacent or overlapping tile)
@@ -188,7 +190,7 @@ public class Board {
         }
     }
 
-    public boolean isReplaceExistTile(Word word) {
+    private boolean isReplaceExistTile(Word word) {
         /*
          * Returns true if one of the word tiles replaces an existing tile on the board
          */
@@ -208,7 +210,7 @@ public class Board {
         return false;
     }
 
-    public boolean checkFirstWord(Word word) {
+    private boolean checkFirstWord(Word word) {
         /*
          * returns true if the first word placement in the game leans on the star
          * tile[7][7]
@@ -234,9 +236,7 @@ public class Board {
     }
 
     public boolean dictionaryLegal(Word word) {
-        /* return true for now... */
-
-        return true;
+        return HostModel.getHM().dictionaryLegal(word);
     }
 
     public ArrayList<Word> getWords(Word word) {
@@ -372,7 +372,7 @@ public class Board {
         return words;
     }
 
-    public int getScore(Word word) {
+    private int getScore(Word word) {
         /*
          * returns the total score of this word placement, including the Bonus squares
          */
@@ -447,7 +447,7 @@ public class Board {
         return score;
     }
 
-    public Word fullWord(Word word) {
+    private Word fullWord(Word word) {
         /*
          * generates the full word for potential word placement with a null where there
          * is existing tile on the board
@@ -472,7 +472,7 @@ public class Board {
         return newWord;
     }
 
-    public void placeWord(Word word) {
+    private void placeWord(Word word) {
         /*
          * makes a word placment on the board
          */
@@ -542,11 +542,15 @@ public class Board {
                 return 0;
             else
                 placeWord(word);
-                this.currentWords.addAll(words);
+            this.currentWords.addAll(words);
 
             return score;
         }
         return -1;
+    }
+
+    public ArrayList<Word> getCurrentWords() {
+        return this.currentWords;
     }
 
     public void printPlacedWords() {
@@ -676,5 +680,4 @@ public class Board {
         }
 
     }
-
 }

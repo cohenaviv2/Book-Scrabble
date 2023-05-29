@@ -17,7 +17,7 @@ public class Player {
     private final int id;
     private final boolean isHost;
     private int score;
-    private ArrayList<Tile> myTiles;
+    private Map<Character,Tile> myTiles;
     private ArrayList<Word> myWords;
     private boolean myTurn;
 
@@ -26,7 +26,7 @@ public class Player {
         this.name = name;
         this. id = id;
         this.score = 0;
-        this.myTiles = new ArrayList<>();
+        this.myTiles = new HashMap<>();
         this.myWords = new ArrayList<>();
         this.myTurn = false;
     }
@@ -43,11 +43,11 @@ public class Player {
         return score;
     }
 
-    public ArrayList<Tile> getTiles() {
+    public Map<Character,Tile> getMyTiles() {
         return myTiles;
     }
 
-    public ArrayList<Word> getWords() {
+    public ArrayList<Word> getMyWords() {
         return myWords;
     }
 
@@ -61,10 +61,6 @@ public class Player {
 
     public void setScore(int score) {
         this.score = score;
-    }
-
-    public void setTiles(ArrayList<Tile> tiles) {
-        this.myTiles = tiles;
     }
 
     public void setMyTurn(boolean myTurn) {
