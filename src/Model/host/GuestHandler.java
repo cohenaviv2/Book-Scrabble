@@ -36,6 +36,11 @@ public class GuestHandler implements ClientHandler {
     private BufferedReader in;
     private PrintWriter out;
 
+    
+
+    public GuestHandler() {
+    }
+
     private boolean idExist(String request) {
         /*
          * Checks if the guest reqest is valid
@@ -46,8 +51,9 @@ public class GuestHandler implements ClientHandler {
 
         int id = Integer.parseInt(params[0]);
 
-        if (id == 0)
+        if (id == 0) {
             return true;
+        }
 
         if (params.length != 3 || HostModel.getHM().getPlayersByID().get(id) == null
                 || HostModel.getHM().getPlayersByID().get(id).getID() != id) { // No player exist
@@ -70,6 +76,7 @@ public class GuestHandler implements ClientHandler {
             in = new BufferedReader(new InputStreamReader(inFromclient));
             out = new PrintWriter(outToClient, true);
             String request = in.readLine();
+            System.out.println("client request: "+request);
 
             if (idExist(request)) {
                 String[] req = request.split(",");
@@ -77,35 +84,93 @@ public class GuestHandler implements ClientHandler {
                 String modifier = req[1];
                 String guestValue = req[2];
 
-                switch (modifier) {
+                System.out.println("client modifier: "+modifier);
 
+                // if (modifier.equals("connectMe")) {
+                // connectHandler(guestID, guestValue);
+                // return;
+
+                // } else if (modifier.equals("myBookChoice")) {
+                // addBookHandler(guestID, guestValue);
+
+                // } else if (modifier.equals("tryPlaceWord")) {
+                // queryHandler(guestID, guestValue);
+
+                // } else if (modifier.equals("challenge")) {
+                // challengeHandler(guestID, guestValue);
+
+                // } else if (modifier.equals("pullTiles")) {
+                // pullTilesHandler(guestID, guestValue);
+
+                // } else if (modifier.equals("skipTurn")) {
+                // skipTurnHandler(guestID, guestValue);
+
+                // } else if (modifier.equals("quitGame")) {
+                // quitHandler(guestID, guestValue);
+
+                // } else if (modifier.equals("getMyID")) {
+                // getIdHandler(guestID, guestValue);
+
+                // } else if (modifier.equals("getMyScore")) {
+                // scoreHandler(guestID, guestValue);
+
+                // } else if (modifier.equals("isMyTurn")) {
+                // myTurnHandler(guestID, guestValue);
+
+                // } else if (modifier.equals("getCurrentBoard")) {
+                // boardHandler(guestID, guestValue);
+
+                // } else if (modifier.equals("getMyTiles")) {
+                // tilesHandler(guestID, guestValue);
+
+                // } else if (modifier.equals("getMyWords")) {
+                // wordsHandler(guestID, guestValue);
+
+                // }
+                
+                switch (modifier) {
                     // All model cases
                     case "connectMe":
                         connectHandler(guestID, guestValue);
+                        break;
                     case "myBookChoice":
                         addBookHandler(guestID, guestValue);
+                        break;
                     case "tryPlaceWord":
                         queryHandler(guestID, guestValue);
+                        break;
                     case "challenge":
                         challengeHandler(guestID, guestValue);
+                        break;
                     case "pullTiles":
                         pullTilesHandler(guestID, guestValue);
+                        break;
                     case "skipTurn":
                         skipTurnHandler(guestID, guestValue);
+                        break;
                     case "quitGame":
                         quitHandler(guestID, guestValue);
+                        break;
                     case "getMyID":
                         getIdHandler(guestID, guestValue);
+                        break;
                     case "getMyScore":
                         scoreHandler(guestID, guestValue);
+                        break;
                     case "isMyTurn":
                         myTurnHandler(guestID, guestValue);
+                        break;
                     case "getCurrentBoard":
                         boardHandler(guestID, guestValue);
+                        break;
                     case "getMyTiles":
                         tilesHandler(guestID, guestValue);
+                        break;
                     case "getMyWords":
                         wordsHandler(guestID, guestValue);
+                        break;
+                    default:
+                        break;
                 }
             } else {
                 // PRINT DEBUG
@@ -159,6 +224,8 @@ public class GuestHandler implements ClientHandler {
     }
 
     private void pullTilesHandler(String guestID, String count) {
+        out.println(guestID+",pullTiles,1324");
+
     }
 
     private void skipTurnHandler(String guestID, String bool) {
@@ -192,8 +259,10 @@ public class GuestHandler implements ClientHandler {
     }
 
     private void getIdHandler(String guestID, String guestName) {
-        if (guestID.equalsIgnoreCase("0")) {
+        System.out.println("getIdHandler");
+        if (guestID.equals("0")) {
             String id = String.valueOf(HostModel.getHM().getPlayersByName().get(guestName).getID());
+            System.out.println(guestName + " " + id);
             out.println("0,getMyID," + id);
             // PRINT DEBUG
             System.out.println("HOST: " + guestName + " requested is ID (" + id + ")\n");
@@ -238,9 +307,9 @@ public class GuestHandler implements ClientHandler {
             System.out.println("HOST: error in is my turn \n");
         }
     }
-    
+
     private void boardHandler(String guestID, String bool) {
-        /* 
+        /*
          * 1234,getCurrentBoard,true
          * 1234,getCurrentBoard,-----XGHB:
          */

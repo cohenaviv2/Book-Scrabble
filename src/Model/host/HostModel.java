@@ -7,7 +7,7 @@ import java.util.*;
 import model.GameModel;
 import model.game.*;
 import model.game.Tile.Bag;
-import model.server.*;
+import model.server.MyServer;
 
 public class HostModel extends Observable implements GameModel {
 
@@ -93,15 +93,13 @@ public class HostModel extends Observable implements GameModel {
         Word queryWord = new Word(wordTiles, row, col, vertical);
         int score = gameBoard.tryPlaceWord(queryWord);
 
-        if (score == -1){
+        if (score == -1) {
             // PRINT DEBUG
             System.out.println("HOST: your word is not board legal");
-        }
-        else if (score ==0){
+        } else if (score == 0) {
             // PRINT DEBUG
             System.out.println("HOST: some word that was made is not dictionary legal");
-        }
-        else {
+        } else {
             this.hostPlayer.addPoints(score);
             this.hostPlayer.getMyWords().addAll(gameBoard.getCurrentWords());
             pullTiles();
@@ -117,7 +115,7 @@ public class HostModel extends Observable implements GameModel {
     @Override
     public void pullTiles() {
 
-        while(hostPlayer.getMyTiles().size() < 7) {
+        while (hostPlayer.getMyTiles().size() < 7) {
             Tile tile = gameBag.getRand();
             hostPlayer.getMyTiles().put(tile.getLetter(), tile);
         }
@@ -138,14 +136,14 @@ public class HostModel extends Observable implements GameModel {
         }
     }
 
-    private Tile[] createTiles(String word){
+    private Tile[] createTiles(String word) {
         Tile[] ts = new Tile[word.length()];
-		int i = 0;
-		for (char c : word.toCharArray()) {
-			ts[i] = hostPlayer.getMyTiles().get(c);
+        int i = 0;
+        for (char c : word.toCharArray()) {
+            ts[i] = hostPlayer.getMyTiles().get(c);
             i++;
-		}
-		return ts;
+        }
+        return ts;
     }
 
     public boolean dictionaryLegal(Word word) {
@@ -180,7 +178,7 @@ public class HostModel extends Observable implements GameModel {
     }
 
     @Override
-    public Map<Character,Tile> getMyTiles() {
+    public Map<Character, Tile> getMyTiles() {
         return this.hostPlayer.getMyTiles();
     }
 

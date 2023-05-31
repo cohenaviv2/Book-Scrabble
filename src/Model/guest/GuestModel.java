@@ -8,7 +8,6 @@ import java.util.*;
 import model.GameModel;
 import model.game.*;
 
-
 public class GuestModel extends Observable implements GameModel {
 
     // Connectivity :
@@ -19,24 +18,45 @@ public class GuestModel extends Observable implements GameModel {
     // Profiles :
     private Player myPlayer;
     String myName;
+    String ipString;
+    int port;
 
     // Game :
     private Character[][] myBoard;
+
     /*
      * 
      */
-    private Character[][] fillBoard(String board){
+    private Character[][] fillBoard(String board) {
         /*
          * 
          * "1234,getBoard,-----X---G---GHJ:----GBH---"
-            
+         * 
          */
         return null;
 
     }
 
-    public GuestModel() {
+    private void openConversation() {
+        try {
+            this.hostSocket = new Socket(this.ipString, this.port);
+            this.out = new PrintWriter(hostSocket.getOutputStream(), true);
+            this.in = new Scanner(hostSocket.getInputStream());
+        } catch (IOException e) {
+            System.out.println("open conversation failed");
+            e.printStackTrace();
+        }
+    }
 
+    private void closeConversation() {
+        try {
+            this.hostSocket.close();
+            this.in.close();
+            this.out.close();
+        } catch (IOException e) {
+            System.out.println("close conversation failed");
+            e.printStackTrace();
+        }
     }
 
     private boolean isMyRequest(String answer, String indicator) {
@@ -62,47 +82,47 @@ public class GuestModel extends Observable implements GameModel {
          * sets the guest player profile
          * (Gets unique ID from the host)
          */
-        try {
-            this.hostSocket = new Socket(ip, port);
-            try {
-                out = new PrintWriter(hostSocket.getOutputStream(), true);
-                in = new Scanner(hostSocket.getInputStream());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
         this.myName = myName;
+        this.ipString = ip;
+        this.port = port;
+
         if (connectTest()) { // Successfully completed
+            openConversation();
             int id = getMyID();
+            closeConversation();
             this.myPlayer = new Player(myName, id, false); // Sets player with given ID from the host
             // PRINT DEBUG
             System.out.println("GUSET " + myName + ": my Player profile is set up\n");
             System.out.println(this.myPlayer);
         }
+        closeConversation();
 
     }
 
     private boolean connectTest() {
 
-        // Acknowledge test :
+        openConversation();
+
         out.println("0,connectMe," + this.myName);
         String[] answer = in.nextLine().split(",");
 
-        if (answer[1].equalsIgnoreCase("connectMe") && answer[2].equalsIgnoreCase("true")) {
+        if (answer[1].equals("connectMe") && answer[2].equals("true")) {
             // PRINT DEBUG
             System.out.println("GUEST: Connections test passed successfully\n");
+            closeConversation();
             return true;
         }
         // PRINT DEBUG
         System.out.println("GUEST: Connections test failed - Unrecognized error");
+        closeConversation();
         return false;
-
     }
 
     @Override
     public void myBookChoice(String bookName) {
+        openConversation();
+
         out.println(getMyID() + ",myBookChoice," + bookName);
         String answer = in.nextLine();
 
@@ -224,6 +244,13 @@ public class GuestModel extends Observable implements GameModel {
     public void pullTiles() {
 
         /* how we do it ??? */
+
+        /* TEST */
+        openConversation();
+        out.println("0,pullTiles,true");
+        String answer = in.nextLine();
+        System.out.println(answer);
+        closeConversation();
     }
 
     @Override
@@ -262,11 +289,7 @@ public class GuestModel extends Observable implements GameModel {
         if (isMyRequest(answer, "quitGame")) {
             String value = answer.split(",")[2];
             if (value.equalsIgnoreCase("true")) {
-                try {
-                    this.hostSocket.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                /********** */
             }
         } else {
             // PRINT DEBUG
@@ -354,7 +377,7 @@ public class GuestModel extends Observable implements GameModel {
     }
 
     @Override
-    public Map<Character,Tile> getMyTiles() {
+    public Map<Character, Tile> getMyTiles() {
         return this.myPlayer.getMyTiles();
     }
 

@@ -6,6 +6,27 @@
     "configurations": [
         {
             "type": "java",
+            "name": "mainTestHost",
+            "request": "launch",
+            "mainClass": "model.server.host.mainTestHost",
+            "projectName": "Book Scrabble_c0c2c55d"
+        },
+        {
+            "type": "java",
+            "name": "mainTestGuest",
+            "request": "launch",
+            "mainClass": "model.guest.mainTestGuest",
+            "projectName": "Book Scrabble_c0c2c55d"
+        },
+        {
+            "type": "java",
+            "name": "mainTestHost",
+            "request": "launch",
+            "mainClass": "model.host.mainTestHost",
+            "projectName": "Book Scrabble_c0c2c55d"
+        },
+        {
+            "type": "java",
             "name": "Current File",
             "request": "launch",
             "mainClass": "${file}"

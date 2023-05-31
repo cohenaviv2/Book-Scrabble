@@ -13,7 +13,6 @@ import java.net.*;
  */
 
 public class MyServer {
-    private ServerSocket theServer;
     protected final int port;
     protected final ClientHandler ch;
     protected volatile boolean stop;
@@ -36,7 +35,7 @@ public class MyServer {
 
     private void runServer() throws Exception {
         try {
-            theServer = new ServerSocket(port, 0, InetAddress.getByName("0.0.0.0"));
+            ServerSocket theServer = new ServerSocket(this.port);
             theServer.setSoTimeout(1000); // 1sec
             while (!stop) {
                 try {

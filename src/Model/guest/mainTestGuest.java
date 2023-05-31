@@ -7,7 +7,7 @@ import java.io.InputStreamReader;
 public class mainTestGuest {
     public static void main(String[] args) {
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-        System.out.println("\n*** GUEST MODE ***\n");
+        System.out.println("\n*** GUEST MODE ***");
 
         // Create Guest model:
         GuestModel gs = new GuestModel();
@@ -27,13 +27,13 @@ public class mainTestGuest {
         String ip = null;
         int port = 0;
         try {
-            System.out.println("Enter your name, and then press enter: ");
+            System.out.println("Enter your name: ");
             name = in.readLine();
             System.out.println();
-            System.out.println("Enter ip, and then press enter: ");
+            System.out.println("Enter ip: ");
             ip = in.readLine();
             System.out.println();
-            System.out.println("Enter port, and then press enter: ");
+            System.out.println("Enter port: ");
             port = Integer.parseInt(in.readLine());
             System.out.println();
         } catch (IOException e) {
@@ -42,6 +42,7 @@ public class mainTestGuest {
 
         // Connect to the host server:
         gs.connectMe(name, ip, port);
+        gs.pullTiles();
 
         // Wait...
         System.out.println();
@@ -52,6 +53,7 @@ public class mainTestGuest {
             e.printStackTrace();
         }
         System.out.println();
+
 
         // Disconnect the host server and quit the game:
         gs.quitGame();

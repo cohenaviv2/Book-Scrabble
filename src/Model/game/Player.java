@@ -20,6 +20,7 @@ public class Player {
     private Map<Character,Tile> myTiles;
     private ArrayList<Word> myWords;
     private boolean myTurn;
+    private int index;
 
     public Player(String name,int id, boolean host) {
         this.isHost = host;
