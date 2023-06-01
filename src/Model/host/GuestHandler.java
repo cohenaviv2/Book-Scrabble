@@ -36,11 +36,6 @@ public class GuestHandler implements ClientHandler {
     private BufferedReader in;
     private PrintWriter out;
 
-    
-
-    public GuestHandler() {
-    }
-
     private boolean idExist(String request) {
         /*
          * Checks if the guest reqest is valid
@@ -55,8 +50,8 @@ public class GuestHandler implements ClientHandler {
             return true;
         }
 
-        if (params.length != 3 || HostModel.getHM().getPlayersByID().get(id) == null
-                || HostModel.getHM().getPlayersByID().get(id).getID() != id) { // No player exist
+        if (params.length != 3 || HostModel.getHM().getGameManager().getGstsByID().get(id) == null
+                || HostModel.getHM().getGameManager().getGstsByID().get(id).getID() != id) { // No player exist
             // PRINT DEBUG
             System.out.println("HOST : Protocol error - invalid/no player exist\n");
             return false;
@@ -69,14 +64,14 @@ public class GuestHandler implements ClientHandler {
         /*
          * handles a client
          * one conversation
-         * one request & answer
+         * one request & one response
          */
 
         try {
             in = new BufferedReader(new InputStreamReader(inFromclient));
             out = new PrintWriter(outToClient, true);
             String request = in.readLine();
-            System.out.println("client request: "+request);
+            System.out.println("client request: " + request); // PRINT DRBUG
 
             if (idExist(request)) {
                 String[] req = request.split(",");
@@ -84,50 +79,8 @@ public class GuestHandler implements ClientHandler {
                 String modifier = req[1];
                 String guestValue = req[2];
 
-                System.out.println("client modifier: "+modifier);
+                System.out.println("client modifier: " + modifier); // PRINT DRBUG
 
-                // if (modifier.equals("connectMe")) {
-                // connectHandler(guestID, guestValue);
-                // return;
-
-                // } else if (modifier.equals("myBookChoice")) {
-                // addBookHandler(guestID, guestValue);
-
-                // } else if (modifier.equals("tryPlaceWord")) {
-                // queryHandler(guestID, guestValue);
-
-                // } else if (modifier.equals("challenge")) {
-                // challengeHandler(guestID, guestValue);
-
-                // } else if (modifier.equals("pullTiles")) {
-                // pullTilesHandler(guestID, guestValue);
-
-                // } else if (modifier.equals("skipTurn")) {
-                // skipTurnHandler(guestID, guestValue);
-
-                // } else if (modifier.equals("quitGame")) {
-                // quitHandler(guestID, guestValue);
-
-                // } else if (modifier.equals("getMyID")) {
-                // getIdHandler(guestID, guestValue);
-
-                // } else if (modifier.equals("getMyScore")) {
-                // scoreHandler(guestID, guestValue);
-
-                // } else if (modifier.equals("isMyTurn")) {
-                // myTurnHandler(guestID, guestValue);
-
-                // } else if (modifier.equals("getCurrentBoard")) {
-                // boardHandler(guestID, guestValue);
-
-                // } else if (modifier.equals("getMyTiles")) {
-                // tilesHandler(guestID, guestValue);
-
-                // } else if (modifier.equals("getMyWords")) {
-                // wordsHandler(guestID, guestValue);
-
-                // }
-                
                 switch (modifier) {
                     // All model cases
                     case "connectMe":
@@ -184,26 +137,28 @@ public class GuestHandler implements ClientHandler {
     }
 
     private void connectHandler(String guestID, String guestName) {
-        if (guestID.equalsIgnoreCase("0")) {
-            HostModel.getHM().getPlayersByName().put(guestName, new Player(guestName, HostModel.generateID(), false));
+        if (guestID.equals("0")) {
+            HostModel.getHM().getGameManager().createGuest(guestName);
             out.println("0,connectMe,true");
             // PRINT DEBUG
             System.out.println("HOST: " + guestName + " is Connected!\n");
         } else {
+            out.println("0,connectMe,false");
             // PRINT DEBUG
             System.out.println("HOST: failed to connect guest - " + guestName);
         }
     }
 
     private void addBookHandler(String guestID, String guestBook) {
-        HostModel.getHM().getBookList().append("/resources/books/" + guestBook);
+        HostModel.getHM().getGameManager().addBook("/resources/books/...");
         out.println(guestID + ",myBookChoice,true");
         // PRINT DEBUG
-        System.out.println("HOST: " + HostModel.getHM().getPlayersByID().get(Integer.parseInt(guestID)).getName()
+        System.out.println("HOST: " + HostModel.getHM().getGameManager().getGstsByID().get(Integer.parseInt(guestID)).getName()
                 + " chose the book - " + guestBook + "\n");
     }
 
     private void queryHandler(String guestID, String wordParams) {
+        /* TODO: turn active word, add points and such... */
         String[] wordData = wordParams.split(":");
         String query = wordData[0];
         int row = Integer.parseInt(wordData[1]);
@@ -221,17 +176,18 @@ public class GuestHandler implements ClientHandler {
     }
 
     private void challengeHandler(String guestID, String challengeParams) {
+
     }
 
     private void pullTilesHandler(String guestID, String count) {
-        out.println(guestID+",pullTiles,1324");
+        out.println(guestID + ",pullTiles,1324");
 
     }
 
     private void skipTurnHandler(String guestID, String bool) {
         if (bool.equals("true")) {
 
-            Player guest = HostModel.getHM().getPlayersByID().get(Integer.parseInt(guestID));
+            Player guest = HostModel.getHM().getGameManager().getGstsByID().get(Integer.parseInt(guestID));
             guest.setMyTurn(false);
             out.println(guestID + ",skipTurn,true");
 
@@ -246,8 +202,8 @@ public class GuestHandler implements ClientHandler {
     private void quitHandler(String guestID, String bool) {
         if (bool.equals("true")) {
 
-            String guestName = HostModel.getHM().getPlayersByID().get(Integer.parseInt(guestID)).getName();
-            HostModel.getHM().getPlayersByID().remove(Integer.parseInt(guestID));
+            String guestName = HostModel.getHM().getGameManager().getGstsByID().get(Integer.parseInt(guestID)).getName();
+            HostModel.getHM().getGameManager().getGstsByID().remove(Integer.parseInt(guestID));
             out.println(guestID + ",quitGame,true");
 
             // PRINT DEBUG
@@ -261,8 +217,7 @@ public class GuestHandler implements ClientHandler {
     private void getIdHandler(String guestID, String guestName) {
         System.out.println("getIdHandler");
         if (guestID.equals("0")) {
-            String id = String.valueOf(HostModel.getHM().getPlayersByName().get(guestName).getID());
-            System.out.println(guestName + " " + id);
+            String id = String.valueOf(HostModel.getHM().getGameManager().getGstByName().get(guestName).getID());
             out.println("0,getMyID," + id);
             // PRINT DEBUG
             System.out.println("HOST: " + guestName + " requested is ID (" + id + ")\n");
@@ -275,7 +230,7 @@ public class GuestHandler implements ClientHandler {
     private void scoreHandler(String guestID, String bool) {
         if (bool.equals("true")) {
 
-            Player guest = HostModel.getHM().getPlayersByID().get(Integer.parseInt(guestID));
+            Player guest = HostModel.getHM().getGameManager().getGstsByID().get(Integer.parseInt(guestID));
             if (guest != null) {
                 String score = Integer.toString(guest.getScore());
                 out.println(guestID + ",getMyScore," + score);
@@ -293,7 +248,7 @@ public class GuestHandler implements ClientHandler {
 
     private void myTurnHandler(String guestID, String bool) {
         if (bool.equals("true")) {
-            Player guest = HostModel.getHM().getPlayersByID().get(Integer.parseInt(guestID));
+            Player guest = HostModel.getHM().getGameManager().getGstsByID().get(Integer.parseInt(guestID));
             if (guest != null) {
                 out.println(guestID + ",isMyTurn," + guest.isMyTurn());
                 // PRINT DEBUG
