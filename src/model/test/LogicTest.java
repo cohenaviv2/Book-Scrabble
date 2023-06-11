@@ -123,7 +123,7 @@ public class LogicTest {
 		// Generate 10 players
 		for (int i = 0; i < 10; i++) {
 			String name = String.valueOf(letter);
-			Player p = new Player(name, HostModel.generateID(), false);
+			Player p = new Player(name, GameManager.generateID(), false);
 			players.add(p);
 			System.out.println(p);
 			letter++;

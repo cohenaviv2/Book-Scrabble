@@ -20,7 +20,7 @@ public class Player {
     private Map<Character, Tile> myTiles;
     private ArrayList<Word> myWords;
     private boolean myTurn;
-    private int index;
+    private int turnIndex;
     private boolean activeWord;
 
     public Player(String name, int id, boolean host) {
@@ -31,7 +31,7 @@ public class Player {
         this.myTiles = new HashMap<>();
         this.myWords = new ArrayList<>();
         this.myTurn = false;
-        this.index = 0;
+        this.turnIndex = 0;
         this.activeWord = false;
     }
 
@@ -75,18 +75,18 @@ public class Player {
         this.myTurn = myTurn;
     }
 
-    public int getIndex() {
-        return index;
+    public int getTurnIndex() {
+        return turnIndex;
     }
 
-    public void setIndex(int index) {
-        this.index = index;
+    public void setTurnIndex(int index) {
+        this.turnIndex = index;
     }
 
     @Override
     public String toString() {
         /* TODO: add more information */
-        return name+", "+id+"\nIs host: " + isHost + "\nScore: " + score + "\n";
+        return name+", "+id+"\nis Host: " + isHost + "\nScore: " + score + "\n";
     }
 
 }

@@ -6,6 +6,34 @@
     "configurations": [
         {
             "type": "java",
+            "name": "main_guest",
+            "request": "launch",
+            "mainClass": "model.main_guest",
+            "projectName": "Book Scrabble_c0c2c55d"
+        },
+        {
+            "type": "java",
+            "name": "main_host",
+            "request": "launch",
+            "mainClass": "model.main_host",
+            "projectName": "Book Scrabble_c0c2c55d"
+        },
+        {
+            "type": "java",
+            "name": "main_host",
+            "request": "launch",
+            "mainClass": "model.host.main_host",
+            "projectName": "Book Scrabble_c0c2c55d"
+        },
+        {
+            "type": "java",
+            "name": "main_guest",
+            "request": "launch",
+            "mainClass": "model.guest.main_guest",
+            "projectName": "Book Scrabble_c0c2c55d"
+        },
+        {
+            "type": "java",
             "name": "mainTestHost",
             "request": "launch",
             "mainClass": "model.server.host.mainTestHost",

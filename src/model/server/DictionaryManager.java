@@ -27,11 +27,11 @@ public class DictionaryManager {
 
     public boolean query(String... args) {
         /*
-         * By given a list of books(args), checks for each book if its in the pool
+         * By given a list of books (args), checks for each book if its in the pool
          * if not, create new Dictionary for this book.
          * Each query, which is the last word in arg [n-1],
          * will be searched in each book separately to update the cache of each relevant
-         * dictionary. this saves time for future queries.
+         * dictionary (saves time for future queries).
          */
 
         String word = args[args.length - 1];

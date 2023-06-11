@@ -10,39 +10,24 @@ import model.server.*;
 
 public class HostModel extends Observable implements GameModel {
 
+    private static final int HOST_PORT = 8040;
+
     private static HostModel hm = null; // Singleton
     private Socket gameServer; // socket to the game server
-    private MyServer hostServer; // my Host server - Will support connection of up to 3 guests
+    private MyServerParallel hostServer; // my Host server - Will support connection of up to 3 guests
     private GameManager gameManager; // game manager contains all the game information including players
 
     private HostModel() {
         /* starts the host server on port 8040 */
-        this.hostServer = new MyServer(8040, new GuestHandler());
+        this.hostServer = new MyServerParallel(HOST_PORT, new GuestHandler2());
         this.hostServer.start();
-        this.gameManager = new GameManager();
+        this.gameManager = GameManager.getGM();
     }
 
     public static HostModel getHM() {
         if (hm == null)
             hm = new HostModel();
         return hm;
-    }
-
-    public GameManager getGameManager() {
-        return this.gameManager;
-    }
-
-    public static int generateID() {
-        /*
-         * Generates a unique ID for each player
-         * only host can create player profiles and ID's
-         */
-        UUID idOne = UUID.randomUUID();
-        String str = "" + idOne;
-        int uid = str.hashCode();
-        String filterStr = "" + uid;
-        str = filterStr.replaceAll("-", "");
-        return Integer.parseInt(str) / 1000;
     }
 
     @Override
@@ -62,9 +47,9 @@ public class HostModel extends Observable implements GameModel {
                 e.printStackTrace();
             }
             if (connectionTest()) { // Successfully completed
-                this.gameManager.createHost(name);
+                this.gameManager.createHostPlayer(name);
                 // PRINT DEBUG
-                System.out.println(gameManager.getGstByName().get(name));
+                System.out.println(gameManager.getHostPlayer());
                 System.out.println("HOST: " + name + " is Connected to the game server!");
             }
         }
@@ -103,7 +88,7 @@ public class HostModel extends Observable implements GameModel {
              * set the active word
              */
 
-            this.gameManager.setActiveWord(word);
+            //this.gameManager.setActiveWord(word);
             this.gameManager.getHostPlayer().setActiveWord(true);
 
             // PRINT DEBUG
@@ -249,4 +234,7 @@ public class HostModel extends Observable implements GameModel {
         return true;
     }
 
+    public GameManager getGameManager() {
+        return this.gameManager;
+    }
 }

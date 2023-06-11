@@ -1,7 +1,5 @@
 package model;
-
 import java.util.*;
-
 import model.game.*;
 
 public interface GameModel {
@@ -11,11 +9,11 @@ public interface GameModel {
     void myBookChoice(String bookName);
     void tryPlaceWord(String word,int row,int col, boolean vertical);
     void challenge(String word,int row,int col, boolean vertical);
-    void pullTiles();
     void skipTurn();
     void quitGame();
-
+    
     // Get data :
+    void pullTiles();
     String getMyName();
     int getMyID();
     int getMyScore();

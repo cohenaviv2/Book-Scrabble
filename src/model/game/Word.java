@@ -50,6 +50,15 @@ public class Word {
     }
 
     @Override
+    public String toString() {
+        String word ="";
+        for (Tile t : tiles){
+            word+=t.getLetter();
+        }
+        return word;
+    }
+
+    @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;

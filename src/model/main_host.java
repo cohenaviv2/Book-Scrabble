@@ -1,17 +1,18 @@
-package model.host;
+package model;
 
 import java.io.*;
 
+import model.host.HostModel;
 import model.server.BookScrabbleHandler;
-import model.server.MyServer;
+import model.server.MyServerParallel;
 
-public class mainTestHost {
+public class main_host {
     public static void main(String[] args) {
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-        System.out.println("\n*** HOST MODE ***\n");
+        System.out.println("*** HOST MODE ***\n");
 
         // Create and start the Game server on port 11224:
-        MyServer gs = new MyServer(11224, new BookScrabbleHandler());
+        MyServerParallel gs = new MyServerParallel(11224, new BookScrabbleHandler());
         gs.start();
 
         // Create Host model:

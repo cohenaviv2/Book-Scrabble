@@ -119,7 +119,7 @@ public class Tile {
 
         public void put(Tile t) {
             /*
-             * Puts the Tile back into the bag and updates the quantities
+             * Puts back the Tile into the bag and updates the quantities
              * can not put back if the quantity of this tile is max
              */
             switch (t.letter) {

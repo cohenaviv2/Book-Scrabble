@@ -1,10 +1,12 @@
-package model.guest;
+package model;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-public class mainTestGuest {
+import model.guest.GuestModel;
+
+public class main_guest {
     public static void main(String[] args) {
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
         System.out.println("\n*** GUEST MODE ***");
@@ -23,38 +25,36 @@ public class mainTestGuest {
         System.out.println();
 
         // Set ip and port:
-        String name = null;
-        String ip = null;
-        int port = 0;
         try {
             System.out.println("Enter your name: ");
-            name = in.readLine();
+            gs.setMyName(in.readLine());
             System.out.println();
             System.out.println("Enter ip: ");
-            ip = in.readLine();
+            gs.setIpString(in.readLine());
             System.out.println();
             System.out.println("Enter port: ");
-            port = Integer.parseInt(in.readLine());
+            gs.setPort(Integer.parseInt(in.readLine()));
             System.out.println();
         } catch (IOException e) {
             e.printStackTrace();
         }
-
+        System.out.println("............");
         // Connect to the host server:
-        gs.connectMe(name, ip, port);
-        gs.getCurrentBoard();
-        gs.pullTiles();
+        gs.connectMe(gs.getMyName(), gs.getIpString(), gs.getPort());
+        gs.getMyTiles();
+        gs.quitGame();
+        //gs.pullTiles();
+        //gs.getCurrentBoard();
 
         // Wait...
         System.out.println();
         try {
-            System.out.println("waiting... ");
+            System.out.println("guest waiting... ");
             String ent = in.readLine();
         } catch (IOException e) {
             e.printStackTrace();
         }
         System.out.println();
-
 
         // Disconnect the host server and quit the game:
         gs.quitGame();
