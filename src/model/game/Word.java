@@ -1,5 +1,6 @@
 package model.game;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
 /*
@@ -11,7 +12,7 @@ import java.util.Arrays;
  * 
  */
 
-public class Word {
+public class Word implements Serializable{
 
     private Tile[] tiles;
     private int row, col;

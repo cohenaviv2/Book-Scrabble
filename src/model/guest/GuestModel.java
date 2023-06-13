@@ -11,6 +11,7 @@ import model.game.*;
 public class GuestModel extends Observable implements GameModel {
 
     // Connectivity :
+    private CommunicationHandler commHandler;
     private Socket hostSocket;
     private PrintWriter out;
     private Scanner in;
@@ -165,136 +166,122 @@ public class GuestModel extends Observable implements GameModel {
     }
 
     @Override
-    public void tryPlaceWord(String word, int row, int col, boolean vertical) {
-        /*
-         * Informs the host that a query has been sent from this guest
-         * host responds the score modifier
-         */
-        try {
-            openConversation();
-            out.println(getMyID() + ",tryPlaceWord," + word + ":" + row + ":" + col + ":" + vertical);
-            String answer = in.nextLine();
-            closeConversation();
-
-            if (isMyRequest(answer, "tryPlaceWord")) {
-                int scoreModifier = Integer.parseInt(answer.split(",")[2]);
-
-                switch (scoreModifier) {
-
-                    case -1:
-                        /* Not board legal */
-
-                        // PRINT DEBUG
-                        System.out.println("GUEST " + myName + ": your word is not board legal\n");
-
-                    case 0:
-                        /* Some word is not dictionary legal */
-
-                        // PRINT DEBUG
-                        System.out
-                                .println("GUEST " + myName + ": some word placement is not dictionay legal\n");
-                    default:
-
-                        /*
-                         * Placement earns points
-                         * Update points, board, tiles
-                         */
-
-                        // this.myBoard = Board.getBoard().getTiles();
-                        this.myScore += scoreModifier; // Add points
-                        // pullTiles(7 - myPlayer.getTiles().size()); // Pull tiles
-
-                        // PRINT DEBUG
-                        System.out.println("GUEST " + myName + ": You earned " + scoreModifier + "points\n");
-                        // -----------//
-                        setChanged();
-                        notifyObservers();
-
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    public void challenge(String word, int row, int col, boolean vertical) {
-        /*
-         * Informs the host that a challenge has been sent from this guest
-         * host responds the challenge score modifier
-         */
-
-        try {
-            openConversation();
-            out.println(getMyID() + ",challenge," + word + ":" + row + ":" + col + ":" + vertical);
-            String answer = in.nextLine();
-            closeConversation();
-
-            if (isMyRequest(answer, "challenge")) {
-                int score = Integer.parseInt(answer.split(",")[2]);
-
-                if (score > 0) {
-
-                    /*
-                     * Challenge was successful
-                     * Update points, board, tiles
-                     */
-
-                    this.myScore += score;
-                    // this.myBoard = Board.getBoard().getTiles();
-                    // pullTiles(7 - myPlayer.getTiles().size());
-
-                    // -----------//
-                    setChanged();
-                    notifyObservers();
-
-                    // PRINT DEBUG
-                    System.out.println("GUEST " + myName + ": The challenge was successful! You eraned " + score
-                            + " points\n");
-
-                } else if (score < 0) {
-
-                    /*
-                     * Challenge failed
-                     * You lose points
-                     */
-
-                    this.myScore += score;
-                    // PRINT DEBUG
-                    System.out.println(
-                            "GUEST " + myName + ": The challenge failed, you lost " + score + " points\n");
-                } else {
-
-                    /* Some error occurred */
-
-                    // PRINT DEBUG
-                    System.out.println("GUEST " + myName + ": problem with challenge (maybe returned 0)\n");
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    @Override
-    public void pullTiles() {
-
-        /* how we do it ??? */
-
-        /* TEST */
+    public void tryPlaceWord(Word myWord) {
+        // /*
+        // * Informs the host that a query has been sent from this guest
+        // * host responds the score modifier
+        // */
         // try {
         // openConversation();
-        // out.println("0,pullTiles,true");
+        // out.println(getMyID() + ",tryPlaceWord," + word + ":" + row + ":" + col + ":"
+        // + vertical);
         // String answer = in.nextLine();
-        // // PRINT DEBUG
-        // System.out.println(answer);
         // closeConversation();
+
+        // if (isMyRequest(answer, "tryPlaceWord")) {
+        // int scoreModifier = Integer.parseInt(answer.split(",")[2]);
+
+        // switch (scoreModifier) {
+
+        // case -1:
+        // /* Not board legal */
+
+        // // PRINT DEBUG
+        // System.out.println("GUEST " + myName + ": your word is not board legal\n");
+
+        // case 0:
+        // /* Some word is not dictionary legal */
+
+        // // PRINT DEBUG
+        // System.out
+        // .println("GUEST " + myName + ": some word placement is not dictionay
+        // legal\n");
+        // default:
+
+        // /*
+        // * Placement earns points
+        // * Update points, board, tiles
+        // */
+
+        // // this.myBoard = Board.getBoard().getTiles();
+        // this.myScore += scoreModifier; // Add points
+        // // pullTiles(7 - myPlayer.getTiles().size()); // Pull tiles
+
+        // // PRINT DEBUG
+        // System.out.println("GUEST " + myName + ": You earned " + scoreModifier +
+        // "points\n");
+        // // -----------//
+        // setChanged();
+        // notifyObservers();
+
+        // }
+        // }
         // } catch (IOException e) {
         // e.printStackTrace();
         // }
+    }
 
-        out.println("Hello from client");
+    @Override
+    public void challenge() {
+        // /*
+        // * Informs the host that a challenge has been sent from this guest
+        // * host responds the challenge score modifier
+        // */
+
+        // try {
+        // openConversation();
+        // out.println(getMyID() + ",challenge," + word + ":" + row + ":" + col + ":" +
+        // vertical);
+        // String answer = in.nextLine();
+        // closeConversation();
+
+        // if (isMyRequest(answer, "challenge")) {
+        // int score = Integer.parseInt(answer.split(",")[2]);
+
+        // if (score > 0) {
+
+        // /*
+        // * Challenge was successful
+        // * Update points, board, tiles
+        // */
+
+        // this.myScore += score;
+        // // this.myBoard = Board.getBoard().getTiles();
+        // // pullTiles(7 - myPlayer.getTiles().size());
+
+        // // -----------//
+        // setChanged();
+        // notifyObservers();
+
+        // // PRINT DEBUG
+        // System.out.println("GUEST " + myName + ": The challenge was successful! You
+        // eraned " + score
+        // + " points\n");
+
+        // } else if (score < 0) {
+
+        // /*
+        // * Challenge failed
+        // * You lose points
+        // */
+
+        // this.myScore += score;
+        // // PRINT DEBUG
+        // System.out.println(
+        // "GUEST " + myName + ": The challenge failed, you lost " + score + "
+        // points\n");
+        // } else {
+
+        // /* Some error occurred */
+
+        // // PRINT DEBUG
+        // System.out.println("GUEST " + myName + ": problem with challenge (maybe
+        // returned 0)\n");
+        // }
+        // }
+        // } catch (IOException e) {
+        // e.printStackTrace();
+        // }
 
     }
 
@@ -331,8 +318,6 @@ public class GuestModel extends Observable implements GameModel {
         out.println(getMyID() + ",quitGame,true");
         String answer = in.nextLine();
         /////////
-        System.out.println(answer);
-
         if (isMyRequest(answer, "quitGame")) {
             String value = answer.split(",")[2];
             if (value.equals("true")) {
@@ -348,6 +333,12 @@ public class GuestModel extends Observable implements GameModel {
             System.out.println("GUEST " + myName + ": error while quit the game");
         }
 
+    }
+
+    @Override
+    public String getChanges() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getChanges'");
     }
 
     @Override
@@ -420,7 +411,7 @@ public class GuestModel extends Observable implements GameModel {
     }
 
     @Override
-    public Character[][] getCurrentBoard() {
+    public Tile[][] getCurrentBoard() {
         try {
             openConversation();
         } catch (IOException e) {
@@ -445,7 +436,7 @@ public class GuestModel extends Observable implements GameModel {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        return myBoard;
+        return null;
     }
 
     public Character[][] stringToBoard(String board) {
@@ -471,7 +462,7 @@ public class GuestModel extends Observable implements GameModel {
     }
 
     @Override
-    public Map<Character, Tile> getMyTiles() {
+    public ArrayList<Tile> getMyTiles() {
         /* TODO */
         out.println(myId + ",getMyTiles,true");
         System.out.println(in.nextLine());
@@ -505,4 +496,5 @@ public class GuestModel extends Observable implements GameModel {
     public void setMyName(String myName) {
         this.myName = myName;
     }
+
 }

@@ -13,11 +13,11 @@ import java.util.*;
  */
 
 public class Player {
-    private String name;
+    private final String name;
     private final int id;
     private final boolean isHost;
     private int score;
-    private Map<Character, Tile> myTiles;
+    private ArrayList<Tile> myHandTiles;
     private ArrayList<Word> myWords;
     private boolean myTurn;
     private int turnIndex;
@@ -28,8 +28,8 @@ public class Player {
         this.name = name;
         this.id = id;
         this.score = 0;
-        this.myTiles = new HashMap<>();
-        this.myWords = new ArrayList<>();
+        this.myHandTiles = new ArrayList<Tile>(7);
+        this.myWords = new ArrayList<Word>();
         this.myTurn = false;
         this.turnIndex = 0;
         this.activeWord = false;
@@ -47,8 +47,8 @@ public class Player {
         return score;
     }
 
-    public Map<Character, Tile> getMyTiles() {
-        return myTiles;
+    public ArrayList<Tile> getMyHandTiles() {
+        return myHandTiles;
     }
 
     public ArrayList<Word> getMyWords() {
@@ -63,11 +63,15 @@ public class Player {
         this.score += points;
     }
 
+    public void addWords(ArrayList<Word> turnWords) {
+        this.myWords.addAll(turnWords);
+    }
+    
     public boolean isActiveWord() {
         return activeWord;
     }
 
-    public void setActiveWord(boolean activeWord) {
+    public void setIsActiveWord(boolean activeWord) {
         this.activeWord = activeWord;
     }
 
@@ -83,10 +87,11 @@ public class Player {
         this.turnIndex = index;
     }
 
+
     @Override
     public String toString() {
         /* TODO: add more information */
-        return name+", "+id+"\nis Host: " + isHost + "\nScore: " + score + "\n";
+        return name + ", " + id + "\nis Host: " + isHost + "\nScore: " + score + "\n";
     }
 
 }

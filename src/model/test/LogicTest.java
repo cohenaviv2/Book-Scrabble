@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import model.game.*;
 import model.game.Tile.Bag;
-import model.host.HostModel;
 
 public class LogicTest {
 

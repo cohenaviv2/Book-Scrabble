@@ -6,6 +6,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "main_guest2",
+            "request": "launch",
+            "mainClass": "model.main_guest2",
+            "projectName": "Book Scrabble_c0c2c55d"
+        },
+        {
+            "type": "java",
             "name": "main_guest",
             "request": "launch",
             "mainClass": "model.main_guest",

@@ -2,7 +2,6 @@ package model.server;
 
 import java.io.*;
 import java.net.*;
-import java.util.*;
 import java.util.concurrent.*;
 
 /*
@@ -18,7 +17,7 @@ import java.util.concurrent.*;
     protected final int port;
     protected final ClientHandler ch;
     protected volatile boolean stop;
-    private static Map<Integer, Socket> clients = new HashMap<>();
+    //private static Map<Integer, Socket> clients = new HashMap<>();
 
     private static final int THREAD_POOL_SIZE = 3;
 
@@ -71,7 +70,7 @@ import java.util.concurrent.*;
             }
 
             executorService.shutdown();
-            this.ch.close();
+            //this.ch.close();
             theServer.close();
         } catch (IOException e) {
             e.printStackTrace();

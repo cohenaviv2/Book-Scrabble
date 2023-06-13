@@ -1,19 +1,19 @@
 package model.host;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-
 import model.GameModel;
 import model.game.*;
 import model.server.*;
+
+import java.io.*;
+import java.net.*;
+import java.util.*;
 
 public class HostModel extends Observable implements GameModel {
 
     private static final int HOST_PORT = 8040;
 
     private static HostModel hm = null; // Singleton
-    private Socket gameServer; // socket to the game server
+
     private MyServerParallel hostServer; // my Host server - Will support connection of up to 3 guests
     private GameManager gameManager; // game manager contains all the game information including players
 
@@ -41,11 +41,11 @@ public class HostModel extends Observable implements GameModel {
          */
 
         if (ip.equals("localhost")) {
-            try {
-                this.gameServer = new Socket(ip, port); // game server
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            // try {
+            // this.gameServerSocket = new Socket(ip, port); // game server
+            // } catch (IOException e) {
+            // e.printStackTrace();
+            // }
             if (connectionTest()) { // Successfully completed
                 this.gameManager.createHostPlayer(name);
                 // PRINT DEBUG
@@ -70,89 +70,81 @@ public class HostModel extends Observable implements GameModel {
     }
 
     @Override
-    public void tryPlaceWord(String word, int row, int col, boolean vertical) {
-        /* TODO: create Word from this string and send it to Board.tryPlaceWord */
-        Tile[] tiles = createTiles(word);
-        Word queryWord = new Word(tiles, row, col, vertical);
-        int score = this.gameManager.getBoard().tryPlaceWord(queryWord);
+    public void tryPlaceWord(Word myWord) {
+        // /* TODO: create Word from this string and send it to Board.tryPlaceWord */
+        // Tile[] tiles = createTiles(word);
+        // Word queryWord = new Word(tiles, row, col, vertical);
+        // int score = this.gameManager.getBoard().tryPlaceWord(queryWord);
 
-        if (score == -1) {
+        // if (score == -1) {
 
-            // PRINT DEBUG
-            System.out.println("HOST: your word is not board legal");
+        // // PRINT DEBUG
+        // System.out.println("HOST: your word is not board legal");
 
-        } else if (score == 0) {
+        // } else if (score == 0) {
 
-            /* Some word is not dictionary legal
-             * player can try to challenge or skip turn
-             * set the active word
-             */
+        // /*
+        // * Some word is not dictionary legal
+        // * player can try to challenge or skip turn
+        // * set the active word
+        // */
 
-            //this.gameManager.setActiveWord(word);
-            this.gameManager.getHostPlayer().setActiveWord(true);
+        // // this.gameManager.setActiveWord(word);
+        // this.gameManager.getHostPlayer().setActiveWord(true);
 
-            // PRINT DEBUG
-            System.out.println("HOST: some word that was made is not dictionary legal");
+        // // PRINT DEBUG
+        // System.out.println("HOST: some word that was made is not dictionary legal");
 
-        } else {
-            /*
-             * Add points,
-             * Add words,
-             * Pull tiles,
-             * Pull current board,
-             * Change turn
-             */
-            this.gameManager.getHostPlayer().addPoints(score);
-            this.gameManager.getHostPlayer().getMyWords().addAll(this.gameManager.getBoard().getCurrentWords());
+        // } else {
+        // /*
+        // * Add points,
+        // * Add words,
+        // * Pull tiles,
+        // * Pull current board,
+        // * Change turn
+        // */
+        // this.gameManager.getHostPlayer().addPoints(score);
+        // this.gameManager.getHostPlayer().getMyWords().addAll(this.gameManager.getBoard().getCurrentWords());
 
-            pullTiles();
-        }
+        // pullTiles();
+        // }
 
     }
 
     @Override
-    public void challenge(String word, int row, int col, boolean vertical) {
-        /* TODO: create Word from this string and send it to Board.tryPlaceWord */
-        Tile[] tiles = createTiles(word);
-        Word queryWord = new Word(tiles, row, col, vertical);
-        // local check
-        int score = this.gameManager.getBoard().tryPlaceWord(queryWord);
+    public void challenge() {
+        // /* TODO: create Word from this string and send it to Board.tryPlaceWord */
+        // //Tile[] tiles = createTiles(word);
+        // Word queryWord = new Word(tiles, row, col, vertical);
+        // // local check
+        // int score = this.gameManager.getBoard().tryPlaceWord(queryWord);
 
-        if (score < 0) {
-            /*
-             * The challenge failed, the player loses points
-             * TODO:
-             * Add points(negative value)
-             * Put back tiles
-             * Change turn
-             */
+        // if (score < 0) {
+        // /*
+        // * The challenge failed, the player loses points
+        // * TODO:
+        // * Add points(negative value)
+        // * Put back tiles
+        // * Change turn
+        // */
 
-            // PRINT DEBUG
-            System.out.println("HOST: challenge failed");
-        } else {
-            /*
-             * The challenge was successful, the player gets extra points
-             * TODO:
-             * Add points
-             * Add words
-             * Pull tiles
-             * Pull current board
-             * Change turn
-             */
-            this.gameManager.getHostPlayer().addPoints(score);
-            this.gameManager.getHostPlayer().getMyWords().addAll(this.gameManager.getBoard().getCurrentWords());
+        // // PRINT DEBUG
+        // System.out.println("HOST: challenge failed");
+        // } else {
+        // /*
+        // * The challenge was successful, the player gets extra points
+        // * TODO:
+        // * Add points
+        // * Add words
+        // * Pull tiles
+        // * Pull current board
+        // * Change turn
+        // */
+        // this.gameManager.getHostPlayer().addPoints(score);
+        // this.gameManager.getHostPlayer().getMyWords().addAll(this.gameManager.getBoard().getCurrentWords());
 
-            pullTiles();
-        }
-    }
-
-    @Override
-    public void pullTiles() {
-        /* Completes the player's hand to 7 Tiles after a successful placement */
-        while (gameManager.getHostPlayer().getMyTiles().size() < 7) {
-            Tile tile = gameManager.getBag().getRand();
-            gameManager.getHostPlayer().getMyTiles().put(tile.getLetter(), tile);
-        }
+        // pullTiles();
+        // }
     }
 
     @Override
@@ -162,12 +154,14 @@ public class HostModel extends Observable implements GameModel {
 
     @Override
     public void quitGame() {
-        try {
-            this.gameServer.close();
-            this.hostServer.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        this.hostServer.close();
+        this.gameManager.close();
+    }
+
+    @Override
+    public String getChanges() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getChanges'");
     }
 
     @Override
@@ -191,24 +185,23 @@ public class HostModel extends Observable implements GameModel {
     }
 
     @Override
-    public Character[][] getCurrentBoard() {
+    public Tile[][] getCurrentBoard() {
         Character[][] charBoard = new Character[15][15];
         for (int i = 0; i < charBoard.length; i++) {
             for (int j = 0; j < charBoard.length; j++) {
                 if (charBoard[i][j] == null) {
                     charBoard[i][j] = '-';
-                }
-                else {
-                    charBoard[i][j] = this.gameManager.getBoard().getTiles()[i][j].letter;
+                } else {
+                    //charBoard[i][j] = this.gameManager.getBoard().getTiles()[i][j].letter;
                 }
             }
         }
-        return charBoard;
+        return null;
     }
 
     @Override
-    public Map<Character, Tile> getMyTiles() {
-        return gameManager.getHostPlayer().getMyTiles();
+    public ArrayList<Tile> getMyTiles() {
+        return gameManager.getHostPlayer().getMyHandTiles();
     }
 
     @Override
@@ -216,25 +209,8 @@ public class HostModel extends Observable implements GameModel {
         return gameManager.getHostPlayer().getMyWords();
     }
 
-    private Tile[] createTiles(String word) {
-        /* Turns a string into a Tile's array */
-        Tile[] ts = new Tile[word.length()];
-        int i = 0;
-        for (char c : word.toCharArray()) {
-            /* */
-            ts[i] = this.gameManager.getHostPlayer().getMyTiles().get(c);
-            i++;
-        }
-        return ts;
-    }
-
-    public boolean dictionaryLegal(Word word) {
-        /* TODO: need to ask the game server */
-
-        return true;
-    }
-
     public GameManager getGameManager() {
         return this.gameManager;
     }
+
 }

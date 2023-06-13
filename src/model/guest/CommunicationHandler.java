@@ -1,18 +1,25 @@
 package model.guest;
+
 import java.io.*;
 import model.server.ClientHandler;
 
 public class CommunicationHandler implements ClientHandler {
+    private final String ipString;
+    private final int port;
+
+    public CommunicationHandler(String ipString, int port) {
+        this.ipString = ipString;
+        this.port = port;
+    }
 
     @Override
     public void handleClient(InputStream inputStream, OutputStream outputStream) {
         try (
-                BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-                PrintWriter writer = new PrintWriter(outputStream, true)
-        ) {
+                BufferedReader in = new BufferedReader(new InputStreamReader(inputStream));
+                PrintWriter out = new PrintWriter(outputStream, true)) {
             String serverMessage;
 
-            while ((serverMessage = reader.readLine()) != null) {
+            while ((serverMessage = in.readLine()) != null) {
                 // Print the server's message
                 System.out.println("Server: " + serverMessage);
 
@@ -23,7 +30,7 @@ public class CommunicationHandler implements ClientHandler {
                     String clientMove = consoleReader.readLine();
 
                     // Send the client's move to the server
-                    writer.println(clientMove);
+                    out.println(clientMove);
                 }
             }
         } catch (IOException e) {

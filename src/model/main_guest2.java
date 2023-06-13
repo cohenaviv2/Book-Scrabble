@@ -6,7 +6,7 @@ import java.io.InputStreamReader;
 
 import model.guest.GuestModel;
 
-public class main_guest {
+public class main_guest2 {
     public static void main(String[] args) {
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
         System.out.println("\n*** GUEST MODE ***");

@@ -34,7 +34,7 @@ import model.server.ClientHandler;
  */
 
 public class GuestHandler2 implements ClientHandler {
-    
+
     private final GameManager gameManager;
     private int GUEST_ID;
     private String QUIT_GAME_ID;
@@ -61,14 +61,14 @@ public class GuestHandler2 implements ClientHandler {
                 String guestMessage;
 
                 // START CHAT
-                while ((guestMessage = in.readLine()) != QUIT_GAME_ID) {
+                while (!(guestMessage = in.readLine()).equals(QUIT_GAME_ID)) {
                     String[] params = guestMessage.split(",");
                     int id = Integer.parseInt(params[0]);
                     String modifier = params[1];
                     String value = params[2];
 
                     // Check if it's currect ID, if not drops the message
-                    if (isGuestID(id)) {
+                    if (id == GUEST_ID) {
 
                         // Process guest's instructions
                         String returnValue = gameManager.processGuestInstruction(id, modifier, value);
@@ -78,8 +78,8 @@ public class GuestHandler2 implements ClientHandler {
                         out.println(response);
 
                         // Check if it's the guest's turn to play
-                        if (isChanged()){
-                            
+                        if (isChanged()) {
+
                         }
                         if (isGuestTurn()) {
 
@@ -87,19 +87,22 @@ public class GuestHandler2 implements ClientHandler {
                             out.println(YOUR_TURN_ID + "true");
                             String guestMove = in.readLine();
                             String moveParams[] = guestMove.split(",");
+                            int moveId = Integer.parseInt(moveParams[0]);
                             String moveMod = moveParams[1];
                             String moveVal = moveParams[2];
 
-                            // Process the guest's move
-                            String moveReturnVal = gameManager.processGuestMove(moveMod, moveVal);
+                            if (moveId == GUEST_ID) {
+                                // Process the guest's move
+                                String moveReturnVal = gameManager.processGuestMove(moveId, moveMod, moveVal);
 
-                            // Send the move response to the guest
-                            String moveResponse = GUEST_ID + "," + moveMod + "," + moveReturnVal;
-                            out.println(moveResponse);
+                                // Send the move response to the guest
+                                String moveResponse = GUEST_ID + "," + moveMod + "," + moveReturnVal;
+                                out.println(moveResponse);
+                            }
 
                         } else {
                             // It's not the guest's turn, sends a message
-                            out.println(YOUR_TURN_ID + "false");
+                            // out.println(YOUR_TURN_ID + "false");
                         }
                     }
 
@@ -137,11 +140,7 @@ public class GuestHandler2 implements ClientHandler {
     }
 
     private boolean isGuestTurn() {
-        return gameManager.getGstsByID(GUEST_ID).isMyTurn();
-    }
-
-    private boolean isGuestID(int messageId) {
-        return messageId == GUEST_ID;
+        return gameManager.getPlayerByID(GUEST_ID).isMyTurn();
     }
 
     @Override

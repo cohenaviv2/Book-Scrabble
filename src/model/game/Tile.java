@@ -1,5 +1,6 @@
 package model.game;
 
+import java.io.Serializable;
 import java.util.Random;
 
 /*
@@ -11,7 +12,7 @@ import java.util.Random;
  * 
  */
 
-public class Tile {
+public class Tile implements Serializable {
 
     public final char letter;
     public final int score;
@@ -28,7 +29,7 @@ public class Tile {
     public int getScore() {
         return score;
     }
-
+    
     /* Bag */
     /*
      * Game bag, Contains 98 tiles and array of quantities

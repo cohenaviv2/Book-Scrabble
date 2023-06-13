@@ -236,7 +236,7 @@ public class Board {
     }
 
     public boolean dictionaryLegal(Word word) {
-        return HostModel.getHM().dictionaryLegal(word);
+        return GameManager.getGM().queryFromServer(word);
     }
 
     public ArrayList<Word> getWords(Word word) {
@@ -310,7 +310,7 @@ public class Board {
             Word tryWord = new Word(tryTiles, startIndex, word.getRow(), false);
             words.add(tryWord);
         } else {
-            words.add(fullWord(word));
+            words.add(getFullWord(word));
         }
 
         /*
@@ -447,7 +447,7 @@ public class Board {
         return score;
     }
 
-    private Word fullWord(Word word) {
+    private Word getFullWord(Word word) {
         /*
          * generates the full word for potential word placement with a null where there
          * is existing tile on the board
@@ -470,6 +470,15 @@ public class Board {
         newWord = new Word(ts, word.getRow(), word.getCol(), word.isVertical()); // COPY CONSTRUCTOR
 
         return newWord;
+    }
+
+    public String wordToString(Word word){
+        Word fullword = getFullWord(word);
+        String w = "";
+        for (Tile t : fullword.getTiles()){
+            w += t.getLetter();
+        }
+        return w;
     }
 
     private void placeWord(Word word) {
@@ -515,7 +524,7 @@ public class Board {
         Word thisWord = null;
         for (Tile t : word.getTiles())
             if (t == null) {
-                thisWord = new Word(fullWord(word)); /* make the full word */
+                thisWord = new Word(getFullWord(word)); /* make the full word */
                 break;
             }
 
