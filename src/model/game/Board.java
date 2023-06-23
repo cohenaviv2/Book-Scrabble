@@ -17,10 +17,10 @@ public class Board {
 
     private static Board boardInstance = null; // Singleton
     private Square[][] board;
-    public static final int SIZE =15;
+    public static final int SIZE = 15;
     private boolean starBonusAct;
     private ArrayList<Word> placedWords;
-    private ArrayList<Word> currentWords;
+    private ArrayList<Word> turnWords;
     private Tile[][] boardTiles;
 
     public Board() {
@@ -28,7 +28,7 @@ public class Board {
         /* initialize */
         this.starBonusAct = false;
         this.placedWords = new ArrayList<>(); // all the placed words on the board (Added in tryPlaceWord)
-        this.currentWords = new ArrayList<>(); // all the words that was made for this turn - flush in tryPlaceWord
+        this.turnWords = new ArrayList<>(); // all the words that was made for this turn - flush in tryPlaceWord
         this.boardTiles = new Tile[SIZE][SIZE]; // for getTiles
 
         board = new Square[SIZE][SIZE];
@@ -117,7 +117,7 @@ public class Board {
          * Where there is no tile on the board it will be null.
          */
 
-        return boardTiles.clone();
+        return boardTiles;
     }
 
     public boolean boardLegal(Word word) {
@@ -195,12 +195,12 @@ public class Board {
         if (word.isVertical()) {
             for (int i = word.getRow(), index = 0; i < word.getTiles().length + word.getRow(); i++, index++)
                 if (this.board[i][word.getCol()].isValue()
-                        && this.board[i][word.getCol()].letterTile != word.getTiles()[index])
+                        && this.board[i][word.getCol()].tile != word.getTiles()[index])
                     return true;
         } else {
             for (int i = word.getCol(), index = 0; i < word.getTiles().length + word.getCol(); i++, index++)
                 if (this.board[word.getRow()][i].isValue()
-                        && this.board[word.getRow()][i].letterTile != word.getTiles()[index])
+                        && this.board[word.getRow()][i].tile != word.getTiles()[index])
                     return true;
         }
 
@@ -281,7 +281,7 @@ public class Board {
                 if (!this.board[start][word.getCol()].isValue())
                     tryTiles[k] = word.getTiles()[(start - word.getRow())];
                 else
-                    tryTiles[k] = this.board[start][word.getCol()].getLetterTile();
+                    tryTiles[k] = this.board[start][word.getCol()].getTile();
             Word tryWord = new Word(tryTiles, word.getCol(), startIndex, false);
             words.add(tryWord);
 
@@ -303,7 +303,7 @@ public class Board {
                 if (!this.board[word.getRow()][start].isValue())
                     tryTiles[k] = word.getTiles()[(start - word.getCol())]; /****** */
                 else
-                    tryTiles[k] = this.board[word.getRow()][start].getLetterTile();
+                    tryTiles[k] = this.board[word.getRow()][start].getTile();
             Word tryWord = new Word(tryTiles, startIndex, word.getRow(), false);
             words.add(tryWord);
         } else {
@@ -333,7 +333,7 @@ public class Board {
                         if (!this.board[i][start].isValue())
                             tryTiles[k] = word.getTiles()[j];
                         else
-                            tryTiles[k] = this.board[i][start].getLetterTile();
+                            tryTiles[k] = this.board[i][start].getTile();
                     Word tryWord = new Word(tryTiles, i, startIndex, false);
                     words.add(tryWord);
                 }
@@ -358,7 +358,7 @@ public class Board {
                         if (!this.board[start][i].isValue())
                             tryTiles[k] = word.getTiles()[j];
                         else
-                            tryTiles[k] = this.board[start][i].getLetterTile();
+                            tryTiles[k] = this.board[start][i].getTile();
                     }
                     Word tryWord = new Word(tryTiles, startIndex, i, true);
                     words.add(tryWord);
@@ -456,9 +456,9 @@ public class Board {
         for (int i = 0; i < word.getTiles().length; i++) {
             if (word.getTiles()[i] == null) {
                 if (word.isVertical()) {
-                    ts[i] = this.board[word.getRow() + i][word.getCol()].getLetterTile();
+                    ts[i] = this.board[word.getRow() + i][word.getCol()].getTile();
                 } else {
-                    ts[i] = this.board[word.getRow()][word.getCol() + i].getLetterTile();
+                    ts[i] = this.board[word.getRow()][word.getCol() + i].getTile();
                 }
             } else {
                 ts[i] = word.getTiles()[i];
@@ -469,10 +469,10 @@ public class Board {
         return newWord;
     }
 
-    public String wordToString(Word word){
+    public String wordToString(Word word) {
         Word fullword = getFullWord(word);
         String w = "";
-        for (Tile t : fullword.getTiles()){
+        for (Tile t : fullword.getTiles()) {
             w += t.getLetter();
         }
         return w;
@@ -489,18 +489,23 @@ public class Board {
         if (word.isVertical()) {
             for (int j = 0, i = word.getRow(); i < word.getTiles().length + word.getRow(); i++, j++) {
                 if (word.getTiles()[j] != null) {
-                    this.board[i][word.getCol()].setLetterTile(word.getTiles()[j]);
-
+                    this.board[i][word.getCol()].setTile(word.getTiles()[j]);
                     this.boardTiles[i][word.getCol()] = word.getTiles()[j];
                 }
+                // else {
+                // this.boardTiles[i][word.getCol()] = word.getTiles()[j];
+
+                // }
             }
         } else {
             for (int j = 0, i = word.getCol(); i < word.getTiles().length + word.getCol(); i++, j++) {
                 if (word.getTiles()[j] != null) {
-                    this.board[word.getRow()][i].setLetterTile(word.getTiles()[j]);
-
+                    this.board[word.getRow()][i].setTile(word.getTiles()[j]);
                     this.boardTiles[word.getRow()][i] = word.getTiles()[j];
                 }
+                // else {
+                // this.boardTiles[word.getRow()][i] = word.getTiles()[j];
+                // }
             }
         }
 
@@ -514,7 +519,7 @@ public class Board {
          * finally returns the total score of each word that was made else returns 0.
          */
         int score = 0;
-        this.currentWords.clear();
+        this.turnWords.clear();
 
         /* word placement contains null - leans on a tile */
         Word thisWord = null;
@@ -532,9 +537,10 @@ public class Board {
         if (boardLegal(thisWord)) {
             ArrayList<Word> words = new ArrayList<Word>(getWords(word));
             for (Word w : words) {
-                if (!dictionaryLegal(w))
+                if (!dictionaryLegal(w)) {
+                    this.turnWords.addAll(words);
                     return 0;
-                else {
+                } else {
                     score += getScore(w);
                     if (score == 0)
                         return 0; /***** illegal - we pulled a null tile that doesnt exist */
@@ -547,7 +553,7 @@ public class Board {
                 return 0;
             else
                 placeWord(word);
-            this.currentWords.addAll(words);
+            this.turnWords.addAll(words);
             printBoard();
 
             return score;
@@ -555,8 +561,8 @@ public class Board {
         return -1;
     }
 
-    public ArrayList<Word> getCurrentWords() {
-        return this.currentWords;
+    public ArrayList<Word> getTurnWords() {
+        return this.turnWords;
     }
 
     public void printPlacedWords() {
@@ -573,12 +579,12 @@ public class Board {
     public void printBoard() {
         /* prints the current board */
 
-        for (int i = 0; i < this.SIZE; i++) {
-            for (int j = 0; j < this.SIZE; j++) {
-                if (this.board[i][j].letterTile == null)
+        for (int i = 0; i < SIZE; i++) {
+            for (int j = 0; j < SIZE; j++) {
+                if (this.board[i][j].tile == null)
                     System.out.print("- ");
                 else
-                    System.out.print(this.board[i][j].letterTile.getLetter() + " ");
+                    System.out.print(this.board[i][j].tile.getLetter() + " ");
             }
             System.out.println();
         }
@@ -588,8 +594,8 @@ public class Board {
     public void printBonus() {
         /* prints the bonus indexes */
 
-        for (int i = 0; i < this.SIZE; i++) {
-            for (int j = 0; j < this.SIZE; j++) {
+        for (int i = 0; i < SIZE; i++) {
+            for (int j = 0; j < SIZE; j++) {
                 if (this.board[i][j].scoreModifier == null)
                     System.out.print("-  ");
                 else
@@ -604,14 +610,14 @@ public class Board {
 
         for (int i = 0; i < SIZE; i++) {
             for (int j = 0; j < SIZE; j++) {
-                this.board[i][j].letterTile = null;
+                this.board[i][j].tile = null;
             }
         }
     }
 
     public boolean isBoardFull() {
-        for (int i = 0; i < this.SIZE; i++) {
-            for (int j = 0; j < this.SIZE; j++) {
+        for (int i = 0; i < SIZE; i++) {
+            for (int j = 0; j < SIZE; j++) {
                 if (!this.board[i][j].isValue())
                     return false;
             }
@@ -624,10 +630,10 @@ public class Board {
         String stringBoard = "";
         for (int i = 0; i < SIZE; i++) {
             for (int j = 0; j < SIZE; j++) {
-                if (board[i][j].getLetterTile() == null) {
+                if (board[i][j].getTile() == null) {
                     stringBoard += '_';
                 } else {
-                    stringBoard += board[i][j].getLetterTile().getLetter();
+                    stringBoard += board[i][j].getTile().getLetter();
                 }
             }
             stringBoard += ":";
@@ -653,34 +659,34 @@ public class Board {
 
     public class Square {
 
-        private Tile letterTile;
+        private Tile tile;
         private final String scoreModifier; // TW,DW,TL,DL (Triple/Double Word/Letter bonus)
 
         public Square() {
             /* initialize to null sqaures that do not contain a bonus */
-            this.letterTile = null;
+            this.tile = null;
             this.scoreModifier = null;
         }
 
         public Square(Tile letterTile, String scoreModifier) {
             /* .... */
-            this.letterTile = letterTile;
+            this.tile = letterTile;
             if (scoreModifier == "TW" || scoreModifier == "DW" || scoreModifier == "TL" || scoreModifier == "DL")
                 this.scoreModifier = scoreModifier;
             else
                 this.scoreModifier = null;
         }
 
-        public Tile getLetterTile() {
-            return letterTile;
+        public Tile getTile() {
+            return tile;
         }
 
-        public void setLetterTile(Tile letterTile) {
-            this.letterTile = letterTile;
+        public void setTile(Tile letterTile) {
+            this.tile = letterTile;
         }
 
         public void removeLetterTile(Tile letterTile) {
-            this.letterTile = null;
+            this.tile = null;
         }
 
         public String getScoreModifier() {
@@ -688,7 +694,7 @@ public class Board {
         }
 
         public boolean isValue() {
-            if (this.letterTile != null)
+            if (this.tile != null)
                 return true;
             else
                 return false;

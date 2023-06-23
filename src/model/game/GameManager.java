@@ -78,8 +78,12 @@ public class GameManager extends Observable {
         this.gameServerPORT = gameServerPORT;
     }
 
-    public void setTotalPlayersCount(int totalPlayers) {
-        this.totalPlayersNum = totalPlayers;
+    public void setTotalPlayersCount(int totalPlayers) throws Exception {
+        if (totalPlayers > 1 && totalPlayers < 5) {
+            this.totalPlayersNum = totalPlayers;
+        } else {
+            throw new Exception("Can manage game only with 2-4 players");
+        }
     }
 
     public boolean isReadyToPlay() {
@@ -181,7 +185,7 @@ public class GameManager extends Observable {
             }
         } else {
             // PRINT DEBUG
-            System.out.println("GAME MANAGER: id do not exist");
+            System.out.println("GAME MANAGER: ID do not exist");
             return null;
         }
     }
@@ -218,7 +222,7 @@ public class GameManager extends Observable {
     }
 
     public void setReady() {
-        
+
         if (readyToPlay.incrementAndGet() == totalPlayersNum) {
             // PRINT DEBUG
             System.out.println("Game Manager: ALL PLAYERS ARE READY TO PLAY! draw tiles...\n");
@@ -326,7 +330,6 @@ public class GameManager extends Observable {
 
     private String queryHandler(int id, String moveValue) {
         /*
-         * TODO:
          * if Active word is activated - can not try place this word.
          * need to check if the guest has all the correct tiles and make the string word
          * to a Word object
@@ -359,12 +362,16 @@ public class GameManager extends Observable {
                 return "notDictionaryLegal";
             } else {
                 player.addPoints(score);
-                player.addWords(gameBoard.getCurrentWords());
+                player.addWords(gameBoard.getTurnWords());
+                for (Tile t : queryWord.getTiles()) {
+                    player.getMyHandTiles().remove(t);
+                }
                 turnManager.pullTiles(id);
                 // send some updated to the players, so they could getChanges():
                 // getCurrentBoard, getMyTiles, getMyWords
-                setChanged();
-                notifyObservers("updateAll");
+
+                // setChanged();
+                // notifyObservers();
 
                 turnManager.nextTurn();
 
@@ -381,7 +388,6 @@ public class GameManager extends Observable {
 
     private String challengeHandler(int playerId, String moveValue) {
         /*
-         * TODO:
          * if Active word is NOT activated - can not try challange this word.
          * need to ask the game sever to challenge this word -
          * if server return true - need to go board.tryPlaceWord() - if all words is
@@ -395,7 +401,7 @@ public class GameManager extends Observable {
             if (turnManager.getActiveWord() == null || !getPlayerByID(playerId).isActiveWord()) {
                 return "false";
             }
-            ArrayList<Word> turnWords = gameBoard.getCurrentWords();
+            ArrayList<Word> turnWords = gameBoard.getTurnWords();
             Word activeWord = turnManager.getActiveWord();
             String answer = challengeToGameServer(turnWords);
             Player player = getPlayerByID(playerId);
@@ -403,18 +409,23 @@ public class GameManager extends Observable {
             if (answer.equals("true")) {
                 // Challenge successfull - player get extra points
                 int score = gameBoard.tryPlaceWord(activeWord);
+
                 // Turn off active word
                 turnManager.setActiveWord(null);
                 player.setIsActiveWord(false);
                 // double points
                 score *= 2;
                 player.addPoints(score);
-                player.addWords(gameBoard.getCurrentWords());
+                player.addWords(turnWords);
+                for (Tile t : activeWord.getTiles()) {
+                    player.getMyHandTiles().remove(t);
+                }
                 turnManager.pullTiles(playerId);
                 // send some updated to the players so they could getChanges():
                 // getCurrentBoard, getMyTiles, getMyWords
-                setChanged();
-                notifyObservers("updateAll");
+
+                // setChanged();
+                // notifyObservers();
 
                 this.turnManager.nextTurn();
 
@@ -494,26 +505,33 @@ public class GameManager extends Observable {
         }
 
         try {
-            this.gameServerSocket = new Socket(gameServerIP, gameServerPORT);
-            PrintWriter out = new PrintWriter(gameServerSocket.getOutputStream(), false);
-            BufferedReader in = new BufferedReader(new InputStreamReader(gameServerSocket.getInputStream()));
-
             for (String cw : words) {
+
                 String req = "C," + getGameBooks() + cw;
+
+                // SET COMM
+                this.gameServerSocket = new Socket(gameServerIP, gameServerPORT);
+                PrintWriter out = new PrintWriter(gameServerSocket.getOutputStream(), true);
+                BufferedReader in = new BufferedReader(new InputStreamReader(gameServerSocket.getInputStream()));
+
                 out.println(req);
                 String ans = in.readLine();
+
                 if (ans.equals("false")) {
                     this.gameServerSocket.close();
+                    out.close();
+                    in.close();
                     return "false";
                 }
                 if (!ans.equals("true") && !ans.equals("false")) {
                     // PRINT DEBUG
                     System.out.println("GAME MANAGER: wrong challenge answer form game server\n");
                 }
+                this.gameServerSocket.close();
+                in.close();
+                out.close();
             }
-            this.gameServerSocket.close();
-            in.close();
-            out.close();
+
             return "true";
         } catch (IOException e) {
             e.printStackTrace();
@@ -544,7 +562,7 @@ public class GameManager extends Observable {
         int bagSize = g.gameBag.size();
         g.turnManager.drawTiles();
         int newSize;
-        if ((newSize = g.gameBag.size()) != bagSize) {
+        if ((newSize = g.gameBag.size()) != bagSize-7*4) {
             System.out.println("bag size doesnt match: " + newSize);
         }
         // Test next turn
@@ -655,6 +673,7 @@ public class GameManager extends Observable {
         public void pullTiles(int playerId) {
             /* Completes players hand to 7 Tiles */
             Player p = getPlayerByID(playerId);
+
             while (p.getMyHandTiles().size() < 7) {
                 Tile t = gameBag.getRand();
                 while (t == null) {
@@ -684,6 +703,8 @@ public class GameManager extends Observable {
                 p.getMyHandTiles().add(0, t);
             }
 
+            System.out.println(gameBag.size());
+
             // Sort tiles
             List<Player> players = playersByID.values().stream().sorted((p1, p2) -> {
                 Tile t1 = p1.getMyHandTiles().get(0);
@@ -691,7 +712,7 @@ public class GameManager extends Observable {
                 return t1.getLetter() - t2.getLetter();
             }).collect(Collectors.toList());
 
-            int firstPlayerId = 0;
+            // int firstPlayerId = 0;
             System.out.println("Turn Manager: players turn indexes :\n##########################");
             // Set turn indexes, first player turn, and put tiles back to the bag
             for (int i = 0; i < players.size(); i++) {
@@ -699,12 +720,14 @@ public class GameManager extends Observable {
 
                 if (i == 0) {
                     p.setMyTurn(true);
-                    firstPlayerId = p.getID();
+                    // firstPlayerId = p.getID();
                 }
                 Tile myTile = p.getMyHandTiles().get(0);
                 p.setTurnIndex(i);
                 System.out.println(p.getName() + " - " + i + " (" + myTile.getLetter() + ")");
                 gameBag.put(myTile);
+                System.out.println(gameBag.size());
+
                 p.getMyHandTiles().remove(0);
                 turnManager.pullTiles(p.getID());
             }
@@ -728,7 +751,7 @@ public class GameManager extends Observable {
             nextPlayer.setMyTurn(true);
             setCurrentTurnIndex(j);
             setChanged();
-            notifyObservers("updateAll");
+            notifyObservers();
             // notifyObservers(nextPlayer.getID() + "yourTurn");
             printTurnInfo();
         }

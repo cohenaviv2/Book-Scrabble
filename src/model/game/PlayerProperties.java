@@ -2,23 +2,22 @@ package model.game;
 
 import java.util.*;
 
-public class GameProperties {
-    /* TODO: make class singleton */
+public class PlayerProperties {
     // Gameplay
     private final String myName;
     private int myScore;
     private boolean myTurn;
     private Tile[][] myBoard;
-    private ArrayList<Tile> myHandTiled;
+    private ArrayList<Tile> myHandTiles;
     private ArrayList<Word> myWords;
     private Map<String, Integer> playersScore;
 
-    public GameProperties(String myName) {
+    public PlayerProperties(String myName) {
         this.myName = myName;
         this.myScore = 0;
         this.myTurn = false;
         this.myBoard = new Tile[Board.SIZE][Board.SIZE];
-        this.myHandTiled = new ArrayList<Tile>(7);
+        this.myHandTiles = new ArrayList<Tile>(7);
         this.myWords = new ArrayList<Word>();
         this.playersScore = new HashMap<>();
     }
@@ -44,7 +43,7 @@ public class GameProperties {
     }
 
     public void setMyTiles(ArrayList<Tile> tiles) {
-        this.myHandTiled = tiles;
+        this.myHandTiles = tiles;
     }
 
     public void updatePlayersScore(String othersScore) {
@@ -68,7 +67,7 @@ public class GameProperties {
     }
 
     public ArrayList<Tile> getMyHandTiles() {
-        return myHandTiled;
+        return myHandTiles;
     }
 
     public ArrayList<Word> getMyWords() {
@@ -87,7 +86,7 @@ public class GameProperties {
         this.playersScore = playersScore;
     }
 
-    public String boardToString() {
+    private String boardToString() {
         String board = "";
         for (int i = 0; i < this.myBoard.length; i++) {
             for (int j = 0; j < this.myBoard.length; j++) {
@@ -112,7 +111,7 @@ public class GameProperties {
 
     @Override
     public String toString() {
-        String info = "*************************************\n";
+        String info = "**********PLAYER PROPERTIES***********\n";
         info += "My name: " + myName + "\n";
         //info += "My id: " + myId + "\n";
         info += "My score: " + myScore + "\n";
@@ -124,20 +123,20 @@ public class GameProperties {
         } else {
             info += "0";
         }
-        info += "\n*************************************\n";
+        info += "\n__________________________________\n";
         info += "My turn: " + isMyTurn() + "\n";
         info += "My Hand tiles: ";
-        if (myHandTiled.size() != 0) {
-            for (Tile t : myHandTiled) {
+        if (myHandTiles.size() != 0) {
+            for (Tile t : myHandTiles) {
                 info += t.getLetter() + ",";
             }
         } else {
             info += "0";
         }
-        info += "\n*************************************\n";
+        info += "\n__________________________________\n";
         info += "Game Board: \n";
         info += boardToString();
-        info += "\n*************************************\n";
+        info += "\n__________________________________\n";
         info += "Other players score: ";
         if (playersScore.size() != 0) {
             info += "\n";
@@ -147,7 +146,7 @@ public class GameProperties {
         } else {
             info += "0\n";
         }
-        info += "*************************************\n";
+        info += "__________________________________\n";
 
         return info;
     }

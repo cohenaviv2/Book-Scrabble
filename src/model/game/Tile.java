@@ -123,7 +123,7 @@ public class Tile implements Serializable {
              * Puts back the Tile into the bag and updates the quantities
              * can not put back if the quantity of this tile is max
              */
-            switch (t.letter) {
+            switch (t.getLetter()) {
                 case 'A':
                     if (this.quantities[0] < 9)
                         this.quantities[0]++;
@@ -233,8 +233,9 @@ public class Tile implements Serializable {
 
         public int size() {
             int size = 0;
-            for (int i : quantities)
-                size += i;
+            for (int i=0;i<quantities.length;i++){
+                size += quantities[i];
+            }
 
             return size;
         }

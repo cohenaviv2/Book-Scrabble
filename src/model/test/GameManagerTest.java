@@ -7,13 +7,19 @@ import model.server.*;
 
 public class GameManagerTest {
     public static void main(String[] args) {
+
+        
         // Create and start the Game server on port 11224:
         MyServerParallel gameServer = new MyServerParallel(11224, new BookScrabbleHandler());
         gameServer.start();
 
         String myName = "Aviv";
         GameManager g = GameManager.get();
-        g.setTotalPlayersCount(1);
+        try {
+            g.setTotalPlayersCount(1);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         g.setGameServerSocket("localhost", 11224);
         int myId = g.connectGuestHandler(myName);
         g.addBookHandler("Harray Potter.txt");

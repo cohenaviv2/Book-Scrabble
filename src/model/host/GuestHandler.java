@@ -1,8 +1,6 @@
 package model.host;
 
 import java.io.*;
-import java.net.Socket;
-import java.util.*;
 import model.game.GameManager;
 import model.server.ClientHandler;
 
@@ -101,7 +99,6 @@ public class GuestHandler implements ClientHandler {
                         System.out.println("GuestHandler: cant set guest's book");
                     }
                 }
-
                 if (!ready) {
                     message = in.readLine();
                     params = message.split(",");

@@ -1,13 +1,10 @@
 package model;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
-import model.game.Tile;
-import model.game.Word;
-import model.host.HostModel;
+import model.game.*;
+import model.host.*;
 import model.server.*;
 
 public class main_host {
@@ -24,7 +21,7 @@ public class main_host {
         System.out.println("********* HOST MODE *********\n");
 
         // Create and start the Game server on port 11224:
-        MyServerParallel gameServer = new MyServerParallel(11224, new BookScrabbleHandler());
+        MyServer gameServer = new MyServer(11224, new BookScrabbleHandler());
         gameServer.start();
 
         // Create Host model:
@@ -46,24 +43,24 @@ public class main_host {
         }
 
         String key;
-        while (!(key = pressEnter("", in)).equals("0")) {
+        while (!(key = pressEnter("PRESS:\n1 - Try place word\n2 - Challange\n3 - Pass turn\n0 - Quit game", in)).equals("0")) {
             if (key.equals("1")) {
-                String letters = pressEnter("ENTER WORD LETTERS: ", in);
-                System.out.println(letters);
-                List<Tile> tiles = new ArrayList<>();
-                for (Character c : letters.toCharArray()) {
-                    for (Tile t : hm.getGameProperties().getMyHandTiles()) {
-                        if (t.getLetter() == c) {
-                            tiles.add(t);
+                String[] line = pressEnter("ENTER WORD LETTERS AND ROW & COL: ", in).split(" ");
+                int row = Integer.parseInt(line[1]);
+                int col = Integer.parseInt(line[2]);
+                Boolean isVer = line[3].equals("t") ? true : false;
+                char[] c = line[0].toCharArray();
+                Tile[] tiles = new Tile[c.length];
+                for (int i=0;i<c.length;i++){
+                    if (c[i] == '_') tiles[i] = null;
+                    for(Tile t : hm.getPlayerProperties().getMyHandTiles()){
+                        if (t.getLetter() == c[i]){
+                            tiles[i] = t;
                         }
                     }
                 }
-                Tile[] tt = new Tile[tiles.size()];
-                for (int i = 0; i < tt.length; i++) {
-                    tt[i] = tiles.get(i);
-                }
 
-                Word word = new Word(tt, 7, 7, false);
+                Word word = new Word(tiles, row, col, isVer);
 
                 hm.tryPlaceWord(word);
 
@@ -77,16 +74,6 @@ public class main_host {
             }
         }
 
-        // if (pressEnter("PRESS ENTER TO SKIP TURN", in).equals("")) {
-
-        // hm.skipTurn();
-        // }
-        // if (pressEnter("PRESS ENTER TO SKIP TURN", in).equals("")) {
-
-        // hm.skipTurn();
-        // }
-
-        // Wait...
         if (pressEnter("PRESS ENTER TO QUIT GAME", in).equals("")) {
 
             // Close game server and Host quit game (close host server):

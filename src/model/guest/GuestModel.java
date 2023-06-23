@@ -5,11 +5,11 @@ import java.util.*;
 import model.GameModel;
 import model.game.*;
 
-public class GuestModel implements GameModel {
+public class GuestModel extends Observable implements GameModel{
 
     private static GuestModel gm = null; // Singleton
     private CommunicationHandler commHandler;
-    private GameProperties gameProperties;
+    private PlayerProperties playerProperties;
 
     private GuestModel() {
     }
@@ -20,8 +20,8 @@ public class GuestModel implements GameModel {
         return gm;
     }
 
-    public GameProperties getGameProperties() {
-        return this.gameProperties;
+    public PlayerProperties getPlayerProperties() {
+        return this.playerProperties;
     }
 
     @Override
@@ -31,7 +31,7 @@ public class GuestModel implements GameModel {
          * sets the guest player profile
          * (Gets unique ID from the host)
          */
-        gameProperties = new GameProperties(name);
+        playerProperties = new PlayerProperties(name);
         commHandler = new CommunicationHandler(ip, port);
         commHandler.connectMe(name);
 
@@ -49,25 +49,34 @@ public class GuestModel implements GameModel {
 
     @Override
     public void tryPlaceWord(Word myWord) {
-        try {
-            String word = ObjectSerializer.serializeObject(myWord);
-            commHandler.sendMessage("tryPlaceWord", word);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        if (playerProperties.isMyTurn()) {
+            try {
+                String word = ObjectSerializer.serializeObject(myWord);
+                commHandler.sendMessage("tryPlaceWord", word);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else
+            System.out.println("its not your turn");
+
     }
 
     @Override
     public void challenge() {
-        commHandler.sendMessage("challenge", "true");
+        if (playerProperties.isMyTurn()) {
+            commHandler.sendMessage("challenge", "true");
+        } else
+            System.out.println("its not your turn");
 
     }
 
     @Override
     public void skipTurn() {
-        if (gameProperties.isMyTurn()) {
+        if (playerProperties.isMyTurn()) {
             commHandler.sendMessage("skipTurn", "true");
-        }
+        } else
+            System.out.println("its not your turn");
+
     }
 
     @Override
@@ -79,66 +88,47 @@ public class GuestModel implements GameModel {
     @Override
     public Map<String, Integer> getOthersScore() {
         commHandler.sendMessage("getOthersScore", "true");
-        return gameProperties.getPlayersScore();
+        return playerProperties.getPlayersScore();
     }
 
     @Override
     public Tile[][] getCurrentBoard() {
         commHandler.sendMessage("getCurrentBoard", "true");
-        return gameProperties.getMyBoard();
+        return playerProperties.getMyBoard();
     }
 
     @Override
     public int getMyScore() {
         commHandler.sendMessage("getMyScore", "true");
-        return gameProperties.getMyScore();
+        return playerProperties.getMyScore();
     }
 
     @Override
     public ArrayList<Tile> getMyTiles() {
         commHandler.sendMessage("getMyTiles", "true");
-        return gameProperties.getMyHandTiles();
+        return playerProperties.getMyHandTiles();
     }
 
     @Override
     public ArrayList<Word> getMyWords() {
         commHandler.sendMessage("getMyWords", "true");
-        return gameProperties.getMyWords();
+        return playerProperties.getMyWords();
     }
 
     @Override
     public boolean isMyTurn() {
         commHandler.sendMessage("isMyTurn", "true");
-        return gameProperties.isMyTurn();
+        return playerProperties.isMyTurn();
     }
 
     public void updateAllStates() {
-        this.gameProperties.setMyBoard(getCurrentBoard());
-        this.gameProperties.setMyTiles(getMyTiles());
-        this.gameProperties.setMyScore(getMyScore());
-        this.gameProperties.setMyWords(getMyWords());
-        this.gameProperties.setMyTurn(isMyTurn());
-        this.gameProperties.setPlayersScore(getOthersScore());
-        // try {
-        //     Thread.sleep(5000);
-        // } catch (InterruptedException e) {
-        //     // TODO Auto-generated catch block
-        //     e.printStackTrace();
-        // }
+        this.playerProperties.setMyBoard(getCurrentBoard());
+        this.playerProperties.setMyTiles(getMyTiles());
+        this.playerProperties.setMyScore(getMyScore());
+        this.playerProperties.setMyWords(getMyWords());
+        this.playerProperties.setMyTurn(isMyTurn());
+        this.playerProperties.setPlayersScore(getOthersScore());
     }
 
-    // @Override
-    // public void update(Observable o, Object arg) {
-    // if (o == commHandler) {
-    // System.out.println("OBSERVER");
-    // // if (((String) arg).equals("myTurn")) {
-    // // gameProperties.setMyTurn(true);
-    // // }
-    // // if (((String) arg).equals("updateAll")) {
-    // // updateAllStates();
-    // // }
-    // updateAllStates();
-    // }
-    // }
 
 }

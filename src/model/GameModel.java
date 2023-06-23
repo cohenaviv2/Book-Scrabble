@@ -1,6 +1,7 @@
 package model;
 
 import java.util.*;
+
 import model.game.*;
 
 /*
@@ -10,7 +11,7 @@ import model.game.*;
  * 
  */
 
-public interface GameModel {
+public interface GameModel{
 
     // SEND DATA
     void connectMe(String name, String ip, int port);

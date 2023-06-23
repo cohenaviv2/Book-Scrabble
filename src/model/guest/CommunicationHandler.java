@@ -5,7 +5,7 @@ import java.net.*;
 import java.util.*;
 import java.util.concurrent.*;
 
-import model.game.GameProperties;
+import model.game.PlayerProperties;
 import model.game.ObjectSerializer;
 import model.game.Tile;
 import model.game.Word;
@@ -16,11 +16,8 @@ public class CommunicationHandler {
     PrintWriter out;
     private int myId;
     private String quitGameString;
-    private String myTurnString;
-    private String updateString;
-    // Turn
     ExecutorService executorService = Executors.newSingleThreadExecutor();
-    GameProperties gameProperties = GuestModel.get().getGameProperties();
+    PlayerProperties playerProperties = GuestModel.get().getPlayerProperties();
 
     public CommunicationHandler(String ipString, int port) {
         try {
@@ -44,16 +41,10 @@ public class CommunicationHandler {
             if (!ans[2].equals("0")) {
                 this.myId = Integer.parseInt(ans[2]);
                 this.quitGameString = myId + ",quitGame,true";
-                this.myTurnString = myId + ",isMyTurn,true";
-                this.updateString = "updateAll";
                 // PRINT DEBUG
                 System.out.println("CommHandler: got my id " + myId + ", " + name + " is Connected!");
             } else {
-                // PRINT DEBUG
-                // System.out.println("CommHandler - connectMe: wrong answer from Host server "
-                // + ans);
                 throw new Exception("CommHandler - connectMe: wrong answer from Host server " + ans);
-
             }
 
         } catch (Exception e) {
@@ -89,13 +80,10 @@ public class CommunicationHandler {
     public void startUpdateListener() throws IOException {
         new Thread(() -> {
             try {
-                System.out.println("START CHAT");
                 String serverMessage;
                 while (!(serverMessage = in.readLine()).equals(quitGameString)) {
                     if (serverMessage.equals("updateAll")) {
                         GuestModel.get().updateAllStates();
-                        // PRINT DEBUG
-                        System.out.println("CommHandler: got updateAll");
                     } else {
                         if (serverMessage.equals("ready"))
                             continue;
@@ -162,7 +150,7 @@ public class CommunicationHandler {
 
     private void skipTurnHandler(String returnedVal) {
         if (returnedVal.equals("true")) {
-            gameProperties.setMyTurn(false);
+            playerProperties.setMyTurn(false);
             // PRINT DEBUG
             System.out.println("CommHandler: you skipped your turn");
 
@@ -174,7 +162,19 @@ public class CommunicationHandler {
     }
 
     private void challengeHandler(String returnedVal) {
-        /* TODO */
+        if (returnedVal.equals("false")) {
+
+            // PRINT DEBUG
+            System.out.println("challenge - some error/turn");
+
+        } else if (returnedVal.equals("skipTurn")) {
+
+            // PRINT DEBUG
+            System.out.println("challenge failed - skiping turn!");
+        } else {
+            // PRINT DEBUG
+            System.out.println("challenge success - you got extra points!");
+        }
     }
 
     private void tryPlaceWordHandler(String returnedVal) {
@@ -206,12 +206,12 @@ public class CommunicationHandler {
 
     private void isMyTurnHandler(String returnedVal) {
         if (returnedVal.equals("true")) {
-            gameProperties.setMyTurn(true);
+            playerProperties.setMyTurn(true);
             // PRINT DEBUG
             System.out.println("CommHandler: your turn - TRUE");
 
         } else if (returnedVal.equals("false")) {
-            gameProperties.setMyTurn(false);
+            playerProperties.setMyTurn(false);
             // PRINT DEBUG
             System.out.println("CommHandler: your turn - FALSE");
 
@@ -232,7 +232,7 @@ public class CommunicationHandler {
         } else {
             try {
                 ArrayList<Word> word = (ArrayList<Word>) ObjectSerializer.deserializeObject(returnedVal);
-                gameProperties.setMyWords(word);
+                playerProperties.setMyWords(word);
             } catch (ClassNotFoundException | IOException e) {
                 e.printStackTrace();
             }
@@ -249,7 +249,7 @@ public class CommunicationHandler {
         } else {
             try {
                 ArrayList<Tile> tile = (ArrayList<Tile>) ObjectSerializer.deserializeObject(returnedVal);
-                gameProperties.setMyTiles(tile);
+                playerProperties.setMyTiles(tile);
             } catch (ClassNotFoundException | IOException e) {
                 e.printStackTrace();
             }
@@ -262,7 +262,7 @@ public class CommunicationHandler {
             System.out.println("CommHandler: cant get score");
         } else {
             int score = Integer.parseInt(returnedVal);
-            gameProperties.setMyScore(score);
+            playerProperties.setMyScore(score);
         }
     }
 
@@ -276,7 +276,7 @@ public class CommunicationHandler {
         } else {
             try {
                 Tile[][] board = (Tile[][]) ObjectSerializer.deserializeObject(returnedVal);
-                gameProperties.setMyBoard(board);
+                playerProperties.setMyBoard(board);
             } catch (ClassNotFoundException | IOException e) {
                 e.printStackTrace();
             }
@@ -294,12 +294,12 @@ public class CommunicationHandler {
             try {
                 Map<String, Integer> othersScores = (Map<String, Integer>) ObjectSerializer
                         .deserializeObject(returnedVal);
-                gameProperties.setPlayersScore(othersScores);
+                playerProperties.setPlayersScore(othersScores);
             } catch (ClassNotFoundException | IOException e) {
                 e.printStackTrace();
             }
         }
-        System.out.println(this.gameProperties);
+        System.out.println(this.playerProperties);
     }
 
     public void close() {

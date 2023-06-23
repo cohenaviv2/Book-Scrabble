@@ -1,10 +1,7 @@
 package model.server.cache;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.Scanner;
+import java.io.*;
+import java.util.*;
 
 /*
  * represents a Book dictionary, responsible for the logic of word search in the dictionary.
@@ -25,7 +22,7 @@ public class Dictionary {
         this.fileList = fileNames;
         this.wordsExistCache = new CacheManager(400, new LRU());
         this.dontExistCache = new CacheManager(100, new LFU());
-        this.bloomFilter = new BloomFilter((int)Math.pow(2, 12), "MD5", "SHA1"); // TODO: original 256
+        this.bloomFilter = new BloomFilter((int)Math.pow(2, 20), "MD5", "SHA1"); // original 256
 
         bloomFilterInit(fileNames);
     }

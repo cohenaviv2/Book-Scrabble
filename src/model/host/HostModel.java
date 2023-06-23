@@ -6,14 +6,13 @@ import model.server.*;
 import java.io.IOException;
 import java.util.*;
 
-public class HostModel implements GameModel, Observer {
+public class HostModel extends Observable implements GameModel, Observer {
 
     private static HostModel hm = null; // Singleton
     private static final int HOST_PORT = 8040;
-
-    private MyServerParallel hostServer; // my Host server - support connection of up to 3 guests
-    private GameManager gameManager; // game manager contains all the game data including players
-    private GameProperties gameProperties; // for the host player
+    private MyServerParallel hostServer; // Host server - support connection of up to 3 guests parallel
+    private GameManager gameManager; // game manager contains all the game data and logic
+    private PlayerProperties playerProperties; // All player properties for the game view
 
     private HostModel() {
         /* starts the host server on port 8040 */
@@ -36,11 +35,15 @@ public class HostModel implements GameModel, Observer {
          * game (including the host player).
          */
 
-        this.gameManager.setTotalPlayersCount(numOftotalPlayers);
+        try {
+            this.gameManager.setTotalPlayersCount(numOftotalPlayers);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
-    public GameProperties getGameProperties() {
-        return gameProperties;
+    public PlayerProperties getPlayerProperties() {
+        return playerProperties;
     }
 
     @Override
@@ -55,10 +58,8 @@ public class HostModel implements GameModel, Observer {
 
         gameManager.setGameServerSocket(ip, port);
         gameManager.createHostPlayer(name);
-        gameProperties = new GameProperties(name);
+        playerProperties = new PlayerProperties(name);
 
-        // PRINT DEBUG
-        // System.out.println(gameManager.getHostPlayer());
         System.out.println("HOST: " + name + " is Connected to the game server!");
 
     }
@@ -76,13 +77,13 @@ public class HostModel implements GameModel, Observer {
     }
 
     @Override
-    public void ready(){
+    public void ready() {
         gameManager.setReady();
     }
 
     @Override
     public void tryPlaceWord(Word myWord) {
-        if (gameProperties.isMyTurn()) {
+        if (playerProperties.isMyTurn()) {
             try {
                 String queryWord = ObjectSerializer.serializeObject(myWord);
                 String ans = gameManager.processPlayerInstruction(gameManager.getHostPlayerId(), "tryPlaceWord",
@@ -103,7 +104,6 @@ public class HostModel implements GameModel, Observer {
                     System.out
                             .println(
                                     "Some word that was made is not dictionary legal!\nYou can try Challenge or skipTurn");
-                    gameProperties.setMyTurn(false);
 
                 } else if (ans.equals("cantSerialize")) {
 
@@ -111,8 +111,8 @@ public class HostModel implements GameModel, Observer {
                     System.out.println("tryPlaceWord - cant serialize");
 
                 } else {
-                    updateAllStates();
-                    gameProperties.setMyTurn(false);
+                    // updateAllStates();
+                    // playerProperties.setMyTurn(false);
 
                     // PRINT DEBUG
                     System.out.println("You got more points!");
@@ -120,12 +120,14 @@ public class HostModel implements GameModel, Observer {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }
+        } else
+            System.out.println("its not your turn");
+
     }
 
     @Override
     public void challenge() {
-        if (gameProperties.isMyTurn()) {
+        if (playerProperties.isMyTurn()) {
             String ans = gameManager.processPlayerInstruction(gameManager.getHostPlayerId(), "challenge", "true");
             if (ans.equals("false")) {
 
@@ -136,29 +138,24 @@ public class HostModel implements GameModel, Observer {
 
                 // PRINT DEBUG
                 System.out.println("some word that was made is not dictionary legal - skiping turn!");
-                gameProperties.setMyTurn(false);
 
             } else {
-                gameProperties.setMyScore(getMyScore());
-                gameProperties.setMyBoard(getCurrentBoard());
-                gameProperties.setMyTurn(false);
-                gameProperties.setMyTiles(getMyTiles());
-                gameProperties.setMyWords(getMyWords());
 
                 // PRINT DEBUG
                 System.out.println("You got extra points!");
             }
-        }
+        } else
+            System.out.println("its not your turn");
     }
 
     @Override
     public void skipTurn() {
-        if (gameProperties.isMyTurn()) {
+        if (playerProperties.isMyTurn()) {
 
             String ans = gameManager.processPlayerInstruction(gameManager.getHostPlayerId(), "skipTurn", "true");
 
             if (ans.equals("true")) {
-                gameProperties.setMyTurn(false);
+                // playerProperties.setMyTurn(false);
                 // PRINT DEBUG
                 System.out.println("Your turn is skipped");
             } else if (ans.equals("false")) {
@@ -168,7 +165,9 @@ public class HostModel implements GameModel, Observer {
                 // PRINT DEBUG
                 System.out.println("skipTurn - wrong answer from GM");
             }
-        }
+        } else
+            System.out.println("its not your turn");
+
     }
 
     @Override
@@ -192,6 +191,8 @@ public class HostModel implements GameModel, Observer {
             } catch (ClassNotFoundException | IOException e) {
                 e.printStackTrace();
             }
+            // PRINT DEBUG
+            System.out.println("Cant serialize");
             return null;
         }
     }
@@ -297,14 +298,13 @@ public class HostModel implements GameModel, Observer {
     }
 
     private void updateAllStates() {
-        this.gameProperties.setMyBoard(getCurrentBoard());
-        this.gameProperties.setMyTiles(getMyTiles());
-        this.gameProperties.setMyScore(getMyScore());
-        this.gameProperties.setMyWords(getMyWords());
-        this.gameProperties.setPlayersScore(getOthersScore());
-        this.gameProperties.setMyTurn(isMyTurn());
-        System.out.println(gameProperties);
-
+        this.playerProperties.setMyBoard(getCurrentBoard());
+        this.playerProperties.setMyTiles(getMyTiles());
+        this.playerProperties.setMyScore(getMyScore());
+        this.playerProperties.setMyWords(getMyWords());
+        this.playerProperties.setPlayersScore(getOthersScore());
+        this.playerProperties.setMyTurn(isMyTurn());
+        System.out.println(playerProperties);
     }
 
     @Override
@@ -314,5 +314,6 @@ public class HostModel implements GameModel, Observer {
             this.hostServer.sendToAll("updateAll");
         }
     }
+
 
 }

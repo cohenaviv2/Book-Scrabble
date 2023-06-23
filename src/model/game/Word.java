@@ -12,7 +12,7 @@ import java.util.Arrays;
  * 
  */
 
-public class Word implements Serializable{
+public class Word implements Serializable {
 
     private Tile[] tiles;
     private int row, col;
@@ -27,10 +27,10 @@ public class Word implements Serializable{
 
     public Word(Word other) {
         if (this != other && other != null) {
-                this.tiles = other.getTiles();
-                this.row = other.getRow();
-                this.col = other.getCol();
-                this.vertical = other.isVertical();
+            this.tiles = other.getTiles();
+            this.row = other.getRow();
+            this.col = other.getCol();
+            this.vertical = other.isVertical();
         }
     }
 
@@ -52,9 +52,12 @@ public class Word implements Serializable{
 
     @Override
     public String toString() {
-        String word ="";
-        for (Tile t : tiles){
-            word+=t.getLetter();
+        String word = "";
+        for (int i = 0; i < tiles.length; i++) {
+            if (tiles[i] == null)
+                word += '_';
+            else
+                word += tiles[i].getLetter();
         }
         return word;
     }

@@ -6,6 +6,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "ModelTest",
+            "request": "launch",
+            "mainClass": "model.test.ModelTest",
+            "projectName": "Book Scrabble_c0c2c55d"
+        },
+        {
+            "type": "java",
             "name": "DictionaryManager",
             "request": "launch",
             "mainClass": "model.server.DictionaryManager",
