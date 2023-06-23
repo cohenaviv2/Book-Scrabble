@@ -6,6 +6,41 @@
     "configurations": [
         {
             "type": "java",
+            "name": "DictionaryManager",
+            "request": "launch",
+            "mainClass": "model.server.DictionaryManager",
+            "projectName": "Book Scrabble_c0c2c55d"
+        },
+        {
+            "type": "java",
+            "name": "GameManager",
+            "request": "launch",
+            "mainClass": "model.game.GameManager",
+            "projectName": "Book Scrabble_c0c2c55d"
+        },
+        {
+            "type": "java",
+            "name": "GameManagerTest",
+            "request": "launch",
+            "mainClass": "model.test.GameManagerTest",
+            "projectName": "Book Scrabble_c0c2c55d"
+        },
+        {
+            "type": "java",
+            "name": "GuestModelTest",
+            "request": "launch",
+            "mainClass": "model.test.GuestModelTest",
+            "projectName": "Book Scrabble_c0c2c55d"
+        },
+        {
+            "type": "java",
+            "name": "CommunicationHandler",
+            "request": "launch",
+            "mainClass": "model.guest.CommunicationHandler",
+            "projectName": "Book Scrabble_c0c2c55d"
+        },
+        {
+            "type": "java",
             "name": "main_guest2",
             "request": "launch",
             "mainClass": "model.main_guest2",

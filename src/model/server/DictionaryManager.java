@@ -3,6 +3,7 @@ package model.server;
 import java.util.HashMap;
 import java.util.Map;
 
+import model.game.GameManager;
 import model.server.cache.Dictionary;
 
 /*
@@ -34,7 +35,7 @@ public class DictionaryManager {
          * dictionary (saves time for future queries).
          */
 
-        String word = args[args.length - 1];
+        String word = args[args.length - 1].toLowerCase();
         boolean result = false;
 
         for (int i = 0; i < args.length - 1; i++) {
@@ -58,7 +59,7 @@ public class DictionaryManager {
          * This will perform an I/O search in the books.
          */
 
-        String word = args[args.length - 1];
+        String word = args[args.length - 1].toLowerCase();
         boolean result = false;
 
         for (int i = 0; i < args.length - 1; i++) {
@@ -80,5 +81,16 @@ public class DictionaryManager {
         if (dictManInstance == null)
             dictManInstance = new DictionaryManager();
         return dictManInstance;
+    }
+
+    public static void main(String[] args) {
+        DictionaryManager d = DictionaryManager.get();
+        GameManager gm = GameManager.get();
+        //Dictionary dic = new Dictionary("resources/books/Harray Potter.txt");
+        // System.out.println("bb "+"PETUNIA".toLowerCase().equalsIgnoreCase("Petunia"));
+        boolean res = d.query("resources/books/Harray Potter.txt","PETUNIA");
+        boolean challange = d.challenge("resources/books/Harray Potter.txt","PETUNIA");
+        System.out.println(res);
+        System.out.println(challange);
     }
 }

@@ -1,45 +1,316 @@
 package model.guest;
 
 import java.io.*;
-import model.server.ClientHandler;
+import java.net.*;
+import java.util.*;
+import java.util.concurrent.*;
 
-public class CommunicationHandler implements ClientHandler {
-    private final String ipString;
-    private final int port;
+import model.game.GameProperties;
+import model.game.ObjectSerializer;
+import model.game.Tile;
+import model.game.Word;
+
+public class CommunicationHandler {
+    private Socket hostSocket;
+    BufferedReader in;
+    PrintWriter out;
+    private int myId;
+    private String quitGameString;
+    private String myTurnString;
+    private String updateString;
+    // Turn
+    ExecutorService executorService = Executors.newSingleThreadExecutor();
+    GameProperties gameProperties = GuestModel.get().getGameProperties();
 
     public CommunicationHandler(String ipString, int port) {
-        this.ipString = ipString;
-        this.port = port;
-    }
-
-    @Override
-    public void handleClient(InputStream inputStream, OutputStream outputStream) {
-        try (
-                BufferedReader in = new BufferedReader(new InputStreamReader(inputStream));
-                PrintWriter out = new PrintWriter(outputStream, true)) {
-            String serverMessage;
-
-            while ((serverMessage = in.readLine()) != null) {
-                // Print the server's message
-                System.out.println("Server: " + serverMessage);
-
-                // Check if it's the client's turn to play
-                if (serverMessage.equals("Your turn to play. Please enter your move:")) {
-                    // Read the client's move from the console
-                    BufferedReader consoleReader = new BufferedReader(new InputStreamReader(System.in));
-                    String clientMove = consoleReader.readLine();
-
-                    // Send the client's move to the server
-                    out.println(clientMove);
-                }
-            }
+        try {
+            this.hostSocket = new Socket(ipString, port);
+            this.in = new BufferedReader(new InputStreamReader(this.hostSocket.getInputStream()));
+            this.out = new PrintWriter(this.hostSocket.getOutputStream(), true);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    @Override
-    public void close() {
-        // Cleanup or additional close logic if required
+    public void sendMessage(String modifier, String value) {
+        out.println(myId + "," + modifier + "," + value);
+
     }
+
+    public void connectMe(String name) {
+        try {
+            out.println("0,connectMe," + name);
+            String[] ans = in.readLine().split(",");
+            if (!ans[2].equals("0")) {
+                this.myId = Integer.parseInt(ans[2]);
+                this.quitGameString = myId + ",quitGame,true";
+                this.myTurnString = myId + ",isMyTurn,true";
+                this.updateString = "updateAll";
+                // PRINT DEBUG
+                System.out.println("CommHandler: got my id " + myId + ", " + name + " is Connected!");
+            } else {
+                // PRINT DEBUG
+                // System.out.println("CommHandler - connectMe: wrong answer from Host server "
+                // + ans);
+                throw new Exception("CommHandler - connectMe: wrong answer from Host server " + ans);
+
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void addMyBookChoice(String book) {
+        try {
+            out.println(myId + ",myBookChoice," + book);
+            String[] ans = in.readLine().split(",");
+            int id = Integer.parseInt(ans[0]);
+            String modifier = ans[1];
+            String value = ans[2];
+            if (id == myId && modifier.equals("myBookChoice") && value.equals("true")) {
+
+                // PRINT DEBUG
+                System.out.println("CommHandler: your book " + book + " is set up! starting chat...");
+                startUpdateListener();
+
+            } else {
+                // PRINT DEBUG
+                // System.out.println("CommHandler - addBookHandler: wrong answer from Host
+                // server " + ans);
+                throw new Exception("CommHandler - addBookHandler: wrong answer from Host server " + ans);
+
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void startUpdateListener() throws IOException {
+        new Thread(() -> {
+            try {
+                System.out.println("START CHAT");
+                String serverMessage;
+                while (!(serverMessage = in.readLine()).equals(quitGameString)) {
+                    if (serverMessage.equals("updateAll")) {
+                        GuestModel.get().updateAllStates();
+                        // PRINT DEBUG
+                        System.out.println("CommHandler: got updateAll");
+                    } else {
+                        if (serverMessage.equals("ready"))
+                            continue;
+                        String[] params = serverMessage.split(",");
+                        int messageId = Integer.parseInt(params[0]);
+                        String modifier = params[1];
+                        String returnedVal = params[2];
+
+                        // if it's not my id, Drop maessage
+                        if (messageId == myId) {
+                            handleResponse(modifier, returnedVal);
+                        }
+                    }
+                }
+                // PRINT DEBUG
+                System.out.println("CommHandler: you quit that game");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }).start();
+
+    }
+
+    private void handleResponse(String modifier, String returnedVal) {
+        switch (modifier) {
+            case "getOthersScore":
+                getOtherScoreHandler(returnedVal);
+                break;
+            case "getCurrentBoard":
+                getCurrentBoardHandler(returnedVal);
+                break;
+            case "getMyScore":
+                getMyScoreHandler(returnedVal);
+                break;
+            case "getMyTiles":
+                getMyTilesHandler(returnedVal);
+                break;
+            case "getMyWords":
+                getMyWordsHandler(returnedVal);
+                break;
+            case "isMyTurn":
+                isMyTurnHandler(returnedVal);
+                break;
+            case "tryPlaceWord":
+                tryPlaceWordHandler(returnedVal);
+                break;
+            case "challenge":
+                challengeHandler(returnedVal);
+                break;
+            case "skipTurn":
+                skipTurnHandler(returnedVal);
+                break;
+            case "quitGame":
+                quitGameHandler(returnedVal);
+                break;
+            default:
+                // PRINT DEBUG
+                System.out.println("CommHandler: wrong instructions operator - " + modifier);
+        }
+    }
+
+    private void quitGameHandler(String returnedVal) {
+    }
+
+    private void skipTurnHandler(String returnedVal) {
+        if (returnedVal.equals("true")) {
+            gameProperties.setMyTurn(false);
+            // PRINT DEBUG
+            System.out.println("CommHandler: you skipped your turn");
+
+        } else if (returnedVal.equals("false")) {
+            // PRINT DEBUG
+            System.out.println("CommHandler: cant skip your turn/it is not your turn");
+
+        }
+    }
+
+    private void challengeHandler(String returnedVal) {
+        /* TODO */
+    }
+
+    private void tryPlaceWordHandler(String returnedVal) {
+        if (returnedVal.equals("false")) {
+
+            // PRINT DEBUG
+            System.out.println("CommHandler: its not your turn");
+
+        } else if (returnedVal.equals("notBoardLegal")) {
+
+            // PRINT DEBUG
+            System.out.println("CommHandler: " + returnedVal);
+
+        } else if (returnedVal.equals("notDictionaryLegal")) {
+
+            // PRINT DEBUG
+            System.out.println("CommHandler: " + returnedVal);
+
+        } else if (returnedVal.equals("cantSerialize")) {
+
+            // PRINT DEBUG
+            System.out.println("CommHandler: " + returnedVal);
+
+        } else {
+            // PRINT DEBUG
+            System.out.println("CommHandler: you get points");
+        }
+    }
+
+    private void isMyTurnHandler(String returnedVal) {
+        if (returnedVal.equals("true")) {
+            gameProperties.setMyTurn(true);
+            // PRINT DEBUG
+            System.out.println("CommHandler: your turn - TRUE");
+
+        } else if (returnedVal.equals("false")) {
+            gameProperties.setMyTurn(false);
+            // PRINT DEBUG
+            System.out.println("CommHandler: your turn - FALSE");
+
+        } else {
+            // PRINT DEBUG
+            System.out.println("CommHandler: wrong answer from Host server " + returnedVal);
+
+        }
+    }
+
+    private void getMyWordsHandler(String returnedVal) {
+        if (returnedVal.equals("false")) {
+            // PRINT DEBUG
+            System.out.println("CommHandler: cant get my words");
+        } else if (returnedVal.equals("cantSerialize")) {
+            // PRINT DEBUG
+            System.out.println("CommHandler: cant serialize my words");
+        } else {
+            try {
+                ArrayList<Word> word = (ArrayList<Word>) ObjectSerializer.deserializeObject(returnedVal);
+                gameProperties.setMyWords(word);
+            } catch (ClassNotFoundException | IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void getMyTilesHandler(String returnedVal) {
+        if (returnedVal.equals("false")) {
+            // PRINT DEBUG
+            System.out.println("CommHandler: cant get my tiles");
+        } else if (returnedVal.equals("cantSerialize")) {
+            // PRINT DEBUG
+            System.out.println("CommHandler: cant serialize my tiles");
+        } else {
+            try {
+                ArrayList<Tile> tile = (ArrayList<Tile>) ObjectSerializer.deserializeObject(returnedVal);
+                gameProperties.setMyTiles(tile);
+            } catch (ClassNotFoundException | IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void getMyScoreHandler(String returnedVal) {
+        if (returnedVal.equals("false")) {
+            // PRINT DEBUG
+            System.out.println("CommHandler: cant get score");
+        } else {
+            int score = Integer.parseInt(returnedVal);
+            gameProperties.setMyScore(score);
+        }
+    }
+
+    private void getCurrentBoardHandler(String returnedVal) {
+        if (returnedVal.equals("false")) {
+            // PRINT DEBUG
+            System.out.println("CommHandler: cant get board");
+        } else if (returnedVal.equals("cantSerialize")) {
+            // PRINT DEBUG
+            System.out.println("CommHandler: cant serialize board");
+        } else {
+            try {
+                Tile[][] board = (Tile[][]) ObjectSerializer.deserializeObject(returnedVal);
+                gameProperties.setMyBoard(board);
+            } catch (ClassNotFoundException | IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void getOtherScoreHandler(String returnedVal) {
+        if (returnedVal.equals("false")) {
+            // PRINT DEBUG
+            System.out.println("CommHandler: cant get others Scores");
+        } else if (returnedVal.equals("cantSerialize")) {
+            // PRINT DEBUG
+            System.out.println("CommHandler: " + returnedVal);
+        } else {
+            try {
+                Map<String, Integer> othersScores = (Map<String, Integer>) ObjectSerializer
+                        .deserializeObject(returnedVal);
+                gameProperties.setPlayersScore(othersScores);
+            } catch (ClassNotFoundException | IOException e) {
+                e.printStackTrace();
+            }
+        }
+        System.out.println(this.gameProperties);
+    }
+
+    public void close() {
+        try {
+            this.in.close();
+            this.out.close();
+            this.hostSocket.close();
+            this.executorService.shutdownNow();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 }

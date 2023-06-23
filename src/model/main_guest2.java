@@ -7,58 +7,73 @@ import java.io.InputStreamReader;
 import model.guest.GuestModel;
 
 public class main_guest2 {
+
+    public static String pressEnter(String info, BufferedReader in) {
+        System.out.println();
+        try {
+            System.out.println(info + "\n");
+            String ent = in.readLine();
+            return ent;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public static void main(String[] args) {
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-        System.out.println("\n*** GUEST MODE ***");
+        System.out.println("*** GUEST MODE ***\n");
 
         // Create Guest model:
-        GuestModel gs = new GuestModel();
+        GuestModel gm = GuestModel.get();
 
-        // Wait...
-        System.out.println();
-        try {
-            System.out.println("PRESS ENTER TO START ");
-            String enter = in.readLine();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        System.out.println();
-
-        // Set ip and port:
+        // Set name, ip and port:
+        String name = null;
         try {
             System.out.println("Enter your name: ");
-            gs.setMyName(in.readLine());
-            System.out.println();
-            System.out.println("Enter ip: ");
-            gs.setIpString(in.readLine());
-            System.out.println();
-            System.out.println("Enter port: ");
-            gs.setPort(Integer.parseInt(in.readLine()));
+            name = in.readLine();
             System.out.println();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        System.out.println("............");
-        // Connect to the host server:
-        gs.connectMe(gs.getMyName(), gs.getIpString(), gs.getPort());
-        gs.getMyTiles();
-        gs.quitGame();
-        //gs.pullTiles();
-        //gs.getCurrentBoard();
 
         // Wait...
-        System.out.println();
-        try {
-            System.out.println("guest is waiting... PRESS ENTER TO CONTINUE ");
-            String ent = in.readLine();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        System.out.println();
+        if (pressEnter("PRESS 1 TO CONNECT", in).equals("1")) {
 
-        // Disconnect the host server and quit the game:
-        //gs.quitGame();
-        System.out.println("done");
+            // Connect to the host server:
+            gm.connectMe(name, "localhost", 8040);
+
+        }
+
+        if (pressEnter("PRESS 1 TO SET YOUR BOOK", in).equals("1")) {
+
+            gm.myBookChoice("Harray Potter.txt");
+            gm.ready();
+
+        }
+        System.out.println("YOUR TURN - " + gm.getGameProperties().isMyTurn());
+
+        if (pressEnter("PRESS 1 TO SKIP TURN", in).equals("1")) {
+
+            gm.skipTurn();
+
+            System.out.println("TURN - " + gm.getGameProperties().isMyTurn());
+        }
+        if (pressEnter("PRESS 1 TO SKIP TURN", in).equals("1")) {
+
+            gm.skipTurn();
+            
+            System.out.println("TURN - " + gm.getGameProperties().isMyTurn());
+        }
+
+        // Wait...
+        if (pressEnter("PRESS 1 TO QUIT GAME", in).equals("1")) {
+
+            // Disconnect the host server and quit the game:
+            gm.quitGame();
+            System.out.println();
+            System.out.println("done");
+        }
     }
 
 }

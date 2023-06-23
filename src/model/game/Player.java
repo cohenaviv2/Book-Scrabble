@@ -90,7 +90,6 @@ public class Player {
 
     @Override
     public String toString() {
-        /* TODO: add more information */
         return name + ", " + id + "\nis Host: " + isHost + "\nScore: " + score + "\n";
     }
 

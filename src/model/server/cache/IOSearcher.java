@@ -15,20 +15,26 @@ import java.util.Scanner;
 
 public class IOSearcher {
 
-    public static boolean search(String word,String...fileNames){
+    public static boolean search(String word, String... fileNames) {
         for (String book : fileNames) {
             try {
-                Scanner myScanner = new Scanner(new BufferedReader(new FileReader(book)));
-                while(myScanner.hasNext()){
-                    if (word.equals(myScanner.next())){
-                        myScanner.close();
-                        return true;
+                BufferedReader reader = new BufferedReader(new BufferedReader(new FileReader(book)));
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    Scanner myScanner = new Scanner(line);
+                    myScanner.useDelimiter("\\W+");
+                    while (myScanner.hasNext()) {
+                        if (word.equalsIgnoreCase(myScanner.next())) {
+                            myScanner.close();
+                            reader.close();
+                            return true;
+                        }
                     }
+                    myScanner.close();
                 }
-                myScanner.close();
+                reader.close();
             } catch (Exception e) {
-                System.out.println("Exception thrown : " + e);
-                return false;
+                e.printStackTrace();
             }
         }
         return false;

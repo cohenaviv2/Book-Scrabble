@@ -2,6 +2,7 @@ package model.server;
 
 import java.io.*;
 import java.net.*;
+import java.util.*;
 import java.util.concurrent.*;
 
 /*
@@ -14,11 +15,10 @@ import java.util.concurrent.*;
  */
 
  public class MyServerParallel {
-    protected final int port;
-    protected final ClientHandler ch;
-    protected volatile boolean stop;
-    //private static Map<Integer, Socket> clients = new HashMap<>();
-
+    private final int port;
+    private final ClientHandler ch;
+    private volatile boolean stop;
+    private List<Socket> clients = new ArrayList<>();
     private static final int THREAD_POOL_SIZE = 3;
 
     public MyServerParallel(int port, ClientHandler ch) {
@@ -47,24 +47,27 @@ import java.util.concurrent.*;
             while (!stop) {
                 try {
                     Socket aClient = theServer.accept(); // blocking call
-                    System.out.println("SERVER: NEW CLIENT CONNECTED: " + aClient.getInetAddress().getHostAddress());
+                    this.clients.add(aClient);
+                    //System.out.println("SERVER: NEW CLIENT CONNECTED: " + aClient.getInetAddress().getHostAddress());
 
                     executorService.execute(() -> {
                         try {
                             ClientHandler clientHandler = this.ch.getClass().getDeclaredConstructor().newInstance();
                             clientHandler.handleClient(aClient.getInputStream(), aClient.getOutputStream());
-                            System.out.println("** SERVER: CHAT ENDED **");
+                            clientHandler.close();
+                            //System.out.println("** SERVER: CHAT ENDED **\n");
                         } catch (Exception e) {
                             e.printStackTrace();
                         } finally {
                             try {
                                 aClient.close();
+                                
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
                         }
                     });
-                    System.out.println("** SERVER:  END ACCEPTING CLIENT -> NEXT CLIENT **");
+                    //System.out.println("** SERVER:  END ACCEPTING CLIENT -> NEXT CLIENT **\n");
                 } catch (SocketTimeoutException e) {
                 }
             }
@@ -74,6 +77,17 @@ import java.util.concurrent.*;
             theServer.close();
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    public void sendToAll(String message){
+        for (Socket s : clients){
+            try {
+                PrintWriter out = new PrintWriter(s.getOutputStream(), true);
+                out.println(message);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 

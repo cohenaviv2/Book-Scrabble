@@ -1,6 +1,8 @@
 package model.server;
 
 import java.io.*;
+import java.net.Socket;
+import java.util.*;
 
 /*
  * The Book scrabble handler is used to communicate with the game server
@@ -24,36 +26,34 @@ public class BookScrabbleHandler implements ClientHandler {
 
     @Override
     public void handleClient(InputStream inFromclient, OutputStream outToClient) {
-
-        String[] userLine = null;
         try {
             in = new BufferedReader(new InputStreamReader(inFromclient));
             out = new PrintWriter(outToClient, true);
-            userLine = in.readLine().split(",");
+            String[] userLine = in.readLine().split(",");
+            String operator = userLine[0];
+            String[] books = new String[userLine.length - 1];
+            System.arraycopy(userLine, 1, books, 0, (userLine.length - 1));
+
+            DictionaryManager dm = DictionaryManager.get();
+
+            if (operator.equals("Q")) {
+                if (dm.query(books)) {
+                    out.println("true");
+                } else {
+                    out.println("false");
+                }
+            } else if (operator.equals("C")) {
+                if (dm.challenge(books)) {
+                    out.println("true");
+                } else {
+                    out.println("false");
+                }
+            } else {
+                System.out.println(userLine[0] + "," + userLine[1] + "," + userLine[2]);
+                out.println("wrong operator");
+            }
         } catch (IOException e) {
             e.printStackTrace();
-        }
-        String operator = userLine[0];
-        String[] books = new String[userLine.length - 1];
-        System.arraycopy(userLine, 1, books, 0, (userLine.length - 1));
-
-        DictionaryManager dm = DictionaryManager.get();
-
-        if (operator.equals("Q")) {
-            if (dm.query(books)) {
-                out.println("true");
-            } else {
-                out.println("false");
-            }
-        } else if (operator.equals("C")) {
-            if (dm.challenge(books)) {
-                out.println("true");
-            } else {
-                out.println("false");
-            }
-        } else {
-            System.out.println(userLine[0]+","+userLine[1]+","+userLine[2]);
-            out.println("wrong operator");
         }
 
     }
@@ -68,5 +68,7 @@ public class BookScrabbleHandler implements ClientHandler {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
     }
+
 }

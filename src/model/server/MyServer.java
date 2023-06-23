@@ -43,11 +43,11 @@ public class MyServer {
                     System.out.println("New client connected: " + aClient.getInetAddress().getHostAddress());
                     this.ch.handleClient(aClient.getInputStream(), aClient.getOutputStream());
                     System.out.println("\n** end handle client **\n");
+                    this.ch.close();
                     aClient.close();
                 } catch (SocketTimeoutException e) {
                 }
             }
-            this.ch.close();
             theServer.close();
         } catch (IOException e) {
             e.printStackTrace();

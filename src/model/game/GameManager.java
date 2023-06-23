@@ -3,6 +3,7 @@ package model.game;
 import java.io.*;
 import java.net.Socket;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import model.game.Tile.Bag;
@@ -17,21 +18,28 @@ import model.game.Tile.Bag;
  * 
  */
 
-public class GameManager {
+public class GameManager extends Observable {
 
     private static GameManager gm = null; // Singleton
 
     // Game:
     private Board gameBoard;
     private Bag gameBag;
-    private TurnManager turnManager;
+
+    public Bag getGameBag() {
+        return gameBag;
+    }
+
+    private final TurnManager turnManager;
     private Map<String, String> fullBookList;
     private StringBuilder gameBooks;
 
     // Participants:
-    private final Player hostPlayer;
+    private Player hostPlayer;
     private Map<Integer, Player> playersByID;
     private Map<String, Player> playersByName;
+    private int totalPlayersNum;
+    private volatile AtomicInteger readyToPlay;
 
     // Connectivity
     private Socket gameServerSocket;
@@ -42,32 +50,40 @@ public class GameManager {
         this.gameBoard = Board.getBoard();
         this.gameBag = Tile.Bag.getBag();
         this.turnManager = new TurnManager();
-        this.hostPlayer = null;
         // initial all game Books from directory
-        this.fullBookList = new HashMap<>();
+        this.fullBookList = new HashMap<>(); // book name to path
         File booksDirectory = new File("resources/books");
         File[] txtFiles = booksDirectory.listFiles((dir, name) -> name.endsWith(".txt"));
         if (txtFiles != null) {
             for (File file : txtFiles) {
                 String fileName = file.getName();
-                String filePath = file.getPath();
+                String filePath = file.getPath().replaceAll("\\\\", "/");
                 fullBookList.put(fileName, filePath);
             }
         }
         this.gameBooks = new StringBuilder();
         this.playersByID = new HashMap<>();
         this.playersByName = new HashMap<>();
+        this.readyToPlay = new AtomicInteger(0);
     }
 
-    public static GameManager getGM() {
+    public static GameManager get() {
         if (gm == null)
             gm = new GameManager();
         return gm;
     }
 
-    public void setGameServer(String gameServerIP, int gameServerPORT) {
+    public void setGameServerSocket(String gameServerIP, int gameServerPORT) {
         this.gameServerIP = gameServerIP;
         this.gameServerPORT = gameServerPORT;
+    }
+
+    public void setTotalPlayersCount(int totalPlayers) {
+        this.totalPlayersNum = totalPlayers;
+    }
+
+    public boolean isReadyToPlay() {
+        return readyToPlay.get() == totalPlayersNum;
     }
 
     public static int generateID() {
@@ -90,6 +106,7 @@ public class GameManager {
          */
         int hostID = generateID();
         Player host = new Player(hostName, hostID, true);
+        this.hostPlayer = host;
         this.playersByID.put(hostID, host);
         this.playersByName.put(hostName, host);
     }
@@ -103,7 +120,7 @@ public class GameManager {
         this.playersByName.put(guestName, guest);
     }
 
-    public void addBook(String bookName) {
+    private void addBookToList(String bookName) {
         /*
          * Add book chosen by a player to String gameBooks
          * gameBooks is used for communicating with the game server
@@ -111,39 +128,16 @@ public class GameManager {
         this.gameBooks.append(bookName + ",");
     }
 
-    public int connectMe(String firstLine) {
-        /*
-         * Connect handler which use to handle a guset "connectMe" request
-         * Sets the guest profile and returns the guest id as response
-         */
-        String[] params = firstLine.split(",");
-        if (params[0].equals("0") && params[1].equals("connectMe")) {
-            String guestName = params[2];
-            createGuestPlayer(guestName);
-            // PRINT DEBUG
-            System.out.println("GAME MANAGER: guest " + guestName + " profile was created!");
-            return getPlayerByName(guestName).getID();
-        } else {
-            // PRINT DEBUG
-            System.out.println("GAME MANAGER: faild to connect guest");
-            return 0;
-        }
-    }
-
     private boolean isIdExist(int id) {
         return this.playersByID.get(id) != null || this.hostPlayer.getID() == id;
-    }
-
-    public String getBookByName(String book) {
-        return this.fullBookList.get(book);
     }
 
     public String getGameBooks() {
         return gameBooks.toString();
     }
 
-    public Player getHostPlayer() {
-        return hostPlayer;
+    public int getHostPlayerId() {
+        return hostPlayer.getID();
     }
 
     public Player getPlayerByID(int id) {
@@ -154,15 +148,16 @@ public class GameManager {
         return playersByName.get(name);
     }
 
-    public String processGuestInstruction(int guestId, String modifier, String value) {
+    public String processPlayerInstruction(int guestId, String modifier, String value) {
         if (isIdExist(guestId)) {
-            // All model cases that indicates some guest instructions which not refers to a
-            // game move
+            // All model cases that indicates some guest instructions
             switch (modifier) {
                 case "myBookChoice":
                     return addBookHandler(value);
-                case "getChanges":
-                    return changesHandler(guestId, value);
+                case "ready":
+                    return readyHandler(value);
+                case "getOthersScore":
+                    return getPlayersScoreHandler(guestId, value);
                 case "getCurrentBoard":
                     return boardHandler(value);
                 case "getMyScore":
@@ -171,12 +166,14 @@ public class GameManager {
                     return tilesHandler(guestId, value);
                 case "getMyWords":
                     return wordsHandler(guestId, value);
-                case "getMyName":
-                    return getNameHandler(guestId, value);
-                case "getMyID":
-                    return getIdHandler(guestId, value);
                 case "isMyTurn":
                     return myTurnHandler(guestId, value);
+                case "tryPlaceWord":
+                    return queryHandler(guestId, value);
+                case "challenge":
+                    return challengeHandler(guestId, value);
+                case "skipTurn":
+                    return skipTurnHandler(guestId, value);
                 default:
                     // PRINT DEBUG
                     System.out.println("GAME MANAGER: wrong instructions operator - " + modifier);
@@ -189,17 +186,67 @@ public class GameManager {
         }
     }
 
-    private String addBookHandler(String value) {
-        String bookPath;
-        if ((bookPath = fullBookList.get(value)) != null) {
-            addBook(bookPath);
+    public int connectGuestHandler(String guestName) {
+        /*
+         * Connect handler which use to handle a guset "connectMe" request
+         * Sets the guest profile and returns the guest id as response
+         */
+        createGuestPlayer(guestName);
+        // PRINT DEBUG
+        System.out.println("GAME MANAGER: guest " + guestName + " profile was created!");
+        return getPlayerByName(guestName).getID();
+    }
+
+    public String addBookHandler(String bookName) {
+        String path;
+        if ((path = fullBookList.get(bookName)) != null) {
+            addBookToList(path);
+
+            // PRINT DEBUG
+            System.out.println("Game Manager: your book " + bookName + " is set up!\n");
             return "true";
         }
+
+        // PRINT DEBUG
+        System.out.println("Game Manager: failed to set up this book");
         return "false";
     }
 
-    private String changesHandler(int guestId, String value) {
-        return null;
+    private String readyHandler(String value) {
+        setReady();
+        return "ready";
+    }
+
+    public void setReady() {
+        
+        if (readyToPlay.incrementAndGet() == totalPlayersNum) {
+            // PRINT DEBUG
+            System.out.println("Game Manager: ALL PLAYERS ARE READY TO PLAY! draw tiles...\n");
+            turnManager.drawTiles();
+        }
+    }
+
+    private String getPlayersScoreHandler(int guestId, String value) {
+        if (value.equals("true")) {
+
+            List<Player> p = this.playersByID.values().stream().filter(player -> player.getID() != guestId)
+                    .collect(Collectors.toList());
+
+            Map<String, Integer> scores = new HashMap<>();
+            for (Player pl : p) {
+                scores.put(pl.getName(), pl.getScore());
+            }
+            try {
+                String sc = ObjectSerializer.serializeObject(scores);
+                return sc;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return "cantSerialize";
+        } else {
+            return "false";
+        }
+
     }
 
     private String boardHandler(String value) {
@@ -239,30 +286,14 @@ public class GameManager {
 
     private String wordsHandler(int guestId, String value) {
         if (value.equals("true")) {
-            if (gameBoard.getCurrentWords().size() == 0)
-                return "empty";
             String words;
             try {
-                words = ObjectSerializer.serializeObject(gameBoard.getCurrentWords());
+                words = ObjectSerializer.serializeObject(getPlayerByID(guestId).getMyWords());
                 return words;
             } catch (IOException e) {
                 e.printStackTrace();
             }
             return "cantSerialize";
-        } else
-            return "false";
-    }
-
-    private String getNameHandler(int guestId, String value) {
-        if (value.equals("true")) {
-            return getPlayerByID(guestId).getName();
-        } else
-            return "false";
-    }
-
-    private String getIdHandler(int guestId, String value) {
-        if (value.equals("true")) {
-            return String.valueOf(getPlayerByID(guestId).getID());
         } else
             return "false";
     }
@@ -281,77 +312,62 @@ public class GameManager {
         String bool = params[2];
         if (isIdExist(id) && quitMod.equals("quitGame") && bool.equals("true")) {
             Player p = this.playersByID.get(id);
+            String name = p.getName();
             // put back player tiles
             for (Tile t : p.getMyHandTiles()) {
                 this.gameBag.put(t);
             }
             this.playersByID.remove(id);
             this.playersByName.remove(p.getName());
+            // PRINT DEBUG
+            System.out.println("GameManager: " + name + " has quit the game!");
         }
-    }
-
-    public String processGuestMove(int moveId, String moveModifier, String moveValue) {
-
-        switch (moveModifier) {
-            // All model cases that indicates a possible guest game move
-            case "tryPlaceWord":
-                return queryHandler(moveId, moveValue);
-            case "challenge":
-                return challengeHandler(moveId, moveValue);
-            case "skipTurn":
-                return skipTurnHandler(moveId, moveValue);
-            default:
-                // PRINT DEBUG
-                System.out.println("GAME MANAGER: wrong game move operator");
-                return null;
-        }
-    }
-
-    private void updatePlayers() {
     }
 
     private String queryHandler(int id, String moveValue) {
         /*
          * TODO:
          * if Active word is activated - can not try place this word.
-         * need to check if the guest has all the currect tiles and make the string word
+         * need to check if the guest has all the correct tiles and make the string word
          * to a Word object
          * go to board.tryPlaceWord() - if not board legal - returns -1 (need to try
          * again), else set Active
          * word
          * if word was dictionary legal : updated score, updated words, pull tiles,
          * change turn...
-         * notifyAll to getChanges (turn index, get currectBoard, players points and
+         * notifyAll to getChanges (turn index, get correct Board, players points and
          * such...)
-         * if the word wasnt dictionary legal : need to set Active word and inform the
+         * if the word wasn't dictionary legal : need to set Active word and inform the
          * player that some word
          * that was created is not dictionary legal and the player can try to challenge
          * or skip turn.
          */
-        if (this.turnManager.getActiveWord() != null) {
+        if (turnManager.getActiveWord() != null) {
             return "false";
         }
         try {
             Word queryWord = (Word) ObjectSerializer.deserializeObject(moveValue);
             Player player = getPlayerByID(id);
             int score = gameBoard.tryPlaceWord(queryWord);
-
             if (score == -1) {
                 return "notBoardLegal";
             } else if (score == 0) {
                 // some word that was made is not dictionary legal
                 // players can challenge this word or skip turn
-                this.turnManager.setActiveWord(queryWord);
+                turnManager.setActiveWord(queryWord);
                 player.setIsActiveWord(true);
                 return "notDictionaryLegal";
             } else {
                 player.addPoints(score);
                 player.addWords(gameBoard.getCurrentWords());
-                this.turnManager.pullTiles(id);
-                // send some updated to the players so they could getChanges():
+                turnManager.pullTiles(id);
+                // send some updated to the players, so they could getChanges():
                 // getCurrentBoard, getMyTiles, getMyWords
-                updatePlayers();
-                this.turnManager.nextTurn();
+                setChanged();
+                notifyObservers("updateAll");
+
+                turnManager.nextTurn();
+
                 String playerScore = String.valueOf(score);
 
                 return playerScore;
@@ -376,52 +392,53 @@ public class GameManager {
          * 
          */
         if (moveValue.equals("true")) {
-            if (this.turnManager.getActiveWord() == null || !getPlayerByID(playerId).isActiveWord()) {
+            if (turnManager.getActiveWord() == null || !getPlayerByID(playerId).isActiveWord()) {
                 return "false";
             }
             ArrayList<Word> turnWords = gameBoard.getCurrentWords();
             Word activeWord = turnManager.getActiveWord();
-            String answer = challengeFromServer(turnWords);
+            String answer = challengeToGameServer(turnWords);
             Player player = getPlayerByID(playerId);
 
             if (answer.equals("true")) {
+                // Challenge successfull - player get extra points
                 int score = gameBoard.tryPlaceWord(activeWord);
-                if (score == 0) {
-                    // some word that was made is not dictionary legal - skip turn
-                    this.turnManager.setActiveWord(null);
-                    player.setIsActiveWord(false);
-                    this.turnManager.nextTurn();
-                    return "skipTurn";
-                } else {
-                    // double points
-                    score *= 2;
-                    player.addPoints(score);
-                    player.addWords(gameBoard.getCurrentWords());
-                    this.turnManager.pullTiles(playerId);
-                    this.turnManager.setActiveWord(null);
-                    player.setIsActiveWord(false);
-                    // send some updated to the players so they could getChanges():
-                    // getCurrentBoard, getMyTiles, getMyWords
-                    updatePlayers();
-                    this.turnManager.nextTurn();
-                    String playerScore = String.valueOf(score);
-
-                    return playerScore;
-                }
-
-            } else if (answer.equals("false")) {
-                // players loses points and skiping turn
-                int negScore = -10;
-                player.addPoints(negScore);
-                this.turnManager.setActiveWord(null);
+                // Turn off active word
+                turnManager.setActiveWord(null);
                 player.setIsActiveWord(false);
+                // double points
+                score *= 2;
+                player.addPoints(score);
+                player.addWords(gameBoard.getCurrentWords());
+                turnManager.pullTiles(playerId);
                 // send some updated to the players so they could getChanges():
                 // getCurrentBoard, getMyTiles, getMyWords
-                updatePlayers();
+                setChanged();
+                notifyObservers("updateAll");
+
                 this.turnManager.nextTurn();
-                String playerScore = String.valueOf(negScore);
+
+                String playerScore = String.valueOf(score);
 
                 return playerScore;
+
+            } else if (answer.equals("false")) {
+                // Challenge failed - player loses points
+                // Turn off active word
+                turnManager.setActiveWord(null);
+                player.setIsActiveWord(false);
+                // Negative score set
+                int negScore = -10;
+                player.addPoints(negScore);
+                // send some updated to the players so they could getChanges():
+                // getCurrentBoard, getMyTiles, getMyWord
+                // ???
+                setChanged();
+                notifyObservers("updateAll");
+
+                this.turnManager.nextTurn();
+
+                return "skipTurn";
             } else {
                 return "false";
             }
@@ -430,17 +447,17 @@ public class GameManager {
         }
     }
 
-    public boolean queryFromServer(Word word) {
-        /* TODO: need to ask the game server */
+    protected boolean dictionaryLegal(Word word) {
+        /* ask the game server */
 
         String queryWord = gameBoard.wordToString(word);
 
         try {
             this.gameServerSocket = new Socket(gameServerIP, gameServerPORT);
-            PrintWriter out = new PrintWriter(gameServerSocket.getOutputStream(), false);
+            PrintWriter out = new PrintWriter(gameServerSocket.getOutputStream(), true);
             BufferedReader in = new BufferedReader(new InputStreamReader(gameServerSocket.getInputStream()));
 
-            String req = "Q," + gameBooks.toString() + queryWord;
+            String req = "Q," + getGameBooks() + queryWord;
             out.println(req);
             String res = in.readLine();
             if (res.equals("true")) {
@@ -449,17 +466,21 @@ public class GameManager {
                 return false;
             } else {
                 // PRINT DEBUG
-                System.out.println("GAME MANAGER: wrong query answer form game server\n");
+                System.out.println("GAME MANAGER: wrong query answer from game server\n");
             }
+            this.gameServerSocket.close();
+            in.close();
+            out.close();
 
         } catch (IOException e) {
             e.printStackTrace();
         }
-
+        // PRINT DEBUG
+        System.out.println("GAME MANAGER: cant connect game server\n");
         return false;
     }
 
-    private String challengeFromServer(ArrayList<Word> turnWords) {
+    private String challengeToGameServer(ArrayList<Word> turnWords) {
         /*
          * Asks the game server to challenge all the words that was made in this turn
          * game server will perform an I/O search in the game books
@@ -477,11 +498,12 @@ public class GameManager {
             PrintWriter out = new PrintWriter(gameServerSocket.getOutputStream(), false);
             BufferedReader in = new BufferedReader(new InputStreamReader(gameServerSocket.getInputStream()));
 
-            for (String c : words) {
-                String req = "C," + gameBooks.toString() + c;
+            for (String cw : words) {
+                String req = "C," + getGameBooks() + cw;
                 out.println(req);
                 String ans = in.readLine();
                 if (ans.equals("false")) {
+                    this.gameServerSocket.close();
                     return "false";
                 }
                 if (!ans.equals("true") && !ans.equals("false")) {
@@ -489,18 +511,21 @@ public class GameManager {
                     System.out.println("GAME MANAGER: wrong challenge answer form game server\n");
                 }
             }
+            this.gameServerSocket.close();
+            in.close();
+            out.close();
             return "true";
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         return "gameServerError";
     }
 
-    private String skipTurnHandler(int id, String moveValue) {
+    private String skipTurnHandler(int playerId, String moveValue) {
         if (moveValue.equals("true")) {
             if (this.turnManager.activeWord != null) {
                 this.turnManager.activeWord = null;
+                getPlayerByID(playerId).setIsActiveWord(false);
             }
             this.turnManager.nextTurn();
             return "true";
@@ -604,15 +629,11 @@ public class GameManager {
     }
 
     public void close() {
-        try {
-            this.gameServerSocket.close();
-            this.turnManager.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        this.turnManager.close();
+
     }
 
-    private class TurnManager {
+    public class TurnManager {
 
         /*
          * The turn manager is responsible to set players turn indexes
@@ -631,7 +652,7 @@ public class GameManager {
             this.currentTurnIndex = -1;
         }
 
-        private void pullTiles(int playerId) {
+        public void pullTiles(int playerId) {
             /* Completes players hand to 7 Tiles */
             Player p = getPlayerByID(playerId);
             while (p.getMyHandTiles().size() < 7) {
@@ -670,20 +691,31 @@ public class GameManager {
                 return t1.getLetter() - t2.getLetter();
             }).collect(Collectors.toList());
 
+            int firstPlayerId = 0;
+            System.out.println("Turn Manager: players turn indexes :\n##########################");
             // Set turn indexes, first player turn, and put tiles back to the bag
             for (int i = 0; i < players.size(); i++) {
                 Player p = players.get(i);
+
                 if (i == 0) {
                     p.setMyTurn(true);
+                    firstPlayerId = p.getID();
                 }
+                Tile myTile = p.getMyHandTiles().get(0);
                 p.setTurnIndex(i);
-                gameBag.put(p.getMyHandTiles().get(0));
+                System.out.println(p.getName() + " - " + i + " (" + myTile.getLetter() + ")");
+                gameBag.put(myTile);
                 p.getMyHandTiles().remove(0);
+                turnManager.pullTiles(p.getID());
             }
+            System.out.println();
+
             setCurrentTurnIndex(0);
+            setChanged();
+            notifyObservers();
         }
 
-        private void nextTurn() {
+        public void nextTurn() {
             /* Set turn to the next player (turn index) */
 
             int i = this.currentTurnIndex;
@@ -695,6 +727,17 @@ public class GameManager {
             oldPlayer.setMyTurn(false);
             nextPlayer.setMyTurn(true);
             setCurrentTurnIndex(j);
+            setChanged();
+            notifyObservers("updateAll");
+            // notifyObservers(nextPlayer.getID() + "yourTurn");
+            printTurnInfo();
+        }
+
+        public void printTurnInfo() {
+            System.out.println("GameManager: Turn information:\n***************************");
+            for (Player p : playersByID.values()) {
+                System.out.println(p.getName() + " - " + p.isMyTurn() + " - " + p.getTurnIndex());
+            }
         }
 
         private void setActiveWord(Word activeWord) {
@@ -716,4 +759,5 @@ public class GameManager {
         public void close() {
         }
     }
+
 }

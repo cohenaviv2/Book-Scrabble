@@ -3,6 +3,7 @@ package model.server.cache;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.Scanner;
 
 /*
@@ -24,7 +25,7 @@ public class Dictionary {
         this.fileList = fileNames;
         this.wordsExistCache = new CacheManager(400, new LRU());
         this.dontExistCache = new CacheManager(100, new LFU());
-        this.bloomFilter = new BloomFilter(256, "MD5", "SHA1");
+        this.bloomFilter = new BloomFilter((int)Math.pow(2, 12), "MD5", "SHA1"); // TODO: original 256
 
         bloomFilterInit(fileNames);
     }
@@ -74,12 +75,19 @@ public class Dictionary {
 
         for (String book : fileNames) {
             try {
-                Scanner myScanner = new Scanner(new BufferedReader(new FileReader(book)));
-                while (myScanner.hasNext()) {
-                    this.bloomFilter.add(myScanner.next());
+                BufferedReader reader = new BufferedReader(new BufferedReader(new FileReader(book)));
+                String line;
+                while ((line=reader.readLine())!= null) {
+                    Scanner myScanner = new Scanner(line);
+                    myScanner.useDelimiter("\\W+");
+                    while(myScanner.hasNext()){
+                        String word = myScanner.next();
+                        this.bloomFilter.add(word);
+                    }
+                    myScanner.close();
                 }
-                myScanner.close();
-            } catch (FileNotFoundException e) {
+                reader.close();
+            } catch (IOException e) {
                 System.out.println("Exception thrown : " + e);
             }
         }

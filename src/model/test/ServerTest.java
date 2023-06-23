@@ -56,7 +56,7 @@ public class ServerTest {
 		boolean ok=true;
 		Random r=new Random();
 		int port=6000+r.nextInt(1000);
-		MyServer s=new MyServer(port, new ClientHandler1());
+		MyServerParallel s=new MyServerParallel(port, new ClientHandler1());
 		int c = Thread.activeCount();
 		s.start(); // runs in the background
 		try {
@@ -139,19 +139,19 @@ public class ServerTest {
 	}
 	
 	public static void testBSCH() {
-		String s1[]=writeFile("s1.txt");
-		String s2[]=writeFile("s2.txt");
+		String s1[]=writeFile("src/model/test/s1.txt");
+		String s2[]=writeFile("src/model/test/s2.txt");
 		
 		Random r=new Random();
 		int port=6000+r.nextInt(1000);
-		MyServer s=new MyServer(port, new BookScrabbleHandler());
+		MyServerParallel s=new MyServerParallel(port, new BookScrabbleHandler());
 		s.start();
-		runClient(port, "Q,s1.txt,s2.txt,"+s1[1], true); //
-		runClient(port, "Q,s1.txt,s2.txt,"+s2[4], true); //
-		runClient(port, "Q,s1.txt,s2.txt,2"+s1[1], false);
-		runClient(port, "Q,s1.txt,s2.txt,3"+s2[4], false);
-		runClient(port, "C,s1.txt,s2.txt,"+s1[9], true); //
-		runClient(port, "C,s1.txt,s2.txt,#"+s2[1], false);
+		runClient(port, "Q,src/model/test/s1.txt,src/model/test/s2.txt,"+s1[1], true); //
+		runClient(port, "Q,src/model/test/s1.txt,src/model/test/s2.txt,"+s2[4], true); //
+		runClient(port, "Q,src/model/test/s1.txt,src/model/test/s2.txt,2"+s1[1], false);
+		runClient(port, "Q,src/model/test/s1.txt,src/model/test/s2.txt,3"+s2[4], false);
+		runClient(port, "C,src/model/test/s1.txt,src/model/test/s2.txt,"+s1[9], true); //
+		runClient(port, "C,src/model/test/s1.txt,src/model/test/s2.txt,#"+s2[1], false);
 		s.close();
 	}
 	
