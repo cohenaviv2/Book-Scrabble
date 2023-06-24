@@ -32,7 +32,12 @@ public class main_guest2 {
         if (pressEnter("PRESS ENTER TO CONNECT", in).equals("")) {
 
             // Connect to the host server:
-            gm.connectMe("Matan", "localhost", 8040);
+            try {
+                gm.connectMe("Matan", "localhost", 8040);
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
             gm.myBookChoice("Harray Potter.txt");
             gm.ready();
 

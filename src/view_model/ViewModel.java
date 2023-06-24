@@ -5,7 +5,7 @@ import java.util.*;
 import javafx.beans.property.*;
 import model.GameModel;
 import model.game.*;
-
+import model.host.HostModel;
 
 public class ViewModel implements Observer {
     GameModel m;
@@ -15,7 +15,7 @@ public class ViewModel implements Observer {
     public ObjectProperty<Tile[][]> myBoard;
     public ListProperty<Tile> myHandTiles;
     public ListProperty<Word> myWords;
-    public MapProperty<String,Integer> playersScore;
+    public MapProperty<String, Integer> playersScore;
 
     public ViewModel(GameModel m) {
         this.m = m;
@@ -34,4 +34,7 @@ public class ViewModel implements Observer {
         throw new UnsupportedOperationException("Unimplemented method 'update'");
     }
 
+    public static void main(String[] args) {
+        System.out.println(HostModel.class.getName());
+    }
 }

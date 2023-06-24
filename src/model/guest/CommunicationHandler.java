@@ -19,14 +19,10 @@ public class CommunicationHandler {
     ExecutorService executorService = Executors.newSingleThreadExecutor();
     PlayerProperties playerProperties = GuestModel.get().getPlayerProperties();
 
-    public CommunicationHandler(String ipString, int port) {
-        try {
-            this.hostSocket = new Socket(ipString, port);
-            this.in = new BufferedReader(new InputStreamReader(this.hostSocket.getInputStream()));
-            this.out = new PrintWriter(this.hostSocket.getOutputStream(), true);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public CommunicationHandler(String ipString, int port) throws IOException {
+        this.hostSocket = new Socket(ipString, port);
+        this.in = new BufferedReader(new InputStreamReader(this.hostSocket.getInputStream()));
+        this.out = new PrintWriter(this.hostSocket.getOutputStream(), true);
     }
 
     public void sendMessage(String modifier, String value) {
@@ -83,6 +79,7 @@ public class CommunicationHandler {
                 String serverMessage;
                 while (!(serverMessage = in.readLine()).equals(quitGameString)) {
                     if (serverMessage.equals("updateAll")) {
+                        updateAllStates();
                         GuestModel.get().updateAllStates();
                     } else {
                         if (serverMessage.equals("ready"))
@@ -104,6 +101,16 @@ public class CommunicationHandler {
                 e.printStackTrace();
             }
         }).start();
+
+    }
+
+    private void updateAllStates() {
+        sendMessage("getCurrentBoard", "true");
+        sendMessage("isMyTurn", "true");
+        sendMessage("getMyWords", "true");
+        sendMessage("getMyTiles", "true");
+        sendMessage("getMyScore", "true");
+        sendMessage("getOthersScore", "true");
 
     }
 

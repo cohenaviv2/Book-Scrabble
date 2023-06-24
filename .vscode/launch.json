@@ -6,6 +6,27 @@
     "configurations": [
         {
             "type": "java",
+            "name": "LoginForm",
+            "request": "launch",
+            "mainClass": "view.LoginForm",
+            "projectName": "Book Scrabble_c0c2c55d"
+        },
+        {
+            "type": "java",
+            "name": "GameView",
+            "request": "launch",
+            "mainClass": "view.GameView",
+            "projectName": "Book Scrabble_c0c2c55d"
+        },
+        {
+            "type": "java",
+            "name": "ViewModel",
+            "request": "launch",
+            "mainClass": "view_model.ViewModel",
+            "projectName": "Book Scrabble_c0c2c55d"
+        },
+        {
+            "type": "java",
             "name": "ModelTest",
             "request": "launch",
             "mainClass": "model.test.ModelTest",

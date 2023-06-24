@@ -1,5 +1,6 @@
 package model;
 
+import java.io.IOException;
 import java.util.*;
 
 import model.game.*;
@@ -14,7 +15,7 @@ import model.game.*;
 public interface GameModel{
 
     // SEND DATA
-    void connectMe(String name, String ip, int port);
+    void connectMe(String name, String ip, int port) throws IOException;
 
     void myBookChoice(String bookName);
 
@@ -29,6 +30,8 @@ public interface GameModel{
     void quitGame();
 
     // GET DATA
+    PlayerProperties getPlayerProperties();
+
     Tile[][] getCurrentBoard();
     
     ArrayList<Tile> getMyTiles();

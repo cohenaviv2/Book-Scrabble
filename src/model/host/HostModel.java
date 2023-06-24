@@ -41,10 +41,7 @@ public class HostModel extends Observable implements GameModel, Observer {
             e.printStackTrace();
         }
     }
-
-    public PlayerProperties getPlayerProperties() {
-        return playerProperties;
-    }
+   
 
     @Override
     public void connectMe(String name, String ip, int port) {
@@ -225,6 +222,11 @@ public class HostModel extends Observable implements GameModel, Observer {
         }
     }
 
+     @Override
+    public PlayerProperties getPlayerProperties() {
+        return this.playerProperties;
+    }
+    
     @Override
     public Tile[][] getCurrentBoard() {
         String ans = gameManager.processPlayerInstruction(gameManager.getHostPlayerId(), "getCurrentBoard", "true");
@@ -312,6 +314,8 @@ public class HostModel extends Observable implements GameModel, Observer {
         if (o == gameManager) {
             updateAllStates();
             this.hostServer.sendToAll("updateAll");
+            setChanged();
+            notifyObservers();
         }
     }
 

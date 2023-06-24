@@ -32,7 +32,12 @@ public class main_guest {
         if (pressEnter("PRESS ENTER TO CONNECT", in).equals("")) {
 
             // Connect to the host server:
-            gm.connectMe("Moshe", "localhost", 8040);
+            try {
+                gm.connectMe("Moshe", "localhost", 8040);
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
             gm.myBookChoice("mobydick.txt");
             gm.ready();
 

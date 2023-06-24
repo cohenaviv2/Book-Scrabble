@@ -56,7 +56,7 @@ public class GameManager extends Observable {
         File[] txtFiles = booksDirectory.listFiles((dir, name) -> name.endsWith(".txt"));
         if (txtFiles != null) {
             for (File file : txtFiles) {
-                String fileName = file.getName();
+                String fileName = file.getName().replaceAll(".txt", "");
                 String filePath = file.getPath().replaceAll("\\\\", "/");
                 fullBookList.put(fileName, filePath);
             }
@@ -78,11 +78,11 @@ public class GameManager extends Observable {
         this.gameServerPORT = gameServerPORT;
     }
 
-    public void setTotalPlayersCount(int totalPlayers) throws Exception {
-        if (totalPlayers > 1 && totalPlayers < 5) {
+    public void setTotalPlayersCount(int totalPlayers) {
+        if (totalPlayers >= 2 && totalPlayers <= 4) {
             this.totalPlayersNum = totalPlayers;
         } else {
-            throw new Exception("Can manage game only with 2-4 players");
+            System.out.println("Can manage game only with 2-4 players");
         }
     }
 
@@ -138,6 +138,10 @@ public class GameManager extends Observable {
 
     public String getGameBooks() {
         return gameBooks.toString();
+    }
+
+    public Map<String, String> getFullBookList() {
+        return fullBookList;
     }
 
     public int getHostPlayerId() {
@@ -562,7 +566,7 @@ public class GameManager extends Observable {
         int bagSize = g.gameBag.size();
         g.turnManager.drawTiles();
         int newSize;
-        if ((newSize = g.gameBag.size()) != bagSize-7*4) {
+        if ((newSize = g.gameBag.size()) != bagSize - 7 * 4) {
             System.out.println("bag size doesnt match: " + newSize);
         }
         // Test next turn
