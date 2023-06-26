@@ -110,7 +110,7 @@ public class DictionaryManager {
         tiles[3] = gm.getGameBag().getTile('A');
         tiles[4] = gm.getGameBag().getTile('Y');
         tiles[5] = gm.getGameBag().getTile('A');
-        Word word = new Word(tiles, 5, 7, true);
+        Word word = new Word(tiles, 7, 7, true);
             String w = ObjectSerializer.serializeObject(word);
             System.out.println(gm.processPlayerInstruction(id, "tryPlaceWord", w));;
             System.out.println(gm.processPlayerInstruction(id, "challenge", "true"));

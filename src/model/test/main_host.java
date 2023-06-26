@@ -1,4 +1,4 @@
-package model;
+package model.test;
 
 import java.io.*;
 import java.util.*;
@@ -26,7 +26,7 @@ public class main_host {
 
         // Create Host model:
         HostModel hm = HostModel.get(); // starts host server on port 8040
-        hm.setNumOfPlayers(3);
+        hm.setNumOfPlayers(2);
 
         // // Set up name & Connect to the game server:
         // String myName = null;
@@ -38,7 +38,7 @@ public class main_host {
         if (pressEnter("PRESS ENTER TO CONNECT", in).equals("")) {
 
             hm.connectMe("Aviv", "localhost", 11224); // to local game server
-            hm.myBookChoice("alice_in_wonderland.txt");
+            hm.myBookChoice("Alice in Wonderland");
             hm.ready();
         }
 

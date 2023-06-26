@@ -9,6 +9,7 @@ import model.game.PlayerProperties;
 import model.game.ObjectSerializer;
 import model.game.Tile;
 import model.game.Word;
+import view_model.MessageReader;
 
 public class CommunicationHandler {
     private Socket hostSocket;
@@ -79,8 +80,7 @@ public class CommunicationHandler {
                 String serverMessage;
                 while (!(serverMessage = in.readLine()).equals(quitGameString)) {
                     if (serverMessage.equals("updateAll")) {
-                        updateAllStates();
-                        GuestModel.get().updateAllStates();
+                        requestAllStates();
                     } else {
                         if (serverMessage.equals("ready"))
                             continue;
@@ -97,6 +97,7 @@ public class CommunicationHandler {
                 }
                 // PRINT DEBUG
                 System.out.println("CommHandler: you quit that game");
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -104,14 +105,19 @@ public class CommunicationHandler {
 
     }
 
-    private void updateAllStates() {
+    private void requestAllStates() {
         sendMessage("getCurrentBoard", "true");
         sendMessage("isMyTurn", "true");
         sendMessage("getMyWords", "true");
         sendMessage("getMyTiles", "true");
         sendMessage("getMyScore", "true");
         sendMessage("getOthersScore", "true");
-
+        // while (playerProperties.getMyBoard() == null &&
+        // playerProperties.getMyHandTiles() == null
+        // && playerProperties.getMyWords() == null &&
+        // playerProperties.getPlayersScore() == null)
+        // ;
+        // System.out.println("END OF BUSY WAITING - commHandler");
     }
 
     private void handleResponse(String modifier, String returnedVal) {
@@ -178,9 +184,13 @@ public class CommunicationHandler {
 
             // PRINT DEBUG
             System.out.println("challenge failed - skiping turn!");
+            MessageReader.setMsg("Challenge failed, You lose 10 points");
+
         } else {
             // PRINT DEBUG
             System.out.println("challenge success - you got extra points!");
+            MessageReader.setMsg("Challenge was successful!\nYou got more Points!");
+
         }
     }
 
@@ -194,11 +204,14 @@ public class CommunicationHandler {
 
             // PRINT DEBUG
             System.out.println("CommHandler: " + returnedVal);
+            MessageReader.setMsg("Word's not Board legal, Try again");
 
         } else if (returnedVal.equals("notDictionaryLegal")) {
 
             // PRINT DEBUG
             System.out.println("CommHandler: " + returnedVal);
+
+            MessageReader.setMsg("Some word is not Dictionary legal\nYou can try Challenge or Pass turn");
 
         } else if (returnedVal.equals("cantSerialize")) {
 
@@ -208,6 +221,8 @@ public class CommunicationHandler {
         } else {
             // PRINT DEBUG
             System.out.println("CommHandler: you get points");
+            MessageReader.setMsg("You got more Points!");
+
         }
     }
 
@@ -216,6 +231,8 @@ public class CommunicationHandler {
             playerProperties.setMyTurn(true);
             // PRINT DEBUG
             System.out.println("CommHandler: your turn - TRUE");
+
+            MessageReader.setMsg("It's your turn!");
 
         } else if (returnedVal.equals("false")) {
             playerProperties.setMyTurn(false);
@@ -307,6 +324,8 @@ public class CommunicationHandler {
             }
         }
         System.out.println(this.playerProperties);
+        GuestModel.get().update();
+
     }
 
     public void close() {

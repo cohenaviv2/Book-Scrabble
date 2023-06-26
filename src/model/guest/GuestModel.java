@@ -13,13 +13,18 @@ public class GuestModel extends Observable implements GameModel {
 
     private GuestModel() {
     }
-
+    
     public static GuestModel get() {
         if (gm == null)
-            gm = new GuestModel();
+        gm = new GuestModel();
         return gm;
     }
 
+    @Override
+    public PlayerProperties getPlayerProperties() {
+        return PlayerProperties.get();
+    }
+    
     @Override
     public void connectMe(String name, String ip, int port) throws IOException {
         /*
@@ -27,7 +32,8 @@ public class GuestModel extends Observable implements GameModel {
          * sets the guest player profile
          * (Gets unique ID from the host)
          */
-        playerProperties = new PlayerProperties(name);
+        playerProperties = PlayerProperties.get();
+        playerProperties.setMyName(name);
         commHandler = new CommunicationHandler(ip, port);
         commHandler.connectMe(name);
 
@@ -81,56 +87,56 @@ public class GuestModel extends Observable implements GameModel {
         commHandler.close();
     }
 
-    @Override
-    public PlayerProperties getPlayerProperties() {
-        return this.playerProperties;
-    }
 
     @Override
     public Map<String, Integer> getOthersScore() {
         // commHandler.sendMessage("getOthersScore", "true");
-        return playerProperties.getPlayersScore();
+        return this.playerProperties.getPlayersScore();
     }
 
     @Override
     public Tile[][] getCurrentBoard() {
         // commHandler.sendMessage("getCurrentBoard", "true");
-        return playerProperties.getMyBoard();
+        return this.playerProperties.getMyBoard();
     }
 
     @Override
     public int getMyScore() {
         // commHandler.sendMessage("getMyScore", "true");
-        return playerProperties.getMyScore();
+        return this.playerProperties.getMyScore();
     }
 
     @Override
     public ArrayList<Tile> getMyTiles() {
         // commHandler.sendMessage("getMyTiles", "true");
-        return playerProperties.getMyHandTiles();
+        return this.playerProperties.getMyHandTiles();
     }
 
     @Override
     public ArrayList<Word> getMyWords() {
         // commHandler.sendMessage("getMyWords", "true");
-        return playerProperties.getMyWords();
+        return this.playerProperties.getMyWords();
     }
 
     @Override
     public boolean isMyTurn() {
         // commHandler.sendMessage("isMyTurn", "true");
-        return playerProperties.isMyTurn();
+        return this.playerProperties.isMyTurn();
     }
 
-    public void updateAllStates() {
+    public void update() {
         // this.playerProperties.setMyBoard(getCurrentBoard());
         // this.playerProperties.setMyTiles(getMyTiles());
         // this.playerProperties.setMyScore(getMyScore());
         // this.playerProperties.setMyWords(getMyWords());
         // this.playerProperties.setMyTurn(isMyTurn());
         // this.playerProperties.setPlayersScore(getOthersScore());
+        // while (playerProperties.getMyBoard()==null&&playerProperties.getMyHandTiles()==null&&playerProperties.getMyWords()==null&&playerProperties.getPlayersScore()==null){
+        //     System.out.println("hi");
+        // }
         setChanged();
-        notifyObservers();
+        notifyObservers();  
+        
     }
 
 }

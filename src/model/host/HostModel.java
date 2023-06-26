@@ -3,6 +3,8 @@ package model.host;
 import model.GameModel;
 import model.game.*;
 import model.server.*;
+import view_model.MessageReader;
+
 import java.io.IOException;
 import java.util.*;
 
@@ -41,7 +43,6 @@ public class HostModel extends Observable implements GameModel, Observer {
             e.printStackTrace();
         }
     }
-   
 
     @Override
     public void connectMe(String name, String ip, int port) {
@@ -55,7 +56,8 @@ public class HostModel extends Observable implements GameModel, Observer {
 
         gameManager.setGameServerSocket(ip, port);
         gameManager.createHostPlayer(name);
-        playerProperties = new PlayerProperties(name);
+        playerProperties = PlayerProperties.get();
+        playerProperties.setMyName(name);
 
         System.out.println("HOST: " + name + " is Connected to the game server!");
 
@@ -94,6 +96,7 @@ public class HostModel extends Observable implements GameModel, Observer {
 
                     // PRINT DEBUG
                     System.out.println("Your word is not board legal!");
+                    MessageReader.setMsg("Word's not Board legal, Try again");
 
                 } else if (ans.equals("notDictionaryLegal")) {
 
@@ -101,6 +104,8 @@ public class HostModel extends Observable implements GameModel, Observer {
                     System.out
                             .println(
                                     "Some word that was made is not dictionary legal!\nYou can try Challenge or skipTurn");
+
+                    MessageReader.setMsg("Some word is not Dictionary legal\nYou can try Challenge or Pass turn");
 
                 } else if (ans.equals("cantSerialize")) {
 
@@ -113,6 +118,8 @@ public class HostModel extends Observable implements GameModel, Observer {
 
                     // PRINT DEBUG
                     System.out.println("You got more points!");
+                    MessageReader.setMsg("You got more Points!");
+
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -135,11 +142,14 @@ public class HostModel extends Observable implements GameModel, Observer {
 
                 // PRINT DEBUG
                 System.out.println("some word that was made is not dictionary legal - skiping turn!");
+                MessageReader.setMsg("Challenge failed, You lose 10 points");
 
             } else {
 
                 // PRINT DEBUG
                 System.out.println("You got extra points!");
+                MessageReader.setMsg("Challenge was successful!\nYou got more Points!");
+
             }
         } else
             System.out.println("its not your turn");
@@ -170,7 +180,6 @@ public class HostModel extends Observable implements GameModel, Observer {
     @Override
     public void quitGame() {
         this.hostServer.close();
-        this.gameManager.close();
     }
 
     @Override
@@ -214,6 +223,8 @@ public class HostModel extends Observable implements GameModel, Observer {
         } else if (ans.equals("true")) {
             // PRINT DEBUG
             System.out.println("it is your turn!");
+            MessageReader.setMsg("It's your turn!");
+
             return true;
         } else {
             // PRINT DEBUG
@@ -222,11 +233,11 @@ public class HostModel extends Observable implements GameModel, Observer {
         }
     }
 
-     @Override
+    @Override
     public PlayerProperties getPlayerProperties() {
-        return this.playerProperties;
+        return PlayerProperties.get();
     }
-    
+
     @Override
     public Tile[][] getCurrentBoard() {
         String ans = gameManager.processPlayerInstruction(gameManager.getHostPlayerId(), "getCurrentBoard", "true");
@@ -312,12 +323,11 @@ public class HostModel extends Observable implements GameModel, Observer {
     @Override
     public void update(Observable o, Object arg) {
         if (o == gameManager) {
-            updateAllStates();
             this.hostServer.sendToAll("updateAll");
+            updateAllStates();
             setChanged();
-            notifyObservers();
+            notifyObservers(playerProperties.getMyName());
         }
     }
-
 
 }

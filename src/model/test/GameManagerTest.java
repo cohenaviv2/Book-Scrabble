@@ -60,7 +60,6 @@ public class GameManagerTest {
         // }
 
         gameServer.close();
-        g.close();
 
     }
 }

@@ -6,6 +6,48 @@
     "configurations": [
         {
             "type": "java",
+            "name": "RunGameServer",
+            "request": "launch",
+            "mainClass": "view.RunGameServer",
+            "projectName": "Book Scrabble_c0c2c55d"
+        },
+        {
+            "type": "java",
+            "name": "main_guest",
+            "request": "launch",
+            "mainClass": "model.test.main_guest",
+            "projectName": "Book Scrabble_c0c2c55d"
+        },
+        {
+            "type": "java",
+            "name": "main_host",
+            "request": "launch",
+            "mainClass": "model.test.main_host",
+            "projectName": "Book Scrabble_c0c2c55d"
+        },
+        {
+            "type": "java",
+            "name": "ViewTest",
+            "request": "launch",
+            "mainClass": "view.test.ViewTest",
+            "projectName": "Book Scrabble_c0c2c55d"
+        },
+        {
+            "type": "java",
+            "name": "ViewModelTest",
+            "request": "launch",
+            "mainClass": "view_model.test.ViewModelTest",
+            "projectName": "Book Scrabble_c0c2c55d"
+        },
+        {
+            "type": "java",
+            "name": "GameViewModel",
+            "request": "launch",
+            "mainClass": "view_model.GameViewModel",
+            "projectName": "Book Scrabble_c0c2c55d"
+        },
+        {
+            "type": "java",
             "name": "LoginForm",
             "request": "launch",
             "mainClass": "view.LoginForm",

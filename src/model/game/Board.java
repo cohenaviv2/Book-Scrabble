@@ -471,6 +471,8 @@ public class Board {
 
     public String wordToString(Word word) {
         Word fullword = getFullWord(word);
+        //
+        System.out.println("full Word - "+fullword);
         String w = "";
         for (Tile t : fullword.getTiles()) {
             w += t.getLetter();
@@ -522,19 +524,19 @@ public class Board {
         this.turnWords.clear();
 
         /* word placement contains null - leans on a tile */
-        Word thisWord = null;
+        Word stringWord = null;
         for (Tile t : word.getTiles())
             if (t == null) {
-                thisWord = new Word(getFullWord(word)); /* make the full word */
+                stringWord = new Word(getFullWord(word)); /* make the full word */
                 break;
             }
 
-        if (thisWord == null)
-            thisWord = new Word(word);
+        if (stringWord == null)
+            stringWord = new Word(word);
 
         /* Check parameters */
 
-        if (boardLegal(thisWord)) {
+        if (boardLegal(stringWord)) {
             ArrayList<Word> words = new ArrayList<Word>(getWords(word));
             for (Word w : words) {
                 if (!dictionaryLegal(w)) {

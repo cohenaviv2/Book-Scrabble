@@ -2,9 +2,10 @@ package model.game;
 
 import java.util.*;
 
-public class PlayerProperties {
+public class PlayerProperties { /* TODO: make class singleton */
     // Gameplay
-    private final String myName;
+    private static PlayerProperties instance = null;
+    private String myName;
     private int myScore;
     private boolean myTurn;
     private Tile[][] myBoard;
@@ -12,14 +13,24 @@ public class PlayerProperties {
     private ArrayList<Word> myWords;
     private Map<String, Integer> playersScore;
 
-    public PlayerProperties(String myName) {
+    private PlayerProperties() {
+        // this.myScore = 0;
+        // this.myTurn = false;
+        // this.myBoard = new Tile[Board.SIZE][Board.SIZE];
+        // this.myHandTiles = new ArrayList<Tile>(7);
+        // this.myWords = new ArrayList<Word>();
+        // this.playersScore = new HashMap<>();
+    }
+
+    public static PlayerProperties get(){
+        if (instance == null){
+            instance = new PlayerProperties();
+        }
+        return instance;
+    }
+    
+    public void setMyName(String myName){
         this.myName = myName;
-        this.myScore = 0;
-        this.myTurn = false;
-        this.myBoard = new Tile[Board.SIZE][Board.SIZE];
-        this.myHandTiles = new ArrayList<Tile>(7);
-        this.myWords = new ArrayList<Word>();
-        this.playersScore = new HashMap<>();
     }
 
     public void setMyScore(int score) {

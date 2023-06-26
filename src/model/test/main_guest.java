@@ -1,4 +1,4 @@
-package model;
+package model.test;
 
 import java.io.*;
 import java.util.*;
@@ -38,13 +38,13 @@ public class main_guest {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
-            gm.myBookChoice("mobydick.txt");
+            gm.myBookChoice("Harray Potter");
             gm.ready();
-
         }
 
         String key;
-        while (!(key = pressEnter("PRESS:\n1 - Try place word\n2 - Challange\n3 - Pass turn\n0 - Quit game", in)).equals("0")) {
+        while (!(key = pressEnter("PRESS:\n1 - Try place word\n2 - Challange\n3 - Pass turn\n0 - Quit game", in))
+                .equals("0")) {
             if (key.equals("1")) {
                 String[] line = pressEnter("ENTER WORD LETTERS AND ROW & COL & isVertical: ", in).split(" ");
                 int row = Integer.parseInt(line[1]);
@@ -52,10 +52,11 @@ public class main_guest {
                 Boolean isVer = line[3].equals("t") ? true : false;
                 char[] c = line[0].toCharArray();
                 Tile[] tiles = new Tile[c.length];
-                for (int i=0;i<c.length;i++){
-                    if (c[i] == '_') tiles[i] = null;
-                    for(Tile t : gm.getPlayerProperties().getMyHandTiles()){
-                        if (t.getLetter() == c[i]){
+                for (int i = 0; i < c.length; i++) {
+                    if (c[i] == '_')
+                        tiles[i] = null;
+                    for (Tile t : gm.getPlayerProperties().getMyHandTiles()) {
+                        if (t.getLetter() == c[i]) {
                             tiles[i] = t;
                         }
                     }

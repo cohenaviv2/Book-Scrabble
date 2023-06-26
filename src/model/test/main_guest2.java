@@ -1,4 +1,4 @@
-package model;
+package model.test;
 
 import java.io.*;
 import java.util.*;
@@ -38,7 +38,7 @@ public class main_guest2 {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
-            gm.myBookChoice("Harray Potter.txt");
+            gm.myBookChoice("Moby-Dick");
             gm.ready();
 
         }

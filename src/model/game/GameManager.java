@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import model.game.Tile.Bag;
+import view_model.MessageReader;
 
 /*
  * The Game Manager maintains the game board, the bag of tiles, the books
@@ -230,6 +231,7 @@ public class GameManager extends Observable {
         if (readyToPlay.incrementAndGet() == totalPlayersNum) {
             // PRINT DEBUG
             System.out.println("Game Manager: ALL PLAYERS ARE READY TO PLAY! draw tiles...\n");
+
             turnManager.drawTiles();
         }
     }
@@ -357,6 +359,8 @@ public class GameManager extends Observable {
             Player player = getPlayerByID(id);
             int score = gameBoard.tryPlaceWord(queryWord);
             if (score == -1) {
+                setChanged();
+                notifyObservers();
                 return "notBoardLegal";
             } else if (score == 0) {
                 // some word that was made is not dictionary legal
@@ -380,7 +384,6 @@ public class GameManager extends Observable {
                 turnManager.nextTurn();
 
                 String playerScore = String.valueOf(score);
-
                 return playerScore;
             }
 
@@ -434,7 +437,6 @@ public class GameManager extends Observable {
                 this.turnManager.nextTurn();
 
                 String playerScore = String.valueOf(score);
-
                 return playerScore;
 
             } else if (answer.equals("false")) {
@@ -452,7 +454,6 @@ public class GameManager extends Observable {
                 notifyObservers("updateAll");
 
                 this.turnManager.nextTurn();
-
                 return "skipTurn";
             } else {
                 return "false";
@@ -464,7 +465,9 @@ public class GameManager extends Observable {
 
     protected boolean dictionaryLegal(Word word) {
         /* ask the game server */
-
+        //
+        System.out.println("Dic Word - " + word);
+        //
         String queryWord = gameBoard.wordToString(word);
 
         try {
@@ -650,11 +653,6 @@ public class GameManager extends Observable {
         System.out.println("done");
     }
 
-    public void close() {
-        this.turnManager.close();
-
-    }
-
     public class TurnManager {
 
         /*
@@ -707,8 +705,6 @@ public class GameManager extends Observable {
                 p.getMyHandTiles().add(0, t);
             }
 
-            System.out.println(gameBag.size());
-
             // Sort tiles
             List<Player> players = playersByID.values().stream().sorted((p1, p2) -> {
                 Tile t1 = p1.getMyHandTiles().get(0);
@@ -716,6 +712,7 @@ public class GameManager extends Observable {
                 return t1.getLetter() - t2.getLetter();
             }).collect(Collectors.toList());
 
+            String turnMessage = "";
             // int firstPlayerId = 0;
             System.out.println("Turn Manager: players turn indexes :\n##########################");
             // Set turn indexes, first player turn, and put tiles back to the bag
@@ -729,15 +726,15 @@ public class GameManager extends Observable {
                 Tile myTile = p.getMyHandTiles().get(0);
                 p.setTurnIndex(i);
                 System.out.println(p.getName() + " - " + i + " (" + myTile.getLetter() + ")");
+                turnMessage += p.getName() + " " + i + "\n";
                 gameBag.put(myTile);
-                System.out.println(gameBag.size());
-
                 p.getMyHandTiles().remove(0);
                 turnManager.pullTiles(p.getID());
             }
             System.out.println();
 
             setCurrentTurnIndex(0);
+            MessageReader.setMsg(turnMessage);
             setChanged();
             notifyObservers();
         }
@@ -753,6 +750,7 @@ public class GameManager extends Observable {
 
             oldPlayer.setMyTurn(false);
             nextPlayer.setMyTurn(true);
+            MessageReader.setMsg("Its "+nextPlayer.getName()+" turn now");
             setCurrentTurnIndex(j);
             setChanged();
             notifyObservers();
