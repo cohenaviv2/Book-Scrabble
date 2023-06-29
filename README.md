@@ -8,8 +8,7 @@ Immerse yourself in the world of Book Scrabble with this Java-based desktop appl
 - [Team Division & GANNT](#team-division--gantt)
 
 ## Video Links
-- [Demo]()
-- [Presentation]()
+- [Presentationv(including demo video)](https://www.youtube.com/watch?v=_trNdM3s-Rk)
 
 ## Overview
 BookScrabble is a classic board game where players aim to score points by creating words on a grid-based game board using letter tiles. Each tile has a specific point value, and the objective is to strategically place tiles to form words and maximize the score.
@@ -86,5 +85,3 @@ A legal word must meet all the following conditions:
 - [Matan Eliyahu](https://github.com/Matan-Eliyahu)
 - [Moshe Azachi](https://github.com/MosheAzachi)
 
-## Demo link
-- https://youtu.be/Axu6ROsOI-mU
