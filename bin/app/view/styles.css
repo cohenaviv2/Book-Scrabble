@@ -1,0 +1,9 @@
+.game-grid {
+    -fx-background-image: url('resources/boardImg.png');
+    -fx-background-size: cover;
+}
+.root {
+    -fx-background-image: url('resources/wood.jpg');
+    -fx-background-repeat: no-repeat;
+    -fx-background-size: cover;
+}

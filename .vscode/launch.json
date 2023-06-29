@@ -6,6 +6,55 @@
     "configurations": [
         {
             "type": "java",
+            "name": "GameManager",
+            "request": "launch",
+            "mainClass": "app.model.game.GameManager",
+            "projectName": "Book Scrabble_c0c2c55d"
+        },
+        {
+            "type": "java",
+            "name": "RunGameServer",
+            "request": "launch",
+            "mainClass": "app.view.RunGameServer",
+            "projectName": "Book Scrabble_c0c2c55d"
+        },
+        {
+            "type": "java",
+            "name": "main_guest",
+            "request": "launch",
+            "mainClass": "app.model.test.main_guest",
+            "projectName": "Book Scrabble_c0c2c55d"
+        },
+        {
+            "type": "java",
+            "name": "main_host",
+            "request": "launch",
+            "mainClass": "app.model.test.main_host",
+            "projectName": "Book Scrabble_c0c2c55d"
+        },
+        {
+            "type": "java",
+            "name": "Main",
+            "request": "launch",
+            "mainClass": "app.view.Main",
+            "projectName": "Book Scrabble_c0c2c55d"
+        },
+        {
+            "type": "java",
+            "name": "Main",
+            "request": "launch",
+            "mainClass": "app.view_model.Main",
+            "projectName": "Book Scrabble_c0c2c55d"
+        },
+        {
+            "type": "java",
+            "name": "Main",
+            "request": "launch",
+            "mainClass": "view_model.Main",
+            "projectName": "Book Scrabble_c0c2c55d"
+        },
+        {
+            "type": "java",
             "name": "RunGameServer",
             "request": "launch",
             "mainClass": "view.RunGameServer",
