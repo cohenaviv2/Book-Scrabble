@@ -78,7 +78,7 @@ A legal word must meet all the following conditions:
 - Does not produce other illegal words on the board.
 
 ## Team Division & GANTT
-<img src="https://github.com/cohenaviv2/Book-Scrabble/blob/main-master/src/resources/workDivision.png" alt="WorkDivision" width="1100px" height="500px">
+<img src="https://github.com/cohenaviv2/Book-Scrabble/blob/main-model/src/resources/workDivision.png" alt="WorkDivision" width="1100px" height="500px">
 <img src="https://github.com/Matan-Eliyahu/BookScrabble/blob/master/Readme%20images/GANTT.png" alt="GANTT" width="1100px" height="500px">
 
 ## Credits
