@@ -81,7 +81,7 @@ A legal word must meet all the following conditions:
 <img src="https://github.com/Matan-Eliyahu/BookScrabble/blob/master/Readme%20images/GANTT.png" alt="GANTT" width="1100px" height="500px">
 
 ## Credits
-- Game Development: [Aviv Cohen](https://github.com/cohenaviv2)
+- [Aviv Cohen](https://github.com/cohenaviv2)
 
 ## Demo link
 - https://www.youtube.com/watch?v=_trNdM3s-Rk
