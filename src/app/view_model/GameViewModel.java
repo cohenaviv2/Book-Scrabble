@@ -63,7 +63,7 @@ public class GameViewModel extends Observable implements Observer {
     }
 
     public void myBookChoice(String bookName) {
-        gameModel.myBookChoice(bookName);
+        gameModel.myBooksChoice(bookName);
     }
 
     public void ready() {

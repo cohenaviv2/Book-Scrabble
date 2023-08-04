@@ -22,7 +22,7 @@ public class GameManager extends Observable {
 
     private static GameManager gm = null; // Singleton
 
-    // Game:
+    // Game
     private Board gameBoard;
     private Bag gameBag;
 
@@ -34,7 +34,7 @@ public class GameManager extends Observable {
     private Map<String, String> fullBookList;
     private StringBuilder gameBooks;
 
-    // Participants:
+    // Participants
     private Player hostPlayer;
     private Map<Integer, Player> playersByID;
     private Map<String, Player> playersByName;

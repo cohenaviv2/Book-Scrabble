@@ -17,7 +17,7 @@ public interface GameModel{
     // SEND DATA
     void connectMe(String name, String ip, int port) throws IOException;
 
-    void myBookChoice(String bookName);
+    void myBooksChoice(String bookName);
 
     void ready();
     

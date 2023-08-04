@@ -38,7 +38,7 @@ public class main_guest {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
-            gm.myBookChoice("Harray Potter");
+            gm.myBooksChoice("Harray Potter");
             gm.ready();
         }
 

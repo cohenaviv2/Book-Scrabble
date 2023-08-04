@@ -1,9 +1,7 @@
-.game-grid {
-    -fx-background-image: url('resources/boardImg.png');
-    -fx-background-size: cover;
-}
-.root {
-    -fx-background-image: url('resources/wood.jpg');
-    -fx-background-repeat: no-repeat;
-    -fx-background-size: cover;
+/* Custom title bar styling */
+.title-bar {
+    -fx-background-color: #3498db; /* Use your desired color */
+    -fx-padding: 5px;
+    -fx-border-width: 0 0 2px 0;
+    -fx-border-color: #2980b9; /* Use a slightly darker shade of your background color */
 }

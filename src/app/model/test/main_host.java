@@ -38,7 +38,7 @@ public class main_host {
         if (pressEnter("PRESS ENTER TO CONNECT", in).equals("")) {
 
             hm.connectMe("Aviv", "localhost", 11224); // to local game server
-            hm.myBookChoice("Alice in Wonderland");
+            hm.myBooksChoice("Alice in Wonderland");
             hm.ready();
         }
 

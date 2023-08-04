@@ -17,7 +17,7 @@ public class ViewModelTest {
         es.execute(() -> {
             hm.setNumOfPlayers(2);
             hm.connectMe("Aviv", "localhost", 11224);
-            hm.myBookChoice("Alice in Wonderland");
+            hm.myBooksChoice("Alice in Wonderland");
             hm.ready();
         });
         // Set guest view-model

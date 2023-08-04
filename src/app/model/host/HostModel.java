@@ -64,7 +64,7 @@ public class HostModel extends Observable implements GameModel, Observer {
     }
 
     @Override
-    public void myBookChoice(String bookName) {
+    public void myBooksChoice(String bookName) {
         /*
          * Adds this book to the book list of the game
          * each player chooses one book (Maximum 4)

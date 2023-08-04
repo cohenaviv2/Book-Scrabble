@@ -41,7 +41,7 @@ public class GuestModel extends Observable implements GameModel {
     }
 
     @Override
-    public void myBookChoice(String bookName) {
+    public void myBooksChoice(String bookName) {
         commHandler.addMyBookChoice(bookName);
     }
 
