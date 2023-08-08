@@ -6,6 +6,62 @@
     "configurations": [
         {
             "type": "java",
+            "name": "RunGameServer",
+            "request": "launch",
+            "mainClass": "app.view.RunGameServer",
+            "projectName": "MyJavaFXApp"
+        },
+        {
+            "type": "java",
+            "name": "LogicTest",
+            "request": "launch",
+            "mainClass": "app.model.test.LogicTest",
+            "projectName": "MyJavaFXApp"
+        },
+        {
+            "type": "java",
+            "name": "ServerTest",
+            "request": "launch",
+            "mainClass": "app.model.test.ServerTest",
+            "projectName": "MyJavaFXApp"
+        },
+        {
+            "type": "java",
+            "name": "CacheTest",
+            "request": "launch",
+            "mainClass": "app.model.test.CacheTest",
+            "projectName": "MyJavaFXApp"
+        },
+        {
+            "type": "java",
+            "name": "GameManager",
+            "request": "launch",
+            "mainClass": "app.model.game.GameManager",
+            "projectName": "MyJavaFXApp"
+        },
+        {
+            "type": "java",
+            "name": "main_guest",
+            "request": "launch",
+            "mainClass": "app.model.test.main_guest",
+            "projectName": "MyJavaFXApp"
+        },
+        {
+            "type": "java",
+            "name": "main_host",
+            "request": "launch",
+            "mainClass": "app.model.test.main_host",
+            "projectName": "MyJavaFXApp"
+        },
+        {
+            "type": "java",
+            "name": "Main",
+            "request": "launch",
+            "mainClass": "com.example.Main",
+            "projectName": "MyJavaFXApp"
+        },
+        {
+            "type": "java",
             "name": "GameManager",
             "request": "launch",
             "mainClass": "app.model.game.GameManager",
