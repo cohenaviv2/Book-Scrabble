@@ -15,6 +15,7 @@ import java.util.concurrent.*;
  */
 
  public class MyServerParallel {
+    public ServerSocket theServer;
     private final int port;
     private final ClientHandler ch;
     private volatile boolean stop;
@@ -39,7 +40,7 @@ import java.util.concurrent.*;
 
     private void runServer() throws Exception {
         try {
-            ServerSocket theServer = new ServerSocket(this.port);
+            theServer = new ServerSocket(this.port);
             theServer.setSoTimeout(1000); // 1sec
 
             ExecutorService executorService = Executors.newFixedThreadPool(THREAD_POOL_SIZE);

@@ -15,7 +15,7 @@ import javafx.scene.control.Button;
 
 public class GameViewModel extends Observable implements Observer {
 
-    private GameModel gameModel;
+    public GameModel gameModel;
 
     private ObservableValue<String> myNameView;
     private ObservableValue<String> myScoreView;

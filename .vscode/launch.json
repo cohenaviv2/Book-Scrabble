@@ -6,6 +6,20 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Main",
+            "request": "launch",
+            "mainClass": "app.view.Main",
+            "projectName": "BookScrableApp"
+        },
+        {
+            "type": "java",
+            "name": "Main",
+            "request": "launch",
+            "mainClass": "app.view.Main",
+            "projectName": "MyJavaFXApp"
+        },
+        {
+            "type": "java",
             "name": "RunGameServer",
             "request": "launch",
             "mainClass": "app.view.RunGameServer",

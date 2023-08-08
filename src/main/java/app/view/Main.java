@@ -3,6 +3,7 @@ package app.view;
 import java.util.*;
 
 import app.model.game.Tile;
+import app.model.host.HostModel;
 import app.view_model.GameViewModel;
 import app.view_model.MessageReader;
 import javafx.beans.binding.*;
@@ -112,8 +113,10 @@ public class Main extends Application implements Observer {
                 System.exit(0);
             });
         } else {
-            closeButton.setOnAction(event -> System.exit(0));
-
+            closeButton.setOnAction(event -> {
+                if(MODE=="H") HostModel.get().stopHostServer();
+                System.exit(0);
+            });
         }
         Button minimizeButton = new Button("_");
         minimizeButton.setStyle(greenButton);

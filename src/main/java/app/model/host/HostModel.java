@@ -12,7 +12,7 @@ public class HostModel extends Observable implements GameModel, Observer {
 
     private static HostModel hm = null; // Singleton
     private static final int HOST_PORT = 8040;
-    private MyServerParallel hostServer; // Host server - support connection of up to 3 guests parallel
+    public MyServerParallel hostServer; // Host server - support connection of up to 3 guests parallel
     private GameManager gameManager; // game manager contains all the game data and logic
     private PlayerProperties playerProperties; // All player properties for the game view
 
@@ -28,6 +28,10 @@ public class HostModel extends Observable implements GameModel, Observer {
         if (hm == null)
             hm = new HostModel();
         return hm;
+    }
+
+    public void stopHostServer(){
+        hostServer.close();
     }
 
     public void setNumOfPlayers(int numOftotalPlayers) {
