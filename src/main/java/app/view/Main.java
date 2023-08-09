@@ -30,29 +30,7 @@ public class Main extends Application implements Observer {
     private String myName;
     private String MODE;
     String msg = MessageReader.getMsg();
-    private Image boardImg = new Image(ClassLoader.getSystemResourceAsStream("board.png"));
-    BackgroundImage boardBackgroundImage = new BackgroundImage(
-            new Image(ClassLoader.getSystemResourceAsStream("board.png")),
-            BackgroundRepeat.NO_REPEAT,
-            BackgroundRepeat.NO_REPEAT,
-            BackgroundPosition.DEFAULT,
-            BackgroundSize.DEFAULT);
-    Background boradBackground = new Background(boardBackgroundImage);
-    BackgroundImage woodBackgroundImage = new BackgroundImage(
-            new Image(ClassLoader.getSystemResourceAsStream("wood4.jpg")),
-            BackgroundRepeat.NO_REPEAT,
-            BackgroundRepeat.NO_REPEAT,
-            BackgroundPosition.DEFAULT,
-            new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, true));
-    Background woodBackground = new Background(woodBackgroundImage);
-
-    BackgroundImage nightSkyBackgroundImage = new BackgroundImage(
-            new Image(ClassLoader.getSystemResourceAsStream("night sky.jpg")),
-            BackgroundRepeat.NO_REPEAT,
-            BackgroundRepeat.NO_REPEAT,
-            BackgroundPosition.DEFAULT,
-            new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, true));
-    Background nightSkyBackground = new Background(nightSkyBackgroundImage);
+  
 
     private Scene gameFlowScene;
     private List<String> selectedBooks = new ArrayList<>();
@@ -62,49 +40,35 @@ public class Main extends Application implements Observer {
     private ObservableList<Button> tileButtons;
     private boolean cellSelected = false;
 
+    String CSS_STYLESHEET = getClass().getResource("/style.css").toExternalForm();
+
     private double xOffset = 0;
     private double yOffset = 0;
-    HBox titleBar;
+    HBox osBar;
 
-    //
-    String blueButton = "-fx-font-size: 20px; -fx-font-weight: bold; -fx-background-color: linear-gradient(darkblue, grey), blue; -fx-background-radius: 10; -fx-text-fill: white; -fx-effect: dropshadow( one-pass-box , black , 8 , 0.0 , 2 , 0 );";
-    String blueButtonHover = "-fx-font-size: 20px; -fx-font-weight: bold; -fx-background-color: linear-gradient(blue, grey), navy; -fx-background-radius: 10; -fx-text-fill: white; -fx-effect: dropshadow( one-pass-box , black , 8 , 0.0 , 2 , 0 );";
-    String yellowButton = "-fx-font-size: 20px; -fx-font-weight: bold; -fx-background-color: linear-gradient(orange, grey), gold; -fx-background-radius: 10; -fx-text-fill: white; -fx-effect: dropshadow( one-pass-box , black , 8 , 0.0 , 2 , 0 );";
-    String yellowButtonHover = "-fx-font-size: 20px; -fx-font-weight: bold; -fx-background-color: linear-gradient(gold, grey), orange; -fx-background-radius: 10; -fx-text-fill: white; -fx-effect: dropshadow( one-pass-box , black , 8 , 0.0 , 2 , 0 );";
-    String greenButton = "-fx-font-size: 20px; -fx-font-weight: bold; -fx-background-color: linear-gradient(green, grey), limegreen; -fx-background-radius: 10; -fx-text-fill: white; -fx-effect: dropshadow( one-pass-box , black , 8 , 0.0 , 2 , 0 );";
-    String greenButtonHover = "-fx-font-size: 20px; -fx-font-weight: bold; -fx-background-color: linear-gradient(darkgreen, grey), green; -fx-background-radius: 10; -fx-text-fill: white; -fx-effect: dropshadow( one-pass-box , black , 8 , 0.0 , 2 , 0 );";
-    String redButton = "-fx-font-size: 20px; -fx-font-weight: bold; -fx-background-color: linear-gradient(red, grey), crimson; -fx-background-radius: 10; -fx-text-fill: white; -fx-effect: dropshadow( one-pass-box , black , 8 , 0.0 , 2 , 0 );";
-    String redButtonHover = "-fx-font-size: 20px; -fx-font-weight: bold; -fx-background-color: linear-gradient(firebrick, grey), red; -fx-background-radius: 10; -fx-text-fill: white; -fx-effect: dropshadow( one-pass-box , black , 8 , 0.0 , 2 , 0 );";
-    String greyButton = "-fx-font-size: 20px; -fx-font-weight: bold; -fx-background-color: linear-gradient(silver, grey), grey; -fx-background-radius: 40; -fx-text-fill: white; -fx-effect: dropshadow( one-pass-box , black , 8 , 0.0 , 2 , 0 );";
-    String greyButtonHover = "-fx-font-size: 20px; -fx-font-weight: bold; -fx-background-color: linear-gradient(darkgray, grey), cadetblue; -fx-background-radius: 40; -fx-text-fill: white; -fx-effect: dropshadow( one-pass-box , black , 8 , 0.0 , 2 , 0 );";
-    String purpleButton = "-fx-font-size: 20px; -fx-font-weight: bold; -fx-background-color: linear-gradient(darkslateblue, grey), darkorchid; -fx-background-radius: 40; -fx-text-fill: white; -fx-effect: dropshadow( one-pass-box , black , 8 , 0.0 , 2 , 0 );";
-    String purpleButtonHover = "-fx-font-size: 20px; -fx-font-weight: bold; -fx-background-color: linear-gradient(darkviolet, grey), indigo; -fx-background-radius: 40; -fx-text-fill: white; -fx-effect: dropshadow( one-pass-box , black , 8 , 0.0 , 2 , 0 );";
-    //
-    String textFieldStyle = "-fx-background-radius: 10px; -fx-background-color: burlywood; -fx-text-fill: black; -fx-font-size: 25px; -fx-font-weight: bold";
-
+    
     private void handleMouseDragged(MouseEvent event) {
-        Stage stage = (Stage) titleBar.getScene().getWindow();
+        Stage stage = (Stage) osBar.getScene().getWindow();
         stage.setX(event.getScreenX() - xOffset);
         stage.setY(event.getScreenY() - yOffset);
     }
 
     private void handleMousePressed(MouseEvent event) {
-        Stage stage = (Stage) titleBar.getScene().getWindow();
+        Stage stage = (Stage) osBar.getScene().getWindow();
 
         xOffset = event.getScreenX() - stage.getX();
         yOffset = event.getScreenY() - stage.getY();
     }
 
-    HBox createBar(Boolean gameIsRunning) {
-        titleBar = new HBox();
-        titleBar.setSpacing(10);
-        titleBar.setStyle("-fx-background-color: transparent;");
-        titleBar.setMinHeight(30);
+    HBox createOsBar(Boolean gameIsRunning) {
+        osBar = new HBox();
+        osBar.setSpacing(10);
+        osBar.getStyleClass().add("os-bar");
+        osBar.setMinHeight(30);
 
-        Button closeButton = new Button("X");
-        closeButton.setStyle(redButton);
-        closeButton.setOnMouseEntered(e -> closeButton.setStyle(redButtonHover));
-        closeButton.setOnMouseExited(e -> closeButton.setStyle(redButton));
+        Button closeButton = new Button("\u2718");
+        closeButton.getStyleClass().add("red-button");
+
         if (gameIsRunning) {
             closeButton.setOnAction(event -> {
                 this.gameViewModel.quitGame();
@@ -114,24 +78,25 @@ public class Main extends Application implements Observer {
             });
         } else {
             closeButton.setOnAction(event -> {
-                if(MODE=="H") HostModel.get().stopHostServer();
+                if (MODE == "H")
+                    HostModel.get().stopHostServer();
                 System.exit(0);
             });
         }
+
         Button minimizeButton = new Button("_");
-        minimizeButton.setStyle(greenButton);
-        minimizeButton.setOnMouseEntered(e -> minimizeButton.setStyle(greenButtonHover));
-        minimizeButton.setOnMouseExited(e -> minimizeButton.setStyle(greenButton));
+        minimizeButton.getStyleClass().add("green-button");
+
         minimizeButton.setOnAction(event -> {
             Stage stage = (Stage) minimizeButton.getScene().getWindow();
             stage.setIconified(true);
         });
 
-        titleBar.getChildren().addAll(closeButton, minimizeButton);
-        titleBar.setOnMousePressed(this::handleMousePressed);
-        titleBar.setOnMouseDragged(this::handleMouseDragged);
+        osBar.getChildren().addAll(closeButton, minimizeButton);
+        osBar.setOnMousePressed(this::handleMousePressed);
+        osBar.setOnMouseDragged(this::handleMouseDragged);
 
-        return titleBar;
+        return osBar;
     }
 
     @Override
@@ -139,21 +104,14 @@ public class Main extends Application implements Observer {
 
         this.primaryStage = primaryStage;
 
-        Button closeButton = new Button("X");
-        closeButton.setStyle(redButton);
-        closeButton.setOnMouseEntered(e -> closeButton.setStyle(redButtonHover));
-        closeButton.setOnMouseExited(e -> closeButton.setStyle(redButton));
-        closeButton.setOnAction(event -> System.exit(0));
-
-        BorderPane customRoot = new BorderPane();
-        customRoot.setTop(closeButton);
-
         this.gameViewModel = new GameViewModel();
         gameViewModel.addObserver(this);
 
         // Create the first window with Host and Guest buttons
         VBox initialWindowBox = createInitialWindow();
         Scene initialWindowScene = new Scene(initialWindowBox, 600, 480);
+        initialWindowBox.setCursor(Cursor.HAND);
+        initialWindowBox.getStylesheets().add(CSS_STYLESHEET);
 
         // Set up the primaryStage
         primaryStage.setTitle("Book Scrabble");
@@ -162,7 +120,7 @@ public class Main extends Application implements Observer {
         primaryStage.show();
     }
 
-    private void openCustomWindow(String text) {
+    private void openCustomWindow(String content) {
         Stage customStage = new Stage();
         customStage.initStyle(StageStyle.UNDECORATED);
 
@@ -181,28 +139,28 @@ public class Main extends Application implements Observer {
         customStage.setX(customStageX);
         customStage.setY(customStageY);
 
-        Label contentLabel = new Label(text);
-        contentLabel.setStyle("-fx-font-weight: bold;");
+        Label contentLabel = new Label(content);
+        contentLabel.getStyleClass().add("content-label");
+
         Button closeButton = new Button("X");
-        closeButton.setStyle(redButton);
-        closeButton.setOnMouseEntered(e -> closeButton.setStyle(redButtonHover));
-        closeButton.setOnMouseExited(e -> closeButton.setStyle(redButton));
+        closeButton.getStyleClass().add("red-button");
         closeButton.setOnAction(event -> customStage.close());
 
         StackPane topPane = new StackPane(closeButton);
         BorderPane.setAlignment(topPane, Pos.TOP_CENTER);
-        topPane.setPadding(new Insets(10, 0, 0, 0)); // Add padding to the top
+        topPane.setPadding(new Insets(40, 0, 0, 0)); // Add padding to the top
 
         VBox centerContent = new VBox(10, contentLabel);
         centerContent.setAlignment(Pos.CENTER);
-        centerContent.setCursor(Cursor.HAND);
 
         BorderPane customRoot = new BorderPane();
-        customRoot.setStyle("-fx-background-color: burlywood;");
+        customRoot.getStyleClass().add("content-background");
         customRoot.setTop(topPane);
         customRoot.setCenter(centerContent);
 
-        Scene customScene = new Scene(customRoot, 500, 350);
+        Scene customScene = new Scene(customRoot, customStageWidth, customStageHeight);
+        customScene.getStylesheets().add(CSS_STYLESHEET);
+        customScene.setCursor(Cursor.HAND);
         customStage.setScene(customScene);
         customStage.show();
     }
@@ -211,54 +169,31 @@ public class Main extends Application implements Observer {
         VBox initialWindowBox = new VBox(10);
         initialWindowBox.setPadding(new Insets(20));
         initialWindowBox.setAlignment(Pos.CENTER);
-        initialWindowBox.setBackground(woodBackground);
-        initialWindowBox.setCursor(Cursor.HAND);
+        initialWindowBox.getStyleClass().add("wood-background");
 
         // Styled header label
         Label headerLabel = new Label("Book Scrabble");
-        headerLabel.setStyle(
-                "-fx-font-size: 55px; -fx-text-fill: antiquewhite; -fx-font-weight: bold; -fx-font-family: 'Comic Sans MS'; -fx-padding: 10px; -fx-effect: dropshadow(gaussian, black, 20, 0, 2, 6);");
+        headerLabel.getStyleClass().add("book-scrabble-header");
 
         Label modeLabel = new Label("Choose Game Mode");
-        modeLabel.setStyle("-fx-font-size: 16px; -fx-padding: 5px; " +
-                "-fx-text-fill: gainsboro; -fx-effect: dropshadow(gaussian, #000000, 20, 0, 2,6);");
+        modeLabel.getStyleClass().add("mode-label");
+
         // Button pane
         HBox buttonPane = new HBox(10);
         buttonPane.setAlignment(Pos.CENTER);
 
         Button hostButton = new Button("Host Mode");
-        hostButton.setStyle(redButton);
+        hostButton.getStyleClass().add("red-button");
         hostButton.setPrefSize(200, 80);
 
         Button guestButton = new Button("Guest Mode");
-        guestButton.setStyle(blueButton);
+        guestButton.getStyleClass().add("blue-button");
         guestButton.setPrefSize(200, 80);
-
-        // Apply some additional styling to the buttons
-        hostButton.setOnMouseEntered(event -> hostButton.setStyle(redButtonHover));
-        hostButton.setOnMouseExited(event -> hostButton.setStyle(redButton));
-        guestButton.setOnMouseEntered(event -> guestButton.setStyle(blueButtonHover));
-        guestButton.setOnMouseExited(event -> guestButton.setStyle(blueButton));
 
         buttonPane.getChildren().addAll(hostButton, guestButton);
 
-        // TitledPane for the collapsible section
-
-        TitledPane titledPane = new TitledPane();
-        titledPane.setText("\u2753");
-        titledPane.setStyle(purpleButton);
-        titledPane.setExpanded(false);
-
-        Label explanationContentLabel = new Label(
-                "In Host Mode, you can host a game for up to 4 players, including yourself.\nAs the host, you run a server and send data to the guests.\nYou can also send word queries to the game server.\n\nIn Guest Mode, you join an existing game hosted by another player.\nAs a guest, you connect to the host's server and participate as\none of the players.\nGuest mode allows you to enjoy the multiplayer experience\nwithout hosting the game.");
-        explanationContentLabel.setStyle("-fx-font-size: 15px; -fx-text-fill: black;");
-
-        titledPane.setContent(explanationContentLabel);
-
         Button helpButton = new Button("\u2753");
-        helpButton.setStyle(purpleButton);
-        helpButton.setOnMouseEntered(e -> helpButton.setStyle(purpleButtonHover));
-        helpButton.setOnMouseExited(e -> helpButton.setStyle(purpleButton));
+        helpButton.getStyleClass().add("purple-button");
         helpButton.setOnAction(e -> openCustomWindow(
                 "In Host Mode, you can host a game for up to 4 players,\nincluding yourself.\nAs the host, you run a server and send data to the guests.\nYou can also send word queries to the game server.\n\nIn Guest Mode, you join an existing game hosted by another player.\nAs a guest, you connect to the host's server and participate as\none of the players.\nGuest mode allows you to enjoy the multiplayer experience\nwithout hosting the game."));
 
@@ -278,7 +213,7 @@ public class Main extends Application implements Observer {
         Label justLabel = new Label("");
         Label justLabel2 = new Label("");
 
-        HBox bar = createBar(false);
+        HBox bar = createOsBar(false);
         initialWindowBox.getChildren().addAll(bar, headerLabel, justLabel, modeLabel, buttonPane, justLabel2,
                 helpButton);
         return initialWindowBox;
@@ -291,8 +226,7 @@ public class Main extends Application implements Observer {
 
         VBox rootContainer = new VBox(40);
         rootContainer.setPadding(new Insets(10));
-        rootContainer.setBackground(woodBackground);
-        rootContainer.setCursor(Cursor.HAND);
+        rootContainer.getStyleClass().add("wood-background");
 
         ScrollPane scrollPane = new ScrollPane();
         scrollPane.setFitToWidth(true);
@@ -300,7 +234,7 @@ public class Main extends Application implements Observer {
         scrollPane.setStyle("-fx-background-color: black;");
 
         FlowPane bookContainer = new FlowPane(40, 40);
-        bookContainer.setBackground(nightSkyBackground);
+        bookContainer.getStyleClass().add("night-sky-background");
         bookContainer.setAlignment(Pos.CENTER);
         bookContainer.setPadding(new Insets(80));
 
@@ -315,7 +249,7 @@ public class Main extends Application implements Observer {
 
             Label bookLabel = new Label(book);
             bookLabel.setAlignment(Pos.CENTER);
-            bookLabel.setStyle("-fx-effect: dropshadow(gaussian, black, 8, 1, 0, 1);");
+            bookLabel.getStyleClass().add("book-label");
             bookLabel.setTextFill(Color.WHITE);
 
             bookBox.getChildren().addAll(imageView, bookLabel);
@@ -323,12 +257,12 @@ public class Main extends Application implements Observer {
             bookBox.setOnMouseClicked(event -> {
                 if (selectedBooks.contains(book)) {
                     selectedBooks.remove(book);
-                    imageView.setStyle("");
+                    imageView.getStyleClass().remove("selected-book-image");
                     MYBOOK = null;
                 } else {
                     selectedBooks.add(book);
                     MYBOOK = book;
-                    imageView.setStyle("-fx-effect: dropshadow(gaussian, gold, 7, 1, 0, 1);");
+                    imageView.getStyleClass().add("selected-book-image");
                 }
             });
 
@@ -337,13 +271,13 @@ public class Main extends Application implements Observer {
 
         scrollPane.setContent(bookContainer);
 
+        HBox buttonPane = new HBox();
+        buttonPane.setAlignment(Pos.CENTER);
+
         Button nextButton = new Button("Done");
-        nextButton.setAlignment(Pos.CENTER);
-        nextButton.setStyle(greenButton);
+        nextButton.getStyleClass().add("green-button");
         nextButton.setPrefHeight(60);
         nextButton.setPrefWidth(120);
-        nextButton.setOnMouseEntered(e -> nextButton.setStyle(greenButtonHover));
-        nextButton.setOnMouseExited(e -> nextButton.setStyle(greenButton));
         nextButton.setOnAction(event -> {
             // Handle the action with the selected books
             // e.g., pass the selectedBooks list to the next screen or perform an action
@@ -351,11 +285,14 @@ public class Main extends Application implements Observer {
             bookSelectionStage.close();
         });
 
-        rootContainer.getChildren().addAll(scrollPane, nextButton);
-        VBox.setVgrow(scrollPane, Priority.ALWAYS);
+        buttonPane.getChildren().add(nextButton);
 
-        Scene scene = new Scene(rootContainer, 900, 700);
-        bookSelectionStage.setScene(scene);
+        rootContainer.getChildren().addAll(scrollPane, buttonPane);
+        // VBox.setVgrow(scrollPane, Priority.ALWAYS);
+        Scene bookSelectionScene = new Scene(rootContainer, 900, 700);
+        bookSelectionScene.getStylesheets().add(CSS_STYLESHEET);
+        bookSelectionScene.setCursor(Cursor.HAND);
+        bookSelectionStage.setScene(bookSelectionScene);
         bookSelectionStage.show();
     }
 
@@ -364,58 +301,53 @@ public class Main extends Application implements Observer {
         loginFormBox.setPadding(new Insets(20));
         loginFormBox.setAlignment(Pos.CENTER);
         loginFormBox.setSpacing(22);
-        loginFormBox.setBackground(woodBackground);
-        loginFormBox.setCursor(Cursor.HAND);
+        loginFormBox.getStyleClass().add("wood-background");
 
+        // My name
+        Label nameLabel = new Label("My name:");
+        nameLabel.getStyleClass().add("login-label");
+        TextField nameTextField = new TextField();
+        //
+        nameTextField.setText("Aviv");
+        //
+        nameTextField.setAlignment(Pos.CENTER);
+        nameTextField.setMaxWidth(200);
+        nameTextField.getStyleClass().add("text-field");
+
+        // Number of players
         Label numOfPlayersLabel = new Label("Number of Players:");
-        numOfPlayersLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: gainsboro;");
+        numOfPlayersLabel.getStyleClass().add("login-label");
         ComboBox<Integer> numOfPlayersComboBox = new ComboBox<>();
         numOfPlayersComboBox.setValue(2);
         numOfPlayersComboBox.getItems().addAll(2, 3, 4);
-        numOfPlayersComboBox.setStyle(textFieldStyle);
+        numOfPlayersComboBox.getStyleClass().add("text-field");
 
-        Label nameLabel = new Label("My name:");
-        nameLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: gainsboro;");
-        TextField nameTextField = new TextField();
-        nameTextField.setText("Aviv");
-        nameTextField.setAlignment(Pos.CENTER);
-        nameTextField.setMaxWidth(200);
-        nameTextField.setStyle(textFieldStyle);
-        // nameTextField.setText("Aviv");
+        // Select books
+        Label selectBookLabel = new Label("Select a Book:");
+        selectBookLabel.getStyleClass().add("login-label");
+        Button booksButton = new Button("Select Books");
+        booksButton.getStyleClass().add("red-button");
+        booksButton.setOnAction(e -> showBookSelectionWindow());
 
-        Label gameServerlabel = new Label("Game server is running localy on port 11224");
+        // game server label
+        Label gameServerlabel = new Label("Game server is uploaded and powered by Oracle Cloud,\nUnubtu 22.04 VM");
+        gameServerlabel.setPrefHeight(80);
         gameServerlabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: gold;");
 
         Label waintingLabel = new Label("");
 
-        Label selectBookLabel = new Label("Select a Book:");
-        selectBookLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: gainsboro;");
-        ListView<String> bookListView = new ListView<>(GameViewModel.getBookList());
-
+        // Next button
         Button nextButton = new Button("Next");
-        nextButton.setStyle(blueButton);
+        nextButton.getStyleClass().add("blue-button");
         nextButton.setPrefHeight(60);
         nextButton.setPrefWidth(120);
-        nextButton.setOnMouseEntered(e -> nextButton.setStyle(blueButtonHover));
-        nextButton.setOnMouseExited(e -> nextButton.setStyle(blueButton));
-
-        Button booksButton = new Button("Select Books");
-        booksButton.setStyle(redButton);
-        booksButton.setOnMouseEntered(e -> booksButton.setStyle(redButtonHover));
-        booksButton.setOnMouseExited(e -> booksButton.setStyle(redButton));
-        booksButton.setOnAction(e -> showBookSelectionWindow());
 
         nextButton.setOnAction(event -> {
             myName = nameTextField.getText();
-            /***********************/
-            String ip = "localhost";
-            int port = 11224;
-            /***********************/
-            String selectedBook = bookListView.getSelectionModel().getSelectedItem();
-            if (MYBOOK != null) {
+            if (selectedBooks.size() != 0) {
                 // Call the corresponding ViewModel method to handle the "Connect me" action
                 gameViewModel.setGameMode(MODE, numOfPlayersComboBox.getValue());
-                gameViewModel.connectMe(myName, ip, port);
+                gameViewModel.connectMe(myName, "0", 0); // 0 = default - ORACLE_GAME_SERVER
                 gameViewModel.myBookChoice(MYBOOK);
                 gameViewModel.ready();
 
@@ -433,101 +365,97 @@ public class Main extends Application implements Observer {
                         .setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: lightgoldenrodyellow;");
                 waintingLabel.setTextFill(Color.BLACK);
                 nameTextField.setDisable(true);
-                selectBookLabel.setDisable(true);
-                bookListView.setDisable(true);
                 nextButton.setDisable(true);
 
             }
         });
 
-        HBox bar = createBar(false);
+        HBox osBar = createOsBar(false);
 
         loginFormBox.getChildren().addAll(
-                bar, nameLabel,
+                osBar, nameLabel,
                 nameTextField, selectBookLabel, booksButton, numOfPlayersLabel, numOfPlayersComboBox,
                 gameServerlabel, waintingLabel,
                 nextButton);
 
-        Scene loginFormScene = new Scene(loginFormBox, 400, 600);
-        primaryStage.setScene(loginFormScene);
+        Scene hostLoginFormScene = new Scene(loginFormBox, 400, 600);
+        hostLoginFormScene.getStylesheets().add(CSS_STYLESHEET);
+        primaryStage.setScene(hostLoginFormScene);
     }
 
     private void showGuestLoginForm() {
         VBox loginFormBox = new VBox(10);
         loginFormBox.setPadding(new Insets(20));
         loginFormBox.setAlignment(Pos.CENTER);
-        loginFormBox.setCursor(Cursor.HAND);
-        loginFormBox.setBackground(woodBackground);
+        loginFormBox.getStyleClass().add("wood-background");
 
+        // My name
         Label nameLabel = new Label("My name:");
-        nameLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: gainsboro;");
+        nameLabel.getStyleClass().add("login-label");
         TextField nameTextField = new TextField();
-        nameTextField.setMaxWidth(200);
-        nameTextField.setAlignment(Pos.CENTER);
-        nameTextField.setStyle(textFieldStyle);
         //
         nameTextField.setText("Moshe");
+        //
+        nameTextField.setMaxWidth(200);
+        nameTextField.setAlignment(Pos.CENTER);
+        nameTextField.getStyleClass().add("text-field");
 
+        // Select books
+        Label booksLabel = new Label("Select a Book:");
+        booksLabel.getStyleClass().add("login-label");
+        Button booksButton = new Button("Select Books");
+        booksButton.getStyleClass().add("red-button");
+        booksButton.setOnAction(e -> showBookSelectionWindow());
+
+        // Host's ip
         Label ipLabel = new Label("Host's IP:");
-        ipLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: gainsboro;");
+        ipLabel.getStyleClass().add("login-label");
         TextField ipTextField = new TextField();
-        ipTextField.setMaxWidth(250);
-        ipTextField.setAlignment(Pos.CENTER);
-        ipTextField.setStyle(textFieldStyle);
         //
         ipTextField.setText("localhost");
+        //
+        ipTextField.setMaxWidth(250);
+        ipTextField.setAlignment(Pos.CENTER);
+        ipTextField.getStyleClass().add("text-field");
 
+        // Host's port
         Label portLabel = new Label("Host's Port:");
-        portLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: gainsboro;");
+        portLabel.getStyleClass().add("login-label");
         TextField portTextField = new TextField();
-        portTextField.setMaxWidth(150);
-        portTextField.setAlignment(Pos.CENTER);
-        portTextField.setStyle(textFieldStyle);
         //
         portTextField.setText("8040");
-
-        Label booksLabel = new Label("Select a Book:");
-        booksLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: gainsboro;");
-
-        Button booksButton = new Button("Select Books");
-        booksButton.setStyle(redButton);
-        booksButton.setOnMouseEntered(e -> booksButton.setStyle(redButtonHover));
-        booksButton.setOnMouseExited(e -> booksButton.setStyle(redButton));
-        booksButton.setOnAction(e -> showBookSelectionWindow());
+        //
+        portTextField.setMaxWidth(150);
+        portTextField.setAlignment(Pos.CENTER);
+        portTextField.getStyleClass().add("text-field");
 
         HBox roundButtonsPane = new HBox(10);
         roundButtonsPane.setAlignment(Pos.CENTER);
+        double preferredHeight = 100; // Set your desired height here
+        roundButtonsPane.setMinHeight(preferredHeight);
+        roundButtonsPane.setPrefHeight(preferredHeight);
 
-        Button settingButton = new Button("\u2684");
-        settingButton.setStyle(greyButton);
-        settingButton.setOnMouseEntered(e -> settingButton.setStyle(greyButtonHover));
-        settingButton.setOnMouseExited(e -> settingButton.setStyle(greyButton));
+        Button settingButton = new Button("\u263C");
+        settingButton.getStyleClass().add("grey-button");
 
         Button helpButton = new Button("\u2753");
-        helpButton.setStyle(purpleButton);
-        helpButton.setOnMouseEntered(e -> helpButton.setStyle(purpleButtonHover));
-        helpButton.setOnMouseExited(e -> helpButton.setStyle(purpleButton));
+        helpButton.getStyleClass().add("purple-button");
 
         roundButtonsPane.getChildren().addAll(helpButton, settingButton);
 
         Label waintingLabel = new Label("");
 
-        /****** */
-        ListView<String> bookListView = new ListView<>(GameViewModel.getBookList());
+        // Connect me
         Button connectButton = new Button("Connect me");
-        connectButton.setStyle(blueButton);
-        connectButton.setOnMouseEntered(e -> connectButton.setStyle(blueButtonHover));
-        connectButton.setOnMouseExited(e -> connectButton.setStyle(blueButton));
-        /****** */
+        connectButton.getStyleClass().add("blue-button");
 
         connectButton.setOnAction(event -> {
             myName = nameTextField.getText();
             String ip = ipTextField.getText();
             int port = Integer.parseInt(portTextField.getText());
-            String selectedBook = bookListView.getSelectionModel().getSelectedItem();
-            if (MYBOOK != null) {
+            if (selectedBooks.size() != 0) {
                 // Call the corresponding ViewModel method to handle the "Connect me" action
-                gameViewModel.setGameMode(MODE, 0);
+                gameViewModel.setGameMode(MODE, 0); // 0 = default for guest
                 gameViewModel.connectMe(myName, ip, port);
                 gameViewModel.myBookChoice(MYBOOK);
                 gameViewModel.ready();
@@ -536,7 +464,6 @@ public class Main extends Application implements Observer {
                 nameTextField.setDisable(true);
                 ipTextField.setDisable(true);
                 portTextField.setDisable(true);
-                bookListView.setDisable(true);
                 connectButton.setDisable(true);
                 waintingLabel.setText("Waiting for all players to connect");
                 waintingLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
@@ -544,7 +471,7 @@ public class Main extends Application implements Observer {
             }
         });
 
-        HBox bar = createBar(false);
+        HBox bar = createOsBar(false);
 
         loginFormBox.getChildren().addAll(
                 bar, nameLabel,
@@ -554,13 +481,12 @@ public class Main extends Application implements Observer {
                 ipLabel,
                 ipTextField,
                 roundButtonsPane,
-                portLabel,
-                portTextField,
                 waintingLabel,
                 connectButton);
 
-        Scene loginFormScene = new Scene(loginFormBox, 400, 600);
-        primaryStage.setScene(loginFormScene);
+        Scene guestLoginFormScene = new Scene(loginFormBox, 400, 600);
+        guestLoginFormScene.getStylesheets().add(CSS_STYLESHEET);
+        primaryStage.setScene(guestLoginFormScene);
     }
 
     private void showGameFlowWindow() {
@@ -570,19 +496,18 @@ public class Main extends Application implements Observer {
         Platform.runLater(() -> {
             BorderPane root = new BorderPane();
 
-            HBox bar = createBar(true);
+            HBox bar = createOsBar(true);
             root.setTop(bar);
 
             // root.setBackground(gameBackground);
-            root.setBackground(nightSkyBackground);
-            root.setCursor(Cursor.HAND);
+            root.getStyleClass().add("game-flow-background");
 
             // Create the sidebar
             VBox sidebar = createSidebar();
             root.setRight(sidebar);
 
             // Create the game board
-            GridPane boardGridPane = createBoardGridPane(boardImg);
+            GridPane boardGridPane = createBoardGridPane();
             boardGridPane.setMinSize(734, 734); // Set the desired minimum size
             boardGridPane.setMaxSize(734, 734); // Set the desired maximum size
 
@@ -593,19 +518,20 @@ public class Main extends Application implements Observer {
             root.setLeft(buttons);
 
             gameFlowScene = new Scene(root, 1620, 840);
-            
+            gameFlowScene.getStylesheets().add(CSS_STYLESHEET);
+            gameFlowScene.setCursor(Cursor.HAND);
+
             double screenWidth = Screen.getPrimary().getVisualBounds().getWidth();
             double screenHeight = Screen.getPrimary().getVisualBounds().getHeight();
-            
+
             // Calculate the centered x and y coordinates
             double centerX = (screenWidth - primaryStage.getWidth()) / 2;
             double centerY = (screenHeight - primaryStage.getHeight()) / 2;
-            
+
             // Set the stage position
             primaryStage.setX(centerX);
             primaryStage.setY(centerY);
 
-            
             primaryStage.setScene(gameFlowScene);
         });
     }
@@ -689,7 +615,7 @@ public class Main extends Application implements Observer {
         return sidebar;
     }
 
-    private GridPane createBoardGridPane(Image boardImage) {
+    private GridPane createBoardGridPane() {
         GridPane gridPane = new GridPane();
         // gridPane.setPrefSize(732, 733); // Set the desired size of the grid
 
@@ -697,7 +623,7 @@ public class Main extends Application implements Observer {
         int boardSize = board.length;
 
         // Set the background image
-        gridPane.setBackground(boradBackground);
+        gridPane.getStyleClass().add("board-background");
         gridPane.setStyle(" -fx-effect: dropshadow(gaussian, #000000, 20, 0, 8, 2);");
 
         for (int row = 0; row < boardSize; row++) {
@@ -788,7 +714,7 @@ public class Main extends Application implements Observer {
         tilePane.getChildren().clear();
 
         // Create the tile buttons and add them to the FlowPane
-        Button resetTurnButton = new Button("\u2B6F");
+        Button resetTurnButton = new Button("⟲"); // \u2B6F
 
         tileButtons = gameViewModel.getButtonTiles();
         for (Button tileButton : tileButtons) {
@@ -813,9 +739,7 @@ public class Main extends Application implements Observer {
         }
 
         // Reset button
-        resetTurnButton.setStyle(greyButton);
-        resetTurnButton.setOnMouseEntered(e -> resetTurnButton.setStyle(greyButtonHover));
-        resetTurnButton.setOnMouseExited(e -> resetTurnButton.setStyle(greyButton));
+        resetTurnButton.getStyleClass().add("grey-button");
         resetTurnButton.setDisable(true);
         resetTurnButton.setOnAction(event -> {
             // Call the method to handle the "Pass Turn" action
@@ -830,19 +754,15 @@ public class Main extends Application implements Observer {
         resetTurnButton.setPrefHeight(20); // Adjust the height as desired
 
         Button passTurnButton = new Button("Pass Turn");
-        passTurnButton.setStyle(yellowButton);
-        passTurnButton.setOnMouseEntered(e -> passTurnButton.setStyle(yellowButtonHover));
-        passTurnButton.setOnMouseExited(e -> passTurnButton.setStyle(yellowButton));
+        passTurnButton.getStyleClass().add("yellow-button");
         passTurnButton.setOnAction(event -> {
             // Call the method to handle the "Pass Turn" action
             gameViewModel.skipTurn();
         });
 
         Button challengeButton = new Button("Challenge");
-        challengeButton.setStyle(greenButton);
+        challengeButton.getStyleClass().add("green-button");
         challengeButton.setDisable(true);
-        challengeButton.setOnMouseEntered(e -> challengeButton.setStyle(greenButtonHover));
-        challengeButton.setOnMouseExited(e -> challengeButton.setStyle(greenButton));
         challengeButton.setOnAction(event -> {
             // Call the method to handle the "Challenge" action
             gameViewModel.challenge();
@@ -850,16 +770,11 @@ public class Main extends Application implements Observer {
 
         if (!gameViewModel.isMyTurn()) {
             challengeButton.setDisable(true);
-            passTurnButton.setStyle(yellowButton);
             passTurnButton.setDisable(true);
-            //
-
         }
 
         Button quitGameButton = new Button("Quit Game");
-        quitGameButton.setStyle(redButton);
-        quitGameButton.setOnMouseEntered(e -> quitGameButton.setStyle(redButtonHover));
-        quitGameButton.setOnMouseExited(e -> quitGameButton.setStyle(redButton));
+        quitGameButton.getStyleClass().add("red-button");
         quitGameButton.setOnAction(event -> {
             // Call the method to handle the "Quit Game" action
             gameViewModel.quitGame();
@@ -871,9 +786,7 @@ public class Main extends Application implements Observer {
         });
 
         tryPlaceWordButton = new Button("Try Place Word");
-        tryPlaceWordButton.setStyle(blueButton);
-        tryPlaceWordButton.setOnMouseEntered(e -> tryPlaceWordButton.setStyle(blueButtonHover));
-        tryPlaceWordButton.setOnMouseExited(e -> tryPlaceWordButton.setStyle(blueButton));
+        tryPlaceWordButton.getStyleClass().add("blue-button");
         tryPlaceWordButton.setOnAction(event -> {
             tryPlaceWordButton.setDisable(true);
             challengeButton.setDisable(false);

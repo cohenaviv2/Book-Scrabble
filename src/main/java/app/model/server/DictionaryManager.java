@@ -103,7 +103,7 @@ public class DictionaryManager {
         MyServer s = new MyServer(11224, new BookScrabbleHandler());
         s.start();
         try {
-        gm.setGameServerSocket("localhost", 11224);
+        //gm.setGameServerSocket("localhost", 11224);
         gm.setTotalPlayersCount(1);
         int id = gm.connectGuestHandler("Aviv");
         gm.addBookHandler("Harray Potter.txt");

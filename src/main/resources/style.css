@@ -1,6 +1,158 @@
+/************* BACKGROUNDS *************/
+
+.board-background {
+  -fx-background-image: url("backgrounds/board.png");
+  -fx-background-repeat: no-repeat;
+  -fx-background-size: contain;
+}
+
+.wood-background {
+  -fx-background-image: url("backgrounds/wood.jpg");
+  -fx-background-repeat: no-repeat;
+  -fx-background-size: auto;
+}
 
 .night-sky-background {
-    background-image:  url('night sky.jpg');
-    background-repeat: no-repeat;
-    background-size: cover;
+  -fx-background-image: url("backgrounds/nightSky.jpg");
+  -fx-background-repeat: no-repeat;
+  -fx-background-size: cover;
 }
+
+.game-flow-background {
+    -fx-background-image: url("backgrounds/gameFlow.jpg");
+    -fx-background-repeat: no-repeat;
+    -fx-background-size: cover;
+  }
+
+/************* BUTTONS *************/
+
+.blue-button {
+  -fx-font-size: 20px;
+  -fx-font-weight: bold;
+  -fx-background-color: linear-gradient(darkblue, grey), blue;
+  -fx-background-radius: 10;
+  -fx-text-fill: white;
+  -fx-effect: dropshadow(one-pass-box, black, 8, 0, 2, 0);
+}
+.blue-button:hover {
+  -fx-background-color: linear-gradient(blue, grey), navy;
+}
+
+.yellow-button {
+  -fx-font-size: 20px;
+  -fx-font-weight: bold;
+  -fx-background-color: linear-gradient(orange, grey), gold;
+  -fx-background-radius: 10;
+  -fx-text-fill: white;
+  -fx-effect: dropshadow(one-pass-box, black, 8, 0, 2, 0);
+}
+.yellow-button:hover {
+  -fx-background-color: linear-gradient(gold, grey), orange;
+}
+
+.green-button {
+  -fx-font-size: 20px;
+  -fx-font-weight: bold;
+  -fx-background-color: linear-gradient(green, grey), limegreen;
+  -fx-background-radius: 10;
+  -fx-text-fill: white;
+  -fx-effect: dropshadow(one-pass-box, black, 8, 0, 2, 0);
+}
+.green-button:hover {
+  -fx-background-color: linear-gradient(darkgreen, grey), green;
+}
+
+.red-button {
+  -fx-font-size: 20px;
+  -fx-font-weight: bold;
+  -fx-background-color: linear-gradient(red, grey), crimson;
+  -fx-background-radius: 10;
+  -fx-text-fill: white;
+  -fx-effect: dropshadow(one-pass-box, black, 8, 0, 2, 0);
+}
+.red-button:hover {
+  -fx-background-color: linear-gradient(firebrick, grey), red;
+}
+
+.grey-button {
+  -fx-font-size: 20px;
+  -fx-font-weight: bold;
+  -fx-background-color: linear-gradient(silver, grey), grey;
+  -fx-background-radius: 40;
+  -fx-text-fill: white;
+  -fx-effect: dropshadow(one-pass-box, black, 8, 0, 2, 0);
+}
+.grey-button:hover {
+  -fx-background-color: linear-gradient(darkgray, grey), cadetblue;
+}
+
+.purple-button {
+  -fx-font-size: 20px;
+  -fx-font-weight: bold;
+  -fx-background-color: linear-gradient(darkslateblue, grey), darkorchid;
+  -fx-background-radius: 40;
+  -fx-text-fill: white;
+  -fx-effect: dropshadow(one-pass-box, black, 8, 0, 2, 0);
+}
+.purple-button:hover {
+  -fx-background-color: linear-gradient(darkviolet, grey), indigo;
+}
+
+/************* GENERAL *************/
+
+.book-scrabble-header {
+  -fx-font-size: 55px;
+  -fx-text-fill: antiquewhite;
+  -fx-font-weight: bold;
+  -fx-font-family: "Comic Sans MS";
+  -fx-padding: 10px;
+  -fx-effect: dropshadow(gaussian, black, 20, 0, 2, 6);
+}
+
+.mode-label {
+  -fx-font-size: 16px;
+  -fx-padding: 5px;
+  -fx-text-fill: gainsboro;
+  -fx-effect: dropshadow(gaussian, #000000, 20, 0, 2, 6);
+}
+
+.book-label {
+  -fx-effect: dropshadow(gaussian, black, 8, 1, 0, 1);
+  -fx-text-fill: white;
+}
+
+.selected-book-image {
+  -fx-effect: dropshadow(gaussian, gold, 7, 1, 0, 1);
+}
+
+.os-bar {
+  -fx-background-color: transparent;
+}
+
+.content-label {
+  -fx-font-weight: bold;
+}
+
+.content-background {
+  -fx-background-color: burlywood;
+}
+
+.text-field {
+  -fx-background-radius: 10px;
+  -fx-background-color: burlywood;
+  -fx-text-fill: black;
+  -fx-font-size: 25px;
+  -fx-font-weight: bold;
+}
+
+.login-label {
+  -fx-font-size: 16px;
+  -fx-font-weight: bold;
+  -fx-text-fill: gainsboro;
+}
+
+.minimize-button {
+    -fx-font-size: 18px;
+    -fx-font-family: "Arial Unicode MS"; /* Choose a font that supports the Unicode character */
+}
+

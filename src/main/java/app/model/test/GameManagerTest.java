@@ -10,8 +10,8 @@ public class GameManagerTest {
 
         
         // Create and start the Game server on port 11224:
-        MyServerParallel gameServer = new MyServerParallel(11224, new BookScrabbleHandler());
-        gameServer.start();
+        // MyServerParallel gameServer = new MyServerParallel(11224, new BookScrabbleHandler());
+        // gameServer.start();
 
         String myName = "Aviv";
         GameManager g = GameManager.get();
@@ -20,7 +20,7 @@ public class GameManagerTest {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        g.setGameServerSocket("localhost", 11224);
+        //g.setGameServerSocket("localhost", 11224);
         int myId = g.connectGuestHandler(myName);
         g.addBookHandler("Harray Potter.txt");
         g.setReady();
@@ -59,7 +59,7 @@ public class GameManagerTest {
         // e.printStackTrace();
         // }
 
-        gameServer.close();
+        //gameServer.close();
 
     }
 }

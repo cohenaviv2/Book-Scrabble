@@ -58,7 +58,7 @@ public class HostModel extends Observable implements GameModel, Observer {
          * also creates host player profile and sets the Game Properties
          */
 
-        gameManager.setGameServerSocket(ip, port);
+        //gameManager.setGameServerSocket(ip, port);
         gameManager.createHostPlayer(name);
         playerProperties = PlayerProperties.get();
         playerProperties.setMyName(name);

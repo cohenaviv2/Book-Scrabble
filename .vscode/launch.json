@@ -6,6 +6,27 @@
     "configurations": [
         {
             "type": "java",
+            "name": "GameManagerTest",
+            "request": "launch",
+            "mainClass": "app.model.test.GameManagerTest",
+            "projectName": "BookScrableApp"
+        },
+        {
+            "type": "java",
+            "name": "GameManager",
+            "request": "launch",
+            "mainClass": "app.model.game.GameManager",
+            "projectName": "BookScrableApp"
+        },
+        {
+            "type": "java",
+            "name": "RunGameServer",
+            "request": "launch",
+            "mainClass": "app.model.server.RunGameServer",
+            "projectName": "BookScrableApp"
+        },
+        {
+            "type": "java",
             "name": "Main",
             "request": "launch",
             "mainClass": "app.view.Main",

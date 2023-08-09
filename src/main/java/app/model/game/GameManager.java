@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import app.model.game.Tile.Bag;
+import app.model.server.RunGameServer;
 
 /*
  * The Game Manager maintains the game board, the bag of tiles, the books
@@ -43,22 +44,24 @@ public class GameManager extends Observable {
 
     // Connectivity
     private Socket gameServerSocket;
-    private String gameServerIP="localhost";
-    private int gameServerPORT=11224;
+    private final String gameServerIP;
+    private final int gameServerPORT;
 
     public GameManager() {
+        this.gameServerIP=RunGameServer.loadProperties().getProperty("GAME_SERVER_IP");
+        this.gameServerPORT=Integer.parseInt(RunGameServer.loadProperties().getProperty("GAME_SERVER_PORT"));
         this.gameBoard = Board.getBoard();
         this.gameBag = Tile.Bag.getBag();
         this.turnManager = new TurnManager();
         // initial all game Books from directory
         this.fullBookList = new HashMap<>(); // book name to path
-        File booksDirectory = new File("src/main/resources/books");
+        File booksDirectory = new File("/server/books");
         File[] txtFiles = booksDirectory.listFiles((dir, name) -> name.endsWith(".txt"));
         if (txtFiles != null) {
             for (File file : txtFiles) {
                 String fileName = file.getName().replaceAll(".txt", "");
                 String filePath = file.getPath().replaceAll("\\\\", "/");
-                fullBookList.put(fileName, filePath);
+                fullBookList.put(fileName, filePath.substring(1));
             }
         }
         this.gameBooks = new StringBuilder();
@@ -73,10 +76,10 @@ public class GameManager extends Observable {
         return gm;
     }
 
-    public void setGameServerSocket(String gameServerIP, int gameServerPORT) {
-        this.gameServerIP = gameServerIP;
-        this.gameServerPORT = gameServerPORT;
-    }
+    // public void setGameServerSocket(String gameServerIP, int gameServerPORT) {
+    //     this.gameServerIP = gameServerIP;
+    //     this.gameServerPORT = gameServerPORT;
+    // }
 
     public void setTotalPlayersCount(int totalPlayers) {
         if (totalPlayers >= 2 && totalPlayers <= 4) {
@@ -334,6 +337,9 @@ public class GameManager extends Observable {
     }
 
     private String queryHandler(int id, String moveValue) {
+
+        System.out.println("\n\n\n\n\n\n\n\n query Handler\n\n\n\n\n\n\n\n");
+
         /*
          * if Active word is activated - can not try place this word.
          * need to check if the guest has all the correct tiles and make the string word
@@ -391,6 +397,9 @@ public class GameManager extends Observable {
     }
 
     private String challengeHandler(int playerId, String moveValue) {
+
+        System.out.println("\n\n\n\n\n\n\n\n challenge Handler\n\n\n\n\n\n\n\n");
+
         /*
          * if Active word is NOT activated - can not try challange this word.
          * need to ask the game sever to challenge this word -
@@ -461,6 +470,9 @@ public class GameManager extends Observable {
     }
 
     protected boolean dictionaryLegal(Word word) {
+        boolean flag = (word==null);
+        System.out.println("\n\n\n\n\n\n\n\n dictionary Legal \n\n word is null : "+flag+"\n\n\n\n\n\n\n\n\n\n");
+
         /* ask the game server */
         //
         System.out.println("Dic Word - " + word);
@@ -469,12 +481,14 @@ public class GameManager extends Observable {
 
         try {
             this.gameServerSocket = new Socket(gameServerIP, gameServerPORT);
+            System.out.println("\n\nconnected to orcale game server: "+gameServerSocket.isConnected());
             PrintWriter out = new PrintWriter(gameServerSocket.getOutputStream(), true);
             BufferedReader in = new BufferedReader(new InputStreamReader(gameServerSocket.getInputStream()));
 
             String req = "Q," + getGameBooks() + queryWord;
             out.println(req);
             String res = in.readLine();
+            System.out.println("\n\n\n SERVER RESPONDE - "+res);
             if (res.equals("true")) {
                 return true;
             } else if (res.equals("false")) {
@@ -496,6 +510,10 @@ public class GameManager extends Observable {
     }
 
     private String challengeToGameServer(ArrayList<Word> turnWords) {
+
+        System.out.println("\n\n\n\n\n\n\n\n challenge To Game Server\n\n\n\n\n\n\n\n");
+
+        
         /*
          * Asks the game server to challenge all the words that was made in this turn
          * game server will perform an I/O search in the game books
