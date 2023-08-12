@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.*;
 
 import app.model.GameModel;
+import app.model.MethodInvoker;
 import app.model.game.*;
 
 public class GuestModel extends Observable implements GameModel {
@@ -47,7 +48,7 @@ public class GuestModel extends Observable implements GameModel {
 
     @Override
     public void ready() {
-        commHandler.sendMessage("ready", "true");
+        commHandler.sendMessage(MethodInvoker.ready, "true");
     }
 
     @Override
@@ -55,7 +56,7 @@ public class GuestModel extends Observable implements GameModel {
         if (playerProperties.isMyTurn()) {
             try {
                 String word = ObjectSerializer.serializeObject(myWord);
-                commHandler.sendMessage("tryPlaceWord", word);
+                commHandler.sendMessage(MethodInvoker.tryPlaceWord, word);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -67,7 +68,7 @@ public class GuestModel extends Observable implements GameModel {
     @Override
     public void challenge() {
         if (playerProperties.isMyTurn()) {
-            commHandler.sendMessage("challenge", "true");
+            commHandler.sendMessage(MethodInvoker.challenge, "true");
         } else
             System.out.println("its not your turn");
 
@@ -76,7 +77,7 @@ public class GuestModel extends Observable implements GameModel {
     @Override
     public void skipTurn() {
         if (playerProperties.isMyTurn()) {
-            commHandler.sendMessage("skipTurn", "true");
+            commHandler.sendMessage(MethodInvoker.skipTurn, "true");
         } else
             System.out.println("its not your turn");
 
@@ -84,15 +85,15 @@ public class GuestModel extends Observable implements GameModel {
 
     @Override
     public void quitGame() {
-        commHandler.sendMessage("quitGame", "true");
+        commHandler.sendMessage(MethodInvoker.quitGame, "true");
         commHandler.close();
     }
 
 
     @Override
-    public Map<String, Integer> getOthersScore() {
+    public Map<String, String> getOthersInfo() {
         // commHandler.sendMessage("getOthersScore", "true");
-        return this.playerProperties.getPlayersScore();
+        return this.playerProperties.getOtherPlayersInfo();
     }
 
     @Override
@@ -126,18 +127,8 @@ public class GuestModel extends Observable implements GameModel {
     }
 
     public void update() {
-        // this.playerProperties.setMyBoard(getCurrentBoard());
-        // this.playerProperties.setMyTiles(getMyTiles());
-        // this.playerProperties.setMyScore(getMyScore());
-        // this.playerProperties.setMyWords(getMyWords());
-        // this.playerProperties.setMyTurn(isMyTurn());
-        // this.playerProperties.setPlayersScore(getOthersScore());
-        // while (playerProperties.getMyBoard()==null&&playerProperties.getMyHandTiles()==null&&playerProperties.getMyWords()==null&&playerProperties.getPlayersScore()==null){
-        //     System.out.println("hi");
-        // }
         setChanged();
-        notifyObservers();  
-        
+        notifyObservers();   
     }
 
 }

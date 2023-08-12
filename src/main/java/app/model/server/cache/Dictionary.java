@@ -89,4 +89,12 @@ public class Dictionary {
             }
         }
     }
+
+    public int getExCacheSize(){
+        return this.wordsExistCache.getSize();
+    }
+
+    public int getNotExCacheSize(){
+        return this.dontExistCache.getSize();
+    }
 }

@@ -134,7 +134,7 @@
 }
 
 .content-background {
-  -fx-background-color: burlywood;
+  -fx-background-color: rgba(201, 126, 27, 0.658);
 }
 
 .text-field {
@@ -155,4 +155,3 @@
     -fx-font-size: 18px;
     -fx-font-family: "Arial Unicode MS"; /* Choose a font that supports the Unicode character */
 }
-

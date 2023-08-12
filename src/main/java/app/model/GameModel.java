@@ -42,6 +42,6 @@ public interface GameModel{
     
     boolean isMyTurn();
 
-    Map<String,Integer> getOthersScore();
+    Map<String,String> getOthersInfo();
 
 }

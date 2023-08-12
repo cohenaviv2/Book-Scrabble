@@ -6,6 +6,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import app.model.MethodInvoker;
 import app.model.game.Tile.Bag;
 import app.model.server.RunGameServer;
 
@@ -26,14 +27,10 @@ public class GameManager extends Observable {
     // Game
     private Board gameBoard;
     private Bag gameBag;
-
-    public Bag getGameBag() {
-        return gameBag;
-    }
-
     private final TurnManager turnManager;
     private Map<String, String> fullBookList;
-    private StringBuilder gameBooks;
+    private Set<String> selectedBooks;
+    private String gameBooksString;
 
     // Participants
     private Player hostPlayer;
@@ -48,23 +45,28 @@ public class GameManager extends Observable {
     private final int gameServerPORT;
 
     public GameManager() {
-        this.gameServerIP=RunGameServer.loadProperties().getProperty("GAME_SERVER_IP");
-        this.gameServerPORT=Integer.parseInt(RunGameServer.loadProperties().getProperty("GAME_SERVER_PORT"));
+
+        // GAME SERVER'S IP AND PORT FROM ENV FILE
+        this.gameServerIP = RunGameServer.loadProperties().getProperty("GAME_SERVER_IP");
+        this.gameServerPORT = Integer.parseInt(RunGameServer.loadProperties().getProperty("GAME_SERVER_PORT"));
+
         this.gameBoard = Board.getBoard();
         this.gameBag = Tile.Bag.getBag();
         this.turnManager = new TurnManager();
+
         // initial all game Books from directory
         this.fullBookList = new HashMap<>(); // book name to path
-        File booksDirectory = new File("/server/books");
+        File booksDirectory = new File("src\\main\\resources\\books");
         File[] txtFiles = booksDirectory.listFiles((dir, name) -> name.endsWith(".txt"));
         if (txtFiles != null) {
             for (File file : txtFiles) {
                 String fileName = file.getName().replaceAll(".txt", "");
-                String filePath = file.getPath().replaceAll("\\\\", "/");
-                fullBookList.put(fileName, filePath.substring(1));
+                String gameServerPath = "server/books/" + fileName + ".txt"; // GAME SERVER PATH
+                fullBookList.put(fileName, gameServerPath);
             }
         }
-        this.gameBooks = new StringBuilder();
+        this.gameBooksString = "";
+        this.selectedBooks = new HashSet<>();
         this.playersByID = new HashMap<>();
         this.playersByName = new HashMap<>();
         this.readyToPlay = new AtomicInteger(0);
@@ -75,11 +77,6 @@ public class GameManager extends Observable {
             gm = new GameManager();
         return gm;
     }
-
-    // public void setGameServerSocket(String gameServerIP, int gameServerPORT) {
-    //     this.gameServerIP = gameServerIP;
-    //     this.gameServerPORT = gameServerPORT;
-    // }
 
     public void setTotalPlayersCount(int totalPlayers) {
         if (totalPlayers >= 2 && totalPlayers <= 4) {
@@ -93,7 +90,7 @@ public class GameManager extends Observable {
         return readyToPlay.get() == totalPlayersNum;
     }
 
-    public static int generateID() {
+    private static int generateID() {
         /*
          * Generates a unique ID for each player
          * only Game Manager can create player profiles and ID's
@@ -127,20 +124,12 @@ public class GameManager extends Observable {
         this.playersByName.put(guestName, guest);
     }
 
-    private void addBookToList(String bookName) {
-        /*
-         * Add book chosen by a player to String gameBooks
-         * gameBooks is used for communicating with the game server
-         */
-        this.gameBooks.append(bookName + ",");
-    }
-
     private boolean isIdExist(int id) {
         return this.playersByID.get(id) != null || this.hostPlayer.getID() == id;
     }
 
     public String getGameBooks() {
-        return gameBooks.toString();
+        return gameBooksString;
     }
 
     public Map<String, String> getFullBookList() {
@@ -159,31 +148,58 @@ public class GameManager extends Observable {
         return playersByName.get(name);
     }
 
+    private int getBagCount(){
+        return this.gameBag.size();
+    }
+
+    public boolean isGameServerConnect(){
+        try {
+            this.gameServerSocket = new Socket(gameServerIP, gameServerPORT);
+            PrintWriter out = new PrintWriter(gameServerSocket.getOutputStream(), true);
+            BufferedReader in = new BufferedReader(new InputStreamReader(gameServerSocket.getInputStream()));
+            out.println("ack");
+            String ans = in.readLine();
+            gameServerSocket.close();
+            out.close();
+            in.close();
+            if(ans.equals("connected")) return true;
+            else{
+                System.out.println("server responde: "+ans);
+                return false;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        
+        return false;
+    }
+
     public String processPlayerInstruction(int guestId, String modifier, String value) {
         if (isIdExist(guestId)) {
             // All model cases that indicates some guest instructions
             switch (modifier) {
-                case "myBookChoice":
-                    return addBookHandler(value);
-                case "ready":
+                case MethodInvoker.myBooksChoice:
+                    return addBooksHandler(value);
+                case MethodInvoker.ready:
                     return readyHandler(value);
-                case "getOthersScore":
-                    return getPlayersScoreHandler(guestId, value);
-                case "getCurrentBoard":
+                case MethodInvoker.getOthersInfo:
+                    return getPlayersInfoHandler(guestId, value);
+                case MethodInvoker.getCurrentBoard:
                     return boardHandler(value);
-                case "getMyScore":
+                case MethodInvoker.getMyScore:
                     return scoreHandler(guestId, value);
-                case "getMyTiles":
+                case MethodInvoker.getMyTiles:
                     return tilesHandler(guestId, value);
-                case "getMyWords":
+                case MethodInvoker.getMyWords:
                     return wordsHandler(guestId, value);
-                case "isMyTurn":
+                case MethodInvoker.isMyTurn:
                     return myTurnHandler(guestId, value);
-                case "tryPlaceWord":
+                case MethodInvoker.tryPlaceWord:
                     return queryHandler(guestId, value);
-                case "challenge":
+                case MethodInvoker.challenge:
                     return challengeHandler(guestId, value);
-                case "skipTurn":
+                case MethodInvoker.skipTurn:
                     return skipTurnHandler(guestId, value);
                 default:
                     // PRINT DEBUG
@@ -208,14 +224,21 @@ public class GameManager extends Observable {
         return getPlayerByName(guestName).getID();
     }
 
-    public String addBookHandler(String bookName) {
-        String path;
-        if ((path = fullBookList.get(bookName)) != null) {
-            addBookToList(path);
+    public String addBooksHandler(String listOfBooksSer) {
+        try {
+            List<String> playerBookList = (List<String>) ObjectSerializer.deserializeObject(listOfBooksSer);
 
+            for (String book : playerBookList) {
+                if (fullBookList.containsKey(book)) {
+                    this.selectedBooks.add(book);
+                }
+            }
             // PRINT DEBUG
-            System.out.println("Game Manager: your book " + bookName + " is set up!\n");
+            System.out.println("Game Manager: your book " + listOfBooksSer + " is set up!\n");
+
             return "true";
+
+        } catch (ClassNotFoundException | IOException e) {
         }
 
         // PRINT DEBUG
@@ -234,22 +257,31 @@ public class GameManager extends Observable {
             // PRINT DEBUG
             System.out.println("Game Manager: ALL PLAYERS ARE READY TO PLAY! draw tiles...\n");
 
+            // Set the Server's game books List
+            for (String book : selectedBooks) {
+                String serverBookPath = fullBookList.get(book);
+                this.gameBooksString += serverBookPath + ",";
+            }
+
+            // Draw tiles - Who's playing first
             turnManager.drawTiles();
         }
     }
 
-    private String getPlayersScoreHandler(int guestId, String value) {
+    private String getPlayersInfoHandler(int guestId, String value) {
         if (value.equals("true")) {
 
-            List<Player> p = this.playersByID.values().stream().filter(player -> player.getID() != guestId)
+            List<Player> otherPlayerList = this.playersByID.values().stream().filter(player -> player.getID() != guestId)
                     .collect(Collectors.toList());
 
-            Map<String, Integer> scores = new HashMap<>();
-            for (Player pl : p) {
-                scores.put(pl.getName(), pl.getScore());
+            Map<String, String> othersInfo = new HashMap<>();
+            
+            for (Player p : otherPlayerList) {
+                String info = String.valueOf(p.getScore())+":"+String.valueOf(p.isMyTurn());
+                othersInfo.put(p.getName(), info);
             }
             try {
-                String sc = ObjectSerializer.serializeObject(scores);
+                String sc = ObjectSerializer.serializeObject(othersInfo);
                 return sc;
             } catch (IOException e) {
                 e.printStackTrace();
@@ -322,7 +354,7 @@ public class GameManager extends Observable {
         int id = Integer.parseInt(params[0]);
         String quitMod = params[1];
         String bool = params[2];
-        if (isIdExist(id) && quitMod.equals("quitGame") && bool.equals("true")) {
+        if (isIdExist(id) && quitMod.equals(MethodInvoker.quitGame) && bool.equals("true")) {
             Player p = this.playersByID.get(id);
             String name = p.getName();
             // put back player tiles
@@ -470,8 +502,8 @@ public class GameManager extends Observable {
     }
 
     protected boolean dictionaryLegal(Word word) {
-        boolean flag = (word==null);
-        System.out.println("\n\n\n\n\n\n\n\n dictionary Legal \n\n word is null : "+flag+"\n\n\n\n\n\n\n\n\n\n");
+        boolean flag = (word == null);
+        System.out.println("\n\n\n\n\n\n\n\n dictionary Legal \n\n word is null : " + flag + "\n\n\n\n\n\n\n\n\n\n");
 
         /* ask the game server */
         //
@@ -481,14 +513,15 @@ public class GameManager extends Observable {
 
         try {
             this.gameServerSocket = new Socket(gameServerIP, gameServerPORT);
-            System.out.println("\n\nconnected to orcale game server: "+gameServerSocket.isConnected());
+            System.out.println("\n\nconnected to orcale game server: " + gameServerSocket.isConnected());
             PrintWriter out = new PrintWriter(gameServerSocket.getOutputStream(), true);
             BufferedReader in = new BufferedReader(new InputStreamReader(gameServerSocket.getInputStream()));
 
             String req = "Q," + getGameBooks() + queryWord;
+            System.out.println("*\n**\n***\n****\n" + req);
             out.println(req);
             String res = in.readLine();
-            System.out.println("\n\n\n SERVER RESPONDE - "+res);
+            System.out.println("\n\n\n SERVER RESPONDE - " + res);
             if (res.equals("true")) {
                 return true;
             } else if (res.equals("false")) {
@@ -513,7 +546,6 @@ public class GameManager extends Observable {
 
         System.out.println("\n\n\n\n\n\n\n\n challenge To Game Server\n\n\n\n\n\n\n\n");
 
-        
         /*
          * Asks the game server to challenge all the words that was made in this turn
          * game server will perform an I/O search in the game books

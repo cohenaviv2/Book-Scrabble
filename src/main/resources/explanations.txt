@@ -1,0 +1,28 @@
+game-mode=In Host Mode, you can host a game for up to 4 players,
+including yourself.
+As the host, you run a server and send data to the guests.
+You can also send word queries to the game server.
+
+In Guest Mode, you join an existing game hosted by another player.
+As a guest, you connect to the host's server and participate as
+one of the players.
+Guest mode allows you to enjoy the multiplayer experience
+without hosting the game.
+host-mode=In Host Mode,  you're in charge. As the host, you manage a game server right on your machine. This server connects you with up to 3 guests, forming a group of 4 players including you.
+
+Imagine it as your personal hub in your own space. You're not just a player; you're the server admin. Your role is to ensure everyone connects and communicates smoothly on your local setup.
+
+But that's not all. You also connect to a game server responsible for checking word legality. This separate server ensures fair play and maintains dictionary standards.
+
+Choose Host Mode, take control locally, and link up to 3 players to your game hub for multiplayer excitement.
+guest-mode=In Guest Mode, you're a player on the move.
+As a guest, you connect to the host server to jump into the game.
+To get started, you'll need the host's IP address.
+
+Simply input the host's IP, and you're in.
+No hosting, no setup. Just plug in and play.
+Guest Mode lets you join the action and experience multiplayer excitement.
+game-flow=gdfgdfg
+custom-port=The host server usually runs on a default Port.
+Sometimes the host chooses a custom Port.
+Ask your host if the Port has changed, and if set it here:

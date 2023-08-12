@@ -11,7 +11,7 @@ public class PlayerProperties {
     private Tile[][] myBoard;
     private ArrayList<Tile> myHandTiles;
     private ArrayList<Word> myWords;
-    private Map<String, Integer> playersScore;
+    private Map<String, String> otherPlayersInfo;
 
     private PlayerProperties() {
         // this.myScore = 0;
@@ -58,11 +58,11 @@ public class PlayerProperties {
     }
 
     public void updatePlayersScore(String othersScore) {
-        String[] scores = othersScore.split(":");
-        for (String s : scores) {
-            String[] params = s.split(",");
-            this.playersScore.put(params[0], Integer.parseInt(params[1]));
-        }
+        // String[] scores = othersScore.split(":");
+        // for (String s : scores) {
+        //     String[] params = s.split(",");
+        //     this.otherPlayersInfo.put(params[0], Integer.parseInt(params[1]));
+        // }
     }
 
     public String getMyName() {
@@ -85,16 +85,16 @@ public class PlayerProperties {
         return myWords;
     }
 
-    public Map<String, Integer> getPlayersScore() {
-        return playersScore;
+    public Map<String, String> getOtherPlayersInfo() {
+        return otherPlayersInfo;
     }
 
     public void setMyWords(ArrayList<Word> myWords) {
         this.myWords = myWords;
     }
 
-    public void setPlayersScore(Map<String, Integer> playersScore) {
-        this.playersScore = playersScore;
+    public void setPlayersInfo(Map<String, String> playersScore) {
+        this.otherPlayersInfo = playersScore;
     }
 
     private String boardToString() {
@@ -149,10 +149,10 @@ public class PlayerProperties {
         info += boardToString();
         info += "\n__________________________________\n";
         info += "Other players score: ";
-        if (playersScore.size() != 0) {
+        if (otherPlayersInfo.size() != 0) {
             info += "\n";
-            for (String name : playersScore.keySet()) {
-                info += name + " - " + playersScore.get(name) + "\n";
+            for (String name : otherPlayersInfo.keySet()) {
+                info += name + " - " + otherPlayersInfo.get(name) + "\n";
             }
         } else {
             info += "0\n";

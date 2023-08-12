@@ -5,6 +5,7 @@ import java.net.*;
 import java.util.*;
 import java.util.concurrent.*;
 
+import app.model.MethodInvoker;
 import app.model.game.ObjectSerializer;
 import app.model.game.PlayerProperties;
 import app.model.game.Tile;
@@ -33,11 +34,11 @@ public class CommunicationHandler {
 
     public void connectMe(String name) {
         try {
-            out.println("0,connectMe," + name);
+            out.println("0" + "," + MethodInvoker.connectMe + "," + name);
             String[] ans = in.readLine().split(",");
             if (!ans[2].equals("0")) {
                 this.myId = Integer.parseInt(ans[2]);
-                this.quitGameString = myId + ",quitGame,true";
+                this.quitGameString = myId + "," + MethodInvoker.quitGame + "," + "true";
                 // PRINT DEBUG
                 System.out.println("CommHandler: got my id " + myId + ", " + name + " is Connected!");
             } else {
@@ -49,17 +50,18 @@ public class CommunicationHandler {
         }
     }
 
-    public void addMyBookChoice(String book) {
+    public void addMyBookChoice(String myBooksSerilized) {
         try {
-            out.println(myId + ",myBookChoice," + book);
+            out.println(myId + "," + MethodInvoker.myBooksChoice + "," + myBooksSerilized);
             String[] ans = in.readLine().split(",");
             int id = Integer.parseInt(ans[0]);
             String modifier = ans[1];
             String value = ans[2];
-            if (id == myId && modifier.equals("myBookChoice") && value.equals("true")) {
+            //System.out.println("\n\n\n\n\n\n\n\n\n\n"+modifier+"\n\n\n\n\n\n\n\n\n\n");
+            if (id == myId && modifier.equals(MethodInvoker.myBooksChoice) && value.equals("true")) {
 
                 // PRINT DEBUG
-                System.out.println("CommHandler: your book " + book + " is set up! starting chat...");
+                System.out.println("CommHandler: your book " + myBooksSerilized + " is set up! starting chat...");
                 startUpdateListener();
 
             } else {
@@ -82,7 +84,7 @@ public class CommunicationHandler {
                     if (serverMessage.equals("updateAll")) {
                         requestAllStates();
                     } else {
-                        if (serverMessage.equals("ready"))
+                        if (serverMessage.equals(MethodInvoker.ready))
                             continue;
                         String[] params = serverMessage.split(",");
                         int messageId = Integer.parseInt(params[0]);
@@ -106,12 +108,12 @@ public class CommunicationHandler {
     }
 
     private void requestAllStates() {
-        sendMessage("getCurrentBoard", "true");
-        sendMessage("isMyTurn", "true");
-        sendMessage("getMyWords", "true");
-        sendMessage("getMyTiles", "true");
-        sendMessage("getMyScore", "true");
-        sendMessage("getOthersScore", "true");
+        sendMessage(MethodInvoker.getCurrentBoard, "true");
+        sendMessage(MethodInvoker.isMyTurn, "true");
+        sendMessage(MethodInvoker.getMyWords, "true");
+        sendMessage(MethodInvoker.getMyTiles, "true");
+        sendMessage(MethodInvoker.getMyScore, "true");
+        sendMessage(MethodInvoker.getOthersInfo, "true");
         // while (playerProperties.getMyBoard() == null &&
         // playerProperties.getMyHandTiles() == null
         // && playerProperties.getMyWords() == null &&
@@ -122,34 +124,34 @@ public class CommunicationHandler {
 
     private void handleResponse(String modifier, String returnedVal) {
         switch (modifier) {
-            case "getOthersScore":
-                getOtherScoreHandler(returnedVal);
+            case MethodInvoker.getOthersInfo:
+                getOtherInfoHandler(returnedVal);
                 break;
-            case "getCurrentBoard":
+            case MethodInvoker.getCurrentBoard:
                 getCurrentBoardHandler(returnedVal);
                 break;
-            case "getMyScore":
+            case MethodInvoker.getMyScore:
                 getMyScoreHandler(returnedVal);
                 break;
-            case "getMyTiles":
+            case MethodInvoker.getMyTiles:
                 getMyTilesHandler(returnedVal);
                 break;
-            case "getMyWords":
+            case MethodInvoker.getMyWords:
                 getMyWordsHandler(returnedVal);
                 break;
-            case "isMyTurn":
+            case MethodInvoker.isMyTurn:
                 isMyTurnHandler(returnedVal);
                 break;
-            case "tryPlaceWord":
+            case MethodInvoker.tryPlaceWord:
                 tryPlaceWordHandler(returnedVal);
                 break;
-            case "challenge":
+            case MethodInvoker.challenge:
                 challengeHandler(returnedVal);
                 break;
-            case "skipTurn":
+            case MethodInvoker.skipTurn:
                 skipTurnHandler(returnedVal);
                 break;
-            case "quitGame":
+            case MethodInvoker.quitGame:
                 quitGameHandler(returnedVal);
                 break;
             default:
@@ -307,7 +309,7 @@ public class CommunicationHandler {
         }
     }
 
-    private void getOtherScoreHandler(String returnedVal) {
+    private void getOtherInfoHandler(String returnedVal) {
         if (returnedVal.equals("false")) {
             // PRINT DEBUG
             System.out.println("CommHandler: cant get others Scores");
@@ -316,9 +318,9 @@ public class CommunicationHandler {
             System.out.println("CommHandler: " + returnedVal);
         } else {
             try {
-                Map<String, Integer> othersScores = (Map<String, Integer>) ObjectSerializer
+                Map<String, String> othersScores = (Map<String, String>) ObjectSerializer
                         .deserializeObject(returnedVal);
-                playerProperties.setPlayersScore(othersScores);
+                playerProperties.setPlayersInfo(othersScores);
             } catch (ClassNotFoundException | IOException e) {
                 e.printStackTrace();
             }

@@ -45,4 +45,8 @@ public class CacheManager {
         }
     }
 
+    public int getSize(){
+        return cache.size();
+    }
+
 }

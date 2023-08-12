@@ -1,6 +1,8 @@
 package app.model.test;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import app.model.game.*;
 import app.model.server.*;
@@ -22,7 +24,13 @@ public class GameManagerTest {
         }
         //g.setGameServerSocket("localhost", 11224);
         int myId = g.connectGuestHandler(myName);
-        g.addBookHandler("Harray Potter.txt");
+        List<String> myBooks = new ArrayList<>();
+        myBooks.add("Harray Potter.txt");
+        String myBooksList;
+        try {
+            myBooksList = ObjectSerializer.serializeObject(myBooks);
+            g.addBooksHandler(myBooksList);
+        } catch (IOException e) { }
         g.setReady();
         // g.addBookHandler("Frank Herbert - Dune.txt");
         // g.addBookHandler("Harray Potter.txt");
@@ -30,10 +38,7 @@ public class GameManagerTest {
             System.out.println("problem with ready to play");
         }
         Tile[] t = new Tile[4]; // McGonagall
-        t[0] = g.getGameBag().getTile('A');
-        t[1] = g.getGameBag().getTile('A');
-        t[2] = g.getGameBag().getTile('A');
-        t[3] = g.getGameBag().getTile('B');
+
         // t[4] = g.getGameBag().getTile('N');
         // t[5] = g.getGameBag().getTile('A');
         // t[6] = g.getGameBag().getTile('G');

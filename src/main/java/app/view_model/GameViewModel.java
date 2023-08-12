@@ -2,6 +2,8 @@ package app.view_model;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import app.model.GameModel;
 import app.model.game.*;
@@ -51,7 +53,9 @@ public class GameViewModel extends Observable implements Observer {
     }
 
     public static ObservableList<String> getBookList() {
-        return FXCollections.observableArrayList(GameManager.get().getFullBookList().keySet());
+        List<String> sortedBookList = new ArrayList<>(GameManager.get().getFullBookList().keySet());
+        Collections.sort(sortedBookList);
+        return FXCollections.observableArrayList(sortedBookList);
     }
 
     public void connectMe(String name, String ip, int port) {
@@ -101,8 +105,8 @@ public class GameViewModel extends Observable implements Observer {
             this.myWordsView = FXCollections.observableArrayList(obsWords);
 
             List<String> obsOthers = new ArrayList<>();
-            for (String n : gameModel.getOthersScore().keySet()) {
-                obsOthers.add(n + ": " + getPlayerProperties().getPlayersScore().get(n));
+            for (String n : gameModel.getOthersInfo().keySet()) {
+                obsOthers.add(n + ":" + getPlayerProperties().getOtherPlayersInfo().get(n));
             }
             this.othersScoreView = FXCollections.observableArrayList(obsOthers);
 

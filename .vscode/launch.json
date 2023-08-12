@@ -6,6 +6,20 @@
     "configurations": [
         {
             "type": "java",
+            "name": "LocalGameServer",
+            "request": "launch",
+            "mainClass": "app.view.LocalGameServer",
+            "projectName": "BookScrableApp"
+        },
+        {
+            "type": "java",
+            "name": "DictionaryManager",
+            "request": "launch",
+            "mainClass": "app.model.server.DictionaryManager",
+            "projectName": "BookScrableApp"
+        },
+        {
+            "type": "java",
             "name": "GameManagerTest",
             "request": "launch",
             "mainClass": "app.model.test.GameManagerTest",

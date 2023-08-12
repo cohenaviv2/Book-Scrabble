@@ -26,39 +26,68 @@ public class RunGameServer {
 
     public static void main(String[] args) {
         try {
-            Properties properties = loadProperties();
-            String GAME_SERVER_IP = properties.getProperty("GAME_SERVER_IP");
-            int GAME_SERVER_PORT = Integer.parseInt(properties.getProperty("GAME_SERVER_PORT"));
-            Socket oracle_game_server = new Socket(GAME_SERVER_IP , GAME_SERVER_PORT);
             //
-            System.out.println("connect to oracle_game_server: " + oracle_game_server.isConnected());
-            //
-            PrintWriter out = new PrintWriter(oracle_game_server.getOutputStream(),true);
-            Scanner in = new Scanner(oracle_game_server.getInputStream());
-            //
-            String req = "C,"+"server/books/Harray Potter.txt,server/books/Alice in Wonderland.txt,"+"SEND";
-            out.println(req);
-            String ans = in.nextLine();
-            System.err.println(ans);
-            //
-            oracle_game_server.close();
+            String ack = "ack";
+            String books = "server/books/Lord of the Flies.txt,server/books/Harray Potter.txt,server/books/All's Well That Ends Well.txt,server/books/Charlie and the Chocolate Factory.txt,server/books/Alice in Wonderland.txt,server/books/Dune - Frank Herbert.txt,server/books/Moby-Dick.txt,";
+            String status = "status";
+            Scanner input = new Scanner(System.in);
+            System.out.println("1 - ack\n2 - status\n3 - query\n4 - challange\n0 - Exit\n");
+            String clInput;
+            while (!(clInput = input.nextLine()).equals("0")) {
+                Properties properties = loadProperties();
+                String GAME_SERVER_IP = properties.getProperty("GAME_SERVER_IP");
+                int GAME_SERVER_PORT = Integer.parseInt(properties.getProperty("GAME_SERVER_PORT"));
+                Socket oracle_game_server = new Socket(GAME_SERVER_IP, GAME_SERVER_PORT);
+                //
+                PrintWriter out = new PrintWriter(oracle_game_server.getOutputStream(), true);
+                Scanner in = new Scanner(oracle_game_server.getInputStream());
+                switch (clInput) {
+                    case "1": {
+                        out.println(ack);
+                        String ans = in.nextLine();
+                        System.out.println("\n" + ans + "\n");
+                        break;
+                    }
+                    case "2": {
+                        out.println(status);
+                        String ans = in.nextLine();
+                        System.out.println("\nNumber of books: " + ans + "\n");
+                        int size;
+                        if ((size = Integer.parseInt(ans)) > 0) {
+                            for (int i = 0; i < size; i++) {
+                                ans = in.nextLine();
+                                System.out.println(ans);
+                            }
+                        }
+                        System.out.println();
+                        break;
+                    }
+                    case "3": {
+                        System.out.println("Enter word:");
+                        String word = input.nextLine();
+                        out.println(
+                                "Q," + books + word);
+                        String ans = in.nextLine();
+                        System.out.println("\n" + ans + "\n");
+                        break;
+                    }
+                    case "4": {
+                        System.out.println("Enter word:");
+                        String word = input.nextLine();
+                        out.println(
+                                "C," +books + word);
+                        String ans = in.nextLine();
+                        System.out.println("\n" + ans + "\n");
+                        break;
+                    }
+                }
+                oracle_game_server.close();
+                System.out.println("1 - ack\n2 - status\n3 - query\n4 - challange\n0 - Exit\n");
+                
+            }
+            input.close();
 
         } catch (IOException e) {
         }
-
-        // System.out.println("########### GAME SERVER ###########\n");
-
-        // // Create and start the Game server on port 11224:
-        // MyServer gameServer = new MyServer(PORT, new BookScrabbleHandler());
-        // gameServer.start();
-        // System.out.println(
-        // "Game server is running On port 11224 in the background...\n\n PRESS 0 TO
-        // CLOSE THE GAME SERVER");
-        // Scanner s = new Scanner(System.in);
-        // if (s.nextLine().equals("0")) {
-        // gameServer.close();
-        // s.close();
-        // System.out.println("Game server is closed");
-        // }
     }
 }

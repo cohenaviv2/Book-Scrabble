@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.*;
 
 import app.model.GameModel;
+import app.model.MethodInvoker;
 import app.model.game.*;
 import app.model.server.*;
 import app.view_model.MessageReader;
@@ -11,7 +12,7 @@ import app.view_model.MessageReader;
 public class HostModel extends Observable implements GameModel, Observer {
 
     private static HostModel hm = null; // Singleton
-    private static final int HOST_PORT = 8040;
+    public static final int HOST_PORT = 8040;
     public MyServerParallel hostServer; // Host server - support connection of up to 3 guests parallel
     private GameManager gameManager; // game manager contains all the game data and logic
     private PlayerProperties playerProperties; // All player properties for the game view
@@ -30,7 +31,7 @@ public class HostModel extends Observable implements GameModel, Observer {
         return hm;
     }
 
-    public void stopHostServer(){
+    public void stopHostServer() {
         hostServer.close();
     }
 
@@ -48,6 +49,10 @@ public class HostModel extends Observable implements GameModel, Observer {
         }
     }
 
+    public boolean isGameServerConnect() {
+        return this.gameManager.isGameServerConnect();
+    }
+
     @Override
     public void connectMe(String name, String ip, int port) {
         /*
@@ -58,7 +63,12 @@ public class HostModel extends Observable implements GameModel, Observer {
          * also creates host player profile and sets the Game Properties
          */
 
-        //gameManager.setGameServerSocket(ip, port);
+        // gameManager.setGameServerSocket(ip, port);
+        if (port != 0) {
+            this.hostServer.close();
+            this.hostServer = new MyServerParallel(port, new GuestHandler());
+            this.hostServer.start();
+        }
         gameManager.createHostPlayer(name);
         playerProperties = PlayerProperties.get();
         playerProperties.setMyName(name);
@@ -68,12 +78,13 @@ public class HostModel extends Observable implements GameModel, Observer {
     }
 
     @Override
-    public void myBooksChoice(String bookName) {
+    public void myBooksChoice(String myBooksSerilized) {
         /*
          * Adds this book to the book list of the game
          * each player chooses one book (Maximum 4)
          */
-        String ans = gameManager.processPlayerInstruction(gameManager.getHostPlayerId(), "myBookChoice", bookName);
+        String ans = gameManager.processPlayerInstruction(gameManager.getHostPlayerId(), MethodInvoker.myBooksChoice,
+                myBooksSerilized);
 
         // PRINT DEBUG
         // System.out.println("HostModel: myBookChoice ans = " + ans);
@@ -89,7 +100,7 @@ public class HostModel extends Observable implements GameModel, Observer {
         if (playerProperties.isMyTurn()) {
             try {
                 String queryWord = ObjectSerializer.serializeObject(myWord);
-                String ans = gameManager.processPlayerInstruction(gameManager.getHostPlayerId(), "tryPlaceWord",
+                String ans = gameManager.processPlayerInstruction(gameManager.getHostPlayerId(), MethodInvoker.tryPlaceWord,
                         queryWord);
                 if (ans.equals("false")) {
 
@@ -131,7 +142,7 @@ public class HostModel extends Observable implements GameModel, Observer {
     @Override
     public void challenge() {
         if (playerProperties.isMyTurn()) {
-            String ans = gameManager.processPlayerInstruction(gameManager.getHostPlayerId(), "challenge", "true");
+            String ans = gameManager.processPlayerInstruction(gameManager.getHostPlayerId(), MethodInvoker.challenge, "true");
             if (ans.equals("false")) {
 
                 // PRINT DEBUG
@@ -157,7 +168,7 @@ public class HostModel extends Observable implements GameModel, Observer {
     public void skipTurn() {
         if (playerProperties.isMyTurn()) {
 
-            String ans = gameManager.processPlayerInstruction(gameManager.getHostPlayerId(), "skipTurn", "true");
+            String ans = gameManager.processPlayerInstruction(gameManager.getHostPlayerId(), MethodInvoker.skipTurn, "true");
 
             if (ans.equals("true")) {
                 // playerProperties.setMyTurn(false);
@@ -180,17 +191,17 @@ public class HostModel extends Observable implements GameModel, Observer {
     }
 
     @Override
-    public Map<String, Integer> getOthersScore() {
-        String ans = gameManager.processPlayerInstruction(gameManager.getHostPlayerId(), "getOthersScore", "true");
+    public Map<String, String> getOthersInfo() {
+        String ans = gameManager.processPlayerInstruction(gameManager.getHostPlayerId(), MethodInvoker.getOthersInfo, "true");
         if (ans.equals("false")) {
             // PRINT DEBUG
             System.out.println("Cant get your others scores");
             return null;
         } else {
-            Map<String, Integer> othersScores;
+            Map<String, String> othersInfo;
             try {
-                othersScores = (Map<String, Integer>) ObjectSerializer.deserializeObject(ans);
-                return othersScores;
+                othersInfo = (Map<String, String>) ObjectSerializer.deserializeObject(ans);
+                return othersInfo;
             } catch (ClassNotFoundException | IOException e) {
                 e.printStackTrace();
             }
@@ -202,7 +213,7 @@ public class HostModel extends Observable implements GameModel, Observer {
 
     @Override
     public int getMyScore() {
-        String ans = gameManager.processPlayerInstruction(gameManager.getHostPlayerId(), "getMyScore", "true");
+        String ans = gameManager.processPlayerInstruction(gameManager.getHostPlayerId(), MethodInvoker.getMyScore, "true");
         if (ans.equals("false")) {
             return 0;
         } else {
@@ -212,7 +223,7 @@ public class HostModel extends Observable implements GameModel, Observer {
 
     @Override
     public boolean isMyTurn() {
-        String ans = gameManager.processPlayerInstruction(gameManager.getHostPlayerId(), "isMyTurn", "true");
+        String ans = gameManager.processPlayerInstruction(gameManager.getHostPlayerId(), MethodInvoker.isMyTurn, "true");
         if (ans.equals("false")) {
             return false;
         } else if (ans.equals("true")) {
@@ -230,7 +241,7 @@ public class HostModel extends Observable implements GameModel, Observer {
 
     @Override
     public Tile[][] getCurrentBoard() {
-        String ans = gameManager.processPlayerInstruction(gameManager.getHostPlayerId(), "getCurrentBoard", "true");
+        String ans = gameManager.processPlayerInstruction(gameManager.getHostPlayerId(), MethodInvoker.getCurrentBoard, "true");
         if (ans.equals("false")) {
             // PRINT DEBUG
             System.out.println("cant get board");
@@ -254,7 +265,7 @@ public class HostModel extends Observable implements GameModel, Observer {
 
     @Override
     public ArrayList<Tile> getMyTiles() {
-        String ans = gameManager.processPlayerInstruction(gameManager.getHostPlayerId(), "getMyTiles", "true");
+        String ans = gameManager.processPlayerInstruction(gameManager.getHostPlayerId(), MethodInvoker.getMyTiles, "true");
         if (ans.equals("false")) {
             // PRINT DEBUG
             System.out.println("cant get your tiles");
@@ -278,7 +289,7 @@ public class HostModel extends Observable implements GameModel, Observer {
 
     @Override
     public ArrayList<Word> getMyWords() {
-        String ans = gameManager.processPlayerInstruction(gameManager.getHostPlayerId(), "getMyWords", "true");
+        String ans = gameManager.processPlayerInstruction(gameManager.getHostPlayerId(), MethodInvoker.getMyWords, "true");
         if (ans.equals("false")) {
             // PRINT DEBUG
             System.out.println("cant get your words");
@@ -305,7 +316,7 @@ public class HostModel extends Observable implements GameModel, Observer {
         this.playerProperties.setMyTiles(getMyTiles());
         this.playerProperties.setMyScore(getMyScore());
         this.playerProperties.setMyWords(getMyWords());
-        this.playerProperties.setPlayersScore(getOthersScore());
+        this.playerProperties.setPlayersInfo(getOthersInfo());
         this.playerProperties.setMyTurn(isMyTurn());
         System.out.println(playerProperties);
     }

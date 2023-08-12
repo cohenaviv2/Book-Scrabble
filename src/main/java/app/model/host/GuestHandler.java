@@ -2,6 +2,7 @@ package app.model.host;
 
 import java.io.*;
 
+import app.model.MethodInvoker;
 import app.model.game.GameManager;
 import app.model.server.ClientHandler;
 import app.view_model.MessageReader;
@@ -63,12 +64,12 @@ public class GuestHandler implements ClientHandler {
     private void connectGuest() throws IOException {
         String message = in.readLine();
         String[] params = message.split(",");
-        if (params[0].equals("0") && params[1].equals("connectMe")) {
+        if (params[0].equals("0") && params[1].equals(MethodInvoker.connectMe)) {
             String name = params[2];
             this.myId = gameManager.connectGuestHandler(name);
-            this.quitGameString = myId + ",quitGame,true"; // quit game modifier
+            this.quitGameString = myId + "," + MethodInvoker.quitGame + "," + "true"; // quit game modifier
             // this.yourTurnString = myId + ",isMyTurn,true"; // my turn modifier
-            String connectionMessage = myId + ",connectMe," + myId; // ack & id
+            String connectionMessage = myId + "," + MethodInvoker.connectMe + "," + myId; // ack & id
             out.println(connectionMessage); // send id
             // PRINT DEBUG
             System.out.println("GUEST HANDLER: guest " + myId + " connected!\n");
@@ -79,20 +80,20 @@ public class GuestHandler implements ClientHandler {
     }
 
     private void waitingRoom() throws IOException, InterruptedException {
-        boolean book = false, ready = false;
+        boolean isBooksSet = false, ready = false;
 
         while (!gameManager.isReadyToPlay()) {
             String message;
-            if (!book) {
+            if (!isBooksSet) {
                 message = in.readLine();
                 String[] params = message.split(",");
                 int id = Integer.parseInt(params[0]);
-                if (id == myId && params[1].equals("myBookChoice")) {
-                    String bookName = params[2];
-                    String ans = gameManager.addBookHandler(bookName);
+                if (id == myId && params[1].equals(MethodInvoker.myBooksChoice)) {
+                    String bookList = params[2];
+                    String ans = gameManager.addBooksHandler(bookList);
                     if (ans.equals("true")) {
-                        book = true;
-                        out.println(myId + ",myBookChoice," + ans);
+                        isBooksSet = true;
+                        out.println(myId + "," + MethodInvoker.myBooksChoice + "," + ans);
                         // PRINT DEBUG
                         System.out.println("GUEST HANDLER: guest " + myId + " set book choice! \n");
                     } else {
@@ -105,7 +106,7 @@ public class GuestHandler implements ClientHandler {
                     message = in.readLine();
                     params = message.split(",");
                     id = Integer.parseInt(params[0]);
-                    if (id == myId && params[1].equals("ready")) {
+                    if (id == myId && params[1].equals(MethodInvoker.ready)) {
                         if (params[2].equals("true")) {
                             gameManager.setReady();
                             // PRINT DEBUG
@@ -144,7 +145,7 @@ public class GuestHandler implements ClientHandler {
         String playerName = this.gameManager.getPlayerByID(myId).getName();
         out.println(quitGameString);
         gameManager.quitGameHandler(quitGameString);
-        MessageReader.setMsg(playerName+" has quit the game!");
+        MessageReader.setMsg(playerName + " has quit the game!");
         // PRINT DEBUG
         System.out.println("GUEST HANDLER: chat ended, " + myId + " has quit the game\n");
     }
