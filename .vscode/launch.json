@@ -6,6 +6,20 @@
     "configurations": [
         {
             "type": "java",
+            "name": "GridPaneEffectExample",
+            "request": "launch",
+            "mainClass": "app.view.GridPaneEffectExample",
+            "projectName": "BookScrableApp"
+        },
+        {
+            "type": "java",
+            "name": "WindowController",
+            "request": "launch",
+            "mainClass": "app.view.WindowController",
+            "projectName": "BookScrableApp"
+        },
+        {
+            "type": "java",
             "name": "LocalGameServer",
             "request": "launch",
             "mainClass": "app.view.LocalGameServer",

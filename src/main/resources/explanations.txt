@@ -1,18 +1,22 @@
-game-mode=In Host Mode, you can host a game for up to 4 players,
-including yourself.
-As the host, you run a server and send data to the guests.
-You can also send word queries to the game server.
+game-mode-host=In Host Mode, you can host a game for up to 4 players, including yourself.
+As the host, you'll be running a host server to send and receive data to the guests.
+You will also connect and send word queries to the game server - which is responsible
+for checking wheather a word is dictionary legal in the game books terms.
 
-In Guest Mode, you join an existing game hosted by another player.
-As a guest, you connect to the host's server and participate as
-one of the players.
-Guest mode allows you to enjoy the multiplayer experience
-without hosting the game.
-host-mode=In Host Mode,  you're in charge. As the host, you manage a game server right on your machine. This server connects you with up to 3 guests, forming a group of 4 players including you.
+game-mode-guest=In Guest Mode, you'll be joining an existing game hosted by another player.
+As a guest, you connect to the host's server and participate as one of the players.
+Guest mode allows you to enjoy the multiplayer experience without hosting the game.
+host-mode=In Host Mode,  you're in charge.
+As the host, you manage a game server right on your machine.
+This means that you'll be running a host server to connects you with up to 3 guests,
+forming a group of 4 players including you.
 
-Imagine it as your personal hub in your own space. You're not just a player; you're the server admin. Your role is to ensure everyone connects and communicates smoothly on your local setup.
+Imagine it as your personal hub in your own space.
+You're not just a player; you're the server admin.
+Your role is to ensure everyone connects and communicates smoothly on your local setup.
 
-But that's not all. You also connect to a game server responsible for checking word legality. This separate server ensures fair play and maintains dictionary standards.
+But that's not all. You also connect to a game server responsible for checking word legality.
+This separate server ensures fair play and maintains dictionary standards.
 
 Choose Host Mode, take control locally, and link up to 3 players to your game hub for multiplayer excitement.
 guest-mode=In Guest Mode, you're a player on the move.

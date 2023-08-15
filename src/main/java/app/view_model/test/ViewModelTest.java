@@ -1,5 +1,6 @@
 package app.view_model.test;
 
+import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -21,19 +22,24 @@ public class ViewModelTest {
             hm.ready();
         });
         // Set guest view-model
-        gvm.connectMe("Aviv", "localhost", 8040);
+        try {
+            gvm.connectMe("Aviv", "localhost", 8040);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         gvm.myBookChoice("Harray Potter");
         gvm.ready();
 
        
         System.out.println();
         System.err.println(gvm.getCurrentBoard() != null);
-        System.err.println(gvm.getOthersScores() != null);
+        System.err.println(gvm.getOthersInfoProperty() != null);
         System.err.println(gvm.getPlayerNameProperty() != null);
         System.err.println(gvm.getPlayerScoreProperty() != null);
-        System.err.println(gvm.getPlayerTiles() != null);
+        System.err.println(gvm.getPlayerTilesProperty() != null);
         System.err.println(gvm.getPlayerTurnProperty() != null);
-        System.err.println(gvm.getPlayerWords() != null);
+        System.err.println(gvm.getPlayerWordsProperty() != null);
 
         gvm.quitGame();
         hm.quitGame();

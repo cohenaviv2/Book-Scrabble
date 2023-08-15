@@ -3,34 +3,54 @@ package app.view;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.*;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Stack;
 
 import app.model.game.ObjectSerializer;
 import app.model.game.Tile;
 import app.model.host.HostModel;
 import app.view_model.GameViewModel;
 import app.view_model.MessageReader;
-import javafx.beans.binding.*;
-import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
-import javafx.scene.text.Text;
-import javafx.scene.text.TextAlignment;
-import javafx.application.*;
+import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.StringBinding;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
-import javafx.scene.layout.*;
+import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
+import javafx.scene.text.TextFlow;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import javafx.scene.image.ImageView;
-import javafx.scene.input.MouseEvent;
 
 public class WindowController {
 
@@ -41,18 +61,32 @@ public class WindowController {
     private int CUSTOM_PORT = 0;
     String msg = MessageReader.getMsg();
 
+    private GridPane gameBoard;
     private Scene gameFlowScene;
     private Map<String, String> txtExplanations;
-    private List<String> selectedBooks = new ArrayList<>();
+    private List<String> selectedBooks;
     private String MY_BOOKS_SERILIZED;
-    private List<Pane> selectedCells = new ArrayList<>();
+    private List<Pane> boundariesCells;
+    private Stack<Pane> placementCelles;
+    private List<Pane> placementList;
     private Button tryPlaceWordButton;
     private ObservableList<Button> tileButtons;
-    private boolean cellSelected = false;
+
+    private final String CSS_STYLESHEET = getClass().getResource("/style.css").toExternalForm();
+    private final Font EMOJI_FONT = Font.loadFont(getClass().getResourceAsStream("src\\main\\resources\\seguiemj.ttf"),
+            24);
+
+    private double xOffset = 0;
+    private double yOffset = 0;
+    HBox osBar;
 
     public WindowController(Stage primaryStage, GameViewModel gameViewModel) {
         this.primaryStage = primaryStage;
         this.gameViewModel = gameViewModel;
+        this.selectedBooks = new ArrayList<>();
+        this.boundariesCells = new ArrayList<>();
+        this.placementCelles = new Stack<>();
+        this.placementList = new ArrayList<>();
         this.txtExplanations = new HashMap<>();
         try (BufferedReader reader = new BufferedReader(new FileReader("src\\main\\resources\\explanations.txt"))) {
             String line;
@@ -81,12 +115,6 @@ public class WindowController {
         }
     }
 
-    String CSS_STYLESHEET = getClass().getResource("/style.css").toExternalForm();
-
-    private double xOffset = 0;
-    private double yOffset = 0;
-    HBox osBar;
-
     private void handleMouseDragged(MouseEvent event) {
         Stage stage = (Stage) osBar.getScene().getWindow();
         stage.setX(event.getScreenX() - xOffset);
@@ -107,6 +135,7 @@ public class WindowController {
         osBar.setMinHeight(30);
 
         Button closeButton = new Button("\u2718");
+        closeButton.setFont(EMOJI_FONT);
         closeButton.getStyleClass().add("red-button");
         // closeButton.setMinHeight(40);
         // closeButton.setPrefHeight(40);
@@ -123,6 +152,7 @@ public class WindowController {
 
         Button minimizeButton = new Button("_");
         minimizeButton.getStyleClass().add("green-button");
+        minimizeButton.setFont(EMOJI_FONT);
 
         minimizeButton.setOnAction(event -> {
             Stage stage = (Stage) minimizeButton.getScene().getWindow();
@@ -157,6 +187,9 @@ public class WindowController {
         customStage.setY(customStageY);
 
         Scene customScene;
+        VBox customRoot = new VBox(30);
+        customRoot.setAlignment(Pos.CENTER);
+        customRoot.getStyleClass().addAll("content-background");
 
         if (isQuitGame) {
             Button yesButton = new Button("Yes");
@@ -177,13 +210,10 @@ public class WindowController {
             buttons.setAlignment(Pos.CENTER);
 
             Text quitGameText = new Text("Are you sure you want to quit game?");
-            quitGameText.setFont(new Font(14));
+            quitGameText.setFont(Font.font("Arial", FontWeight.BOLD, 16));
             quitGameText.setTextAlignment(TextAlignment.CENTER);
 
-            VBox customRoot = new VBox(30);
-            customRoot.setAlignment(Pos.CENTER);
-            customRoot.getStyleClass().addAll("content-background");
-            customRoot.getChildren().addAll(quitGameText,buttons);
+            customRoot.getChildren().addAll(quitGameText, buttons);
 
             customScene = new Scene(customRoot, customStageWidth, customStageHeight);
         } else {
@@ -193,11 +223,8 @@ public class WindowController {
 
             StackPane buttonPane = new StackPane(button);
             BorderPane.setAlignment(buttonPane, Pos.TOP_CENTER);
-            buttonPane.setPadding(new Insets(40, 0, 0, 0)); // Add padding to the top
+            // buttonPane.setPadding(new Insets(30, 0, 0, 0)); // Add padding to the top
 
-            VBox customRoot = new VBox();
-            customRoot.setAlignment(Pos.CENTER);
-            customRoot.getStyleClass().addAll("content-background");
             customRoot.getChildren().addAll(content, buttonPane);
 
             customScene = new Scene(customRoot, customStageWidth, customStageHeight);
@@ -239,12 +266,19 @@ public class WindowController {
         Button helpButton = new Button("\u2753");
         helpButton.getStyleClass().add("purple-button");
 
-        Text contentLabel = new Text(txtExplanations.get("game-mode"));
-        contentLabel.getStyleClass().add("content-label");
-        VBox centerContent = new VBox(10, contentLabel);
+        Text hostModeTitle = new Text("Host Mode");
+        hostModeTitle.setFont(Font.font("Arial", FontWeight.BOLD, 20));
+        Text hostModeText = new Text(txtExplanations.get("game-mode-host"));
+        hostModeText.getStyleClass().add("content-label");
+        Text guestModeTitle = new Text("Guest Mode");
+        guestModeTitle.setFont(Font.font("Arial", FontWeight.BOLD, 20));
+        Text guestModeText = new Text(txtExplanations.get("game-mode-guest"));
+        guestModeText.getStyleClass().add("content-label");
+
+        VBox centerContent = new VBox(10, hostModeTitle, hostModeText, guestModeTitle, guestModeText);
         centerContent.setAlignment(Pos.CENTER);
 
-        helpButton.setOnAction(e -> openCustomWindow(centerContent, "red", "X", 500, 350, false));
+        helpButton.setOnAction(e -> openCustomWindow(centerContent, "red", "X", 650, 400, false));
 
         // Event handler for hostButton
         hostButton.setOnAction(event -> {
@@ -296,12 +330,36 @@ public class WindowController {
             imageView.setFitWidth(120); // Adjust the width of the image here
             imageView.setPreserveRatio(true);
 
-            Label bookLabel = new Label(book);
-            bookLabel.setAlignment(Pos.CENTER);
-            bookLabel.getStyleClass().add("book-label");
-            bookLabel.setTextFill(Color.WHITE);
+            String firstLine = "";
+            String secondLine = "";
 
-            bookBox.getChildren().addAll(imageView, bookLabel);
+            if (book.length() > 18) {
+                int splitIndex = book.substring(0, 18).lastIndexOf(" ");
+                if (splitIndex != -1) {
+                    firstLine = book.substring(0, splitIndex);
+                    secondLine = book.substring(splitIndex + 1);
+                } else {
+                    firstLine = book.substring(0, 18);
+                    secondLine = book.substring(18);
+                }
+            } else {
+                firstLine = book;
+            }
+
+            TextFlow textFlow = new TextFlow();
+
+            Text firstLineText = new Text(firstLine);
+            Text secondLineText = new Text(secondLine);
+            firstLineText.setFill(Color.WHITE);
+            secondLineText.setFill(Color.WHITE);
+            secondLineText.setTextAlignment(TextAlignment.CENTER);
+
+            textFlow.getChildren().addAll(firstLineText, new Text("\n"), secondLineText);
+
+            textFlow.getStyleClass().add("book-label");
+            textFlow.setTextAlignment(TextAlignment.CENTER);
+
+            bookBox.getChildren().addAll(imageView, textFlow);
 
             bookBox.setOnMouseClicked(event -> {
                 if (selectedBooks.contains(book)) {
@@ -357,7 +415,7 @@ public class WindowController {
         HBox osBar = createOsBar(true);
 
         // My name
-        Label nameLabel = new Label("My name");
+        Label nameLabel = new Label("My name:");
         nameLabel.getStyleClass().add("login-label");
         TextField nameTextField = new TextField();
         //
@@ -368,7 +426,7 @@ public class WindowController {
         nameTextField.getStyleClass().add("text-field");
 
         // Number of players
-        Label numOfPlayersLabel = new Label("Number of Players");
+        Label numOfPlayersLabel = new Label("Number of Players:");
         numOfPlayersLabel.getStyleClass().add("login-label");
         ComboBox<Integer> numOfPlayersComboBox = new ComboBox<>();
         numOfPlayersComboBox.setValue(2);
@@ -376,7 +434,7 @@ public class WindowController {
         numOfPlayersComboBox.getStyleClass().add("text-field");
 
         // Select books
-        Label selectBookLabel = new Label("Select Books");
+        Label selectBookLabel = new Label("Select Books:");
         selectBookLabel.getStyleClass().add("login-label");
         Button booksButton = new Button("Select Books");
         booksButton.getStyleClass().add("red-button");
@@ -390,7 +448,7 @@ public class WindowController {
         gameServerTitle.setFont(Font.font("Arial", FontWeight.BOLD, 18));
         Text contentLabel = new Text(
                 "The game server is responsible for checking whether\nthe word is legal in terms of the book dictionary.\nGame Server is uploaded and\npowered by Oracle Cloud\nOn Ubuntu 22.04 VM");
-        contentLabel.setFont(new Font(14));
+        contentLabel.setFont(new Font(16));
         contentLabel.setTextAlignment(TextAlignment.CENTER);
         Button connectionButton = new Button("Check Connection");
         connectionButton.getStyleClass().add("green-button");
@@ -418,7 +476,7 @@ public class WindowController {
         customPortTitle.setFont(Font.font("Arial", FontWeight.BOLD, 18));
         Text customPortLabel = new Text(
                 "Host server runs by default on port 8040\n You can choose a custom port:");
-        customPortLabel.setFont(new Font(14));
+        customPortLabel.setFont(new Font(16));
         customPortLabel.setTextAlignment(TextAlignment.CENTER);
         TextField portField = new TextField("");
         portField.getStyleClass().add("text-field");
@@ -426,7 +484,7 @@ public class WindowController {
         portField.setMaxWidth(120);
         Text invalidPortTxt = new Text("");
         invalidPortTxt.setTextAlignment(TextAlignment.CENTER);
-        invalidPortTxt.setFont(Font.font("Arial", 12));
+        invalidPortTxt.setFont(Font.font("Arial", 14));
         Button setPortButton = new Button("Set port");
         setPortButton.getStyleClass().add("blue-button");
         portField.setOnMouseClicked(e -> invalidPortTxt.setText(""));
@@ -441,7 +499,7 @@ public class WindowController {
                 invalidPortTxt.setFill(Color.BLUE);
             } else {
                 invalidPortTxt.setText(
-                        "Please enter a valid port number. The port should be a number with a maximum 5 digits");
+                        "Please enter a valid port number.\nThe port should be a number with a maximum 5 digits");
                 invalidPortTxt.setFill(Color.RED);
             }
         });
@@ -450,7 +508,27 @@ public class WindowController {
                 invalidPortTxt);
         customPortSettings.setAlignment(Pos.CENTER);
 
-        VBox settings = new VBox(25, gameServerSettings, customPortSettings);
+        // Whats my IP
+        Text myIpText = new Text("Get your IP address and send it to your friend");
+        myIpText.setFont(new Font(16));
+        myIpText.setTextAlignment(TextAlignment.CENTER);
+        TextField myIpField = new TextField("");
+        myIpField.getStyleClass().add("text-field");
+        myIpField.setAlignment(Pos.CENTER);
+        myIpField.setMaxWidth(200);
+        Button myIpButton = new Button("What's My IP");
+        myIpButton.getStyleClass().add("yellow-button");
+        myIpButton.setOnAction(e -> {
+            try {
+                myIpField.setText(InetAddress.getLocalHost().getHostAddress());
+            } catch (UnknownHostException e1) {
+            }
+        });
+
+        VBox myIpSettings = new VBox(10, myIpText, myIpButton, myIpField);
+        myIpSettings.setAlignment(Pos.CENTER);
+
+        VBox settings = new VBox(10, gameServerSettings, customPortSettings, myIpSettings);
         settings.setAlignment(Pos.CENTER);
 
         HBox roundButtonsPane = createButtonsPane();
@@ -459,9 +537,9 @@ public class WindowController {
         hostModeExp.setTextAlignment(TextAlignment.CENTER);
         // hostModeExp.setFont(new Font(14));
         hostModeExp.getStyleClass().add("content-label");
-        helpButton.setOnAction(e -> openCustomWindow(hostModeExp, "red", "X", 500, 350, false));
+        helpButton.setOnAction(e -> openCustomWindow(hostModeExp, "red", "X", 650, 500, false));
         Button settingsButton = (Button) roundButtonsPane.getChildren().get(1);
-        settingsButton.setOnAction(e -> openCustomWindow(settings, "red", "X", 500, 550, false));
+        settingsButton.setOnAction(e -> openCustomWindow(settings, "red", "X", 500, 750, false));
 
         // SET GAME MODE
         gameViewModel.setGameMode(GAME_MODE, numOfPlayersComboBox.getValue());
@@ -475,7 +553,12 @@ public class WindowController {
             MY_NAME = nameTextField.getText();
             if (selectedBooks.size() != 0) {
                 // Call the corresponding ViewModel method to handle the "Connect me" action
-                gameViewModel.connectMe(MY_NAME, "0", CUSTOM_PORT); // 0 = default - ORACLE_GAME_SERVER
+                try {
+                    gameViewModel.connectMe(MY_NAME, "0", CUSTOM_PORT);
+                } catch (IOException e1) {
+                    // TODO Auto-generated catch block
+                    e1.printStackTrace();
+                } // 0 = default - ORACLE_GAME_SERVER
                 gameViewModel.myBookChoice(MY_BOOKS_SERILIZED);
                 gameViewModel.ready();
 
@@ -513,6 +596,7 @@ public class WindowController {
 
         Scene hostLoginFormScene = new Scene(root, 400, 600);
         hostLoginFormScene.getStylesheets().add(CSS_STYLESHEET);
+        hostLoginFormScene.setCursor(Cursor.HAND);
         primaryStage.setScene(hostLoginFormScene);
     }
 
@@ -618,7 +702,12 @@ public class WindowController {
                 if (CUSTOM_PORT == 0) {
                     CUSTOM_PORT = HostModel.HOST_PORT;
                 }
-                gameViewModel.connectMe(MY_NAME, ip, CUSTOM_PORT);
+                try {
+                    gameViewModel.connectMe(MY_NAME, ip, CUSTOM_PORT);
+                } catch (IOException e1) {
+                    // TODO Auto-generated catch block
+                    e1.printStackTrace();
+                }
                 gameViewModel.myBookChoice(MY_BOOKS_SERILIZED);
                 gameViewModel.ready();
 
@@ -748,14 +837,14 @@ public class WindowController {
         // Player Words
         Label wordsLabel = new Label("My Words:");
         ListView<String> wordsListView = new ListView<>();
-        wordsListView.setItems(gameViewModel.getPlayerWords());
+        wordsListView.setItems(gameViewModel.getPlayerWordsProperty());
 
         Label othersScoreLabel = new Label("Other Players:");
         othersScoreLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
 
         // Other players info
         ListView<String> othersScoreListView = new ListView<>();
-        othersScoreListView.setItems(gameViewModel.getOthersScores());
+        othersScoreListView.setItems(gameViewModel.getOthersInfoProperty());
 
         othersScoreListView.setCellFactory(listView -> new ListCell<String>() {
             @Override
@@ -789,86 +878,162 @@ public class WindowController {
     }
 
     private GridPane createBoardGridPane() {
-        GridPane gridPane = new GridPane();
+        gameBoard = new GridPane();
         // gridPane.setPrefSize(732, 733); // Set the desired size of the grid
 
         Tile[][] board = gameViewModel.getCurrentBoard();
         int boardSize = board.length;
 
         // Set the background image
-        gridPane.getStyleClass().add("board-background");
-        gridPane.setStyle(" -fx-effect: dropshadow(gaussian, #000000, 20, 0, 8, 2);");
+        gameBoard.getStyleClass().add("board-background");
 
         for (int row = 0; row < boardSize; row++) {
             for (int col = 0; col < boardSize; col++) {
                 Pane cellPane = new Pane();
+                cellPane.getStyleClass().add("cell");
                 cellPane.setPrefSize(60, 60);
 
-                Label letterLabel;
-                if (board[row][col] == null) {
-                    letterLabel = new Label(null);
-                    cellPane.setStyle("-fx-border-color: transparent;");
-                } else {
-                    letterLabel = new Label(String.valueOf(board[row][col].getLetter()));
-                    cellPane.setStyle("-fx-background-color: transparent; -fx-background-image: url('tiles/"
-                            + letterLabel.getText() + ".png');" +
-                            "-fx-background-size: cover; -fx-border-color: transparent; -fx-border-radius: 4px;");
+                // Label letterLabel;
+                // if (board[row][col] == null) {
+                // letterLabel = new Label(null);
+                // cellPane.setStyle("-fx-border-color: transparent;");
+                // } else {
+                // letterLabel = new Label(String.valueOf(board[row][col].getLetter()));
+                // cellPane.setStyle("-fx-background-color: transparent; -fx-background-image:
+                // url('tiles/"
+                // + letterLabel.getText() + ".png');" +
+                // "-fx-background-size: cover; -fx-border-color: transparent;
+                // -fx-border-radius: 4px;");
+                // }
+
+                if (board[row][col] != null) {
+                    String letter = String.valueOf(board[row][col].getLetter());
+                    cellPane.getStyleClass().add("character");
+                    cellPane.setStyle("-fx-background-image: url('tiles/" + letter + ".png');");
                 }
 
                 cellPane.setOnMouseClicked(event -> {
-                    if (gameViewModel.isMyTurn() && !cellSelected) {
-                        String cellStyle = cellPane.getStyle();
-                        // Toggle cell selection
-                        if (selectedCells.contains(cellPane)) {
-                            selectedCells.remove(cellPane);
-                            cellPane.setStyle("-fx-border-color: transparent;");
-                        } else if (selectedCells.size() < 2) {
-                            selectedCells.add(cellPane);
-                            cellPane.setStyle(cellStyle + "-fx-alignment: center;" +
-                                    "-fx-border-color: black; -fx-border-width: 4px; -fx-border-radius: 5px;");
-                        } else if (selectedCells.size() == 2 && selectedCells.contains(cellPane)) {
-                            selectedCells.remove(cellPane);
-                            cellPane.setStyle(cellStyle.replace(
-                                    "-fx-border-color: black; -fx-border-width: 4px; -fx-border-radius: 5px;", ""));
-                        } else {
-                            // Un-select one of the selected cells
-                            Pane selectedCell = selectedCells.get(0);
-                            selectedCells.remove(selectedCell);
-                            selectedCell.setStyle(cellStyle.replace(
-                                    "-fx-border-color: black; -fx-border-width: 4px; -fx-border-radius: 5px;", ""));
+                    //
+                    placementCelles.clear();
+                    placementList.clear();
+                    //
+                    if (gameViewModel.isMyTurn()) {
+                        if (boundariesCells.size() == 0) {
+                            boundariesCells.add(cellPane);
+                            cellPane.getStyleClass().add("selected");
+                        } else if (boundariesCells.size() == 1) {
+                            if (boundariesCells.contains(cellPane)) {
+                                boundariesCells.remove(cellPane);
+                                cellPane.getStyleClass().remove("selected");
+                            } else {
+                                int firstRow = GridPane.getRowIndex(boundariesCells.get(0));
+                                int firstCol = GridPane.getColumnIndex(boundariesCells.get(0));
+                                int lastRow = GridPane.getRowIndex(cellPane);
+                                int lastCol = GridPane.getColumnIndex(cellPane);
+                                if (firstRow == lastRow || firstCol == lastCol) {
+                                    boundariesCells.add(cellPane);
+                                    cellPane.getStyleClass().add("selected");
+                                }
+                            }
+                        } else if (boundariesCells.size() == 2) {
+                            if (boundariesCells.contains(cellPane)) {
+                                boundariesCells.remove(cellPane);
+                                cellPane.getStyleClass().remove("selected");
+                            } else {
+                                // clear all panes
+                                for (Pane cell : boundariesCells) {
+                                    cell.getStyleClass().remove("selected");
+                                }
+                                boundariesCells.clear();
 
-                            selectedCells.add(cellPane);
-                            cellPane.setStyle(cellStyle + "-fx-alignment: center;" +
-                                    "-fx-border-color: black; -fx-border-width: 4px; -fx-border-radius: 5px;");
+                                // add the new one
+                                boundariesCells.add(cellPane);
+                                cellPane.getStyleClass().add("selected");
+                            }
                         }
 
+                        // // Toggle cell selection
+                        // if (selectedCells.contains(cellPane)) {
+                        // selectedCells.remove(cellPane);
+                        // // cellPane.setStyle("-fx-border-color: transparent;");
+                        // cellPane.getStyleClass().remove("selected");
+                        // } else if (selectedCells.size() < 2) {
+                        // selectedCells.add(cellPane);
+                        // // cellPane.setStyle(cellStyle + "-fx-alignment: center;" +
+                        // // "-fx-border-color: black; -fx-border-width: 4px; -fx-border-radius:
+                        // 5px;");
+                        // cellPane.getStyleClass().add("selected");
+                        // } else if (selectedCells.size() == 2 && selectedCells.contains(cellPane)) {
+                        // selectedCells.remove(cellPane);
+                        // cellPane.getStyleClass().remove("selected");
+                        // } else {
+                        // // Un-select one of the selected cells
+                        // Pane selectedCell = selectedCells.get(0);
+                        // selectedCells.remove(selectedCell);
+                        // selectedCell.getStyleClass().remove("selected");
+                        // selectedCells.add(cellPane);
+                        // cellPane.getStyleClass().add("selected");
+                        // }
+
                         // Enable/disable buttons based on the number of selected cells
-                        boolean enableButtons = selectedCells.size() == 2;
+                        boolean enableButtons = boundariesCells.size() == 2;
                         tryPlaceWordButton.setDisable(!enableButtons);
                         for (Button b : tileButtons) {
                             b.setDisable(!enableButtons);
                         }
                         if (enableButtons) {
-                            int firstRow = GridPane.getRowIndex(selectedCells.get(0));
-                            int firstCol = GridPane.getColumnIndex(selectedCells.get(0));
-                            int lastRow = GridPane.getRowIndex(selectedCells.get(1));
-                            int lastCol = GridPane.getColumnIndex(selectedCells.get(1));
+                            int firstRow = GridPane.getRowIndex(boundariesCells.get(0));
+                            int firstCol = GridPane.getColumnIndex(boundariesCells.get(0));
+                            int lastRow = GridPane.getRowIndex(boundariesCells.get(1));
+                            int lastCol = GridPane.getColumnIndex(boundariesCells.get(1));
 
                             gameViewModel.setFirstSelectedCellRow(firstRow);
                             gameViewModel.setFirstSelectedCellCol(firstCol);
                             gameViewModel.setLastSelectedCellRow(lastRow);
                             gameViewModel.setLastSelectedCellCol(lastCol);
+
+                            setPlacementCells();
+
                         } else {
                             gameViewModel.clearSelectedCells();
                         }
+
                     }
                 });
 
-                gridPane.add(cellPane, col, row);
+                gameBoard.add(cellPane, col, row);
             }
         }
 
-        return gridPane;
+        return gameBoard;
+    }
+
+    private void setPlacementCells() {
+        Tile[][] board = gameViewModel.getCurrentBoard();
+        int size = gameViewModel.getWordLength();
+        boolean isVer = gameViewModel.isWordVertical();
+        int lastRow = gameViewModel.getLastSelectedCellRow();
+        int lastCol = gameViewModel.getLastSelectedCellCol();
+
+        if (isVer) {
+            for (int i = size; i > 0; i--) {
+                if (board[lastRow][lastCol] == null) {
+                    Pane cell = (Pane) getCellFromBoard(lastRow, lastCol);
+                    placementCelles.push(cell);
+                    placementList.add(cell);
+                }
+                lastRow--;
+            }
+        } else {
+            for (int i = size; i > 0; i--) {
+                if (board[lastRow][lastCol] == null) {
+                    Pane cell = (Pane) getCellFromBoard(lastRow, lastCol);
+                    placementCelles.push(cell);
+                    placementList.add(cell);
+                }
+                lastCol--;
+            }
+        }
     }
 
     private VBox createButtons() {
@@ -877,6 +1042,7 @@ public class WindowController {
         buttonsBox.setAlignment(Pos.CENTER);
 
         Label messageLabel = new Label(MessageReader.getMsg());
+        messageLabel.setTextFill(Color.WHITE);
         messageLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
 
         // Create a FlowPane to hold the tile buttons
@@ -889,7 +1055,7 @@ public class WindowController {
         // Create the tile buttons and add them to the FlowPane
         Button resetTurnButton = new Button("⟲"); // \u2B6F
 
-        tileButtons = gameViewModel.getButtonTiles();
+        tileButtons = gameViewModel.getButtonTilesProperty();
         for (Button tileButton : tileButtons) {
             tileButton.setPrefSize(45, 45);
             tileButton.setStyle("-fx-background-color: transparent; -fx-background-image: url('tiles/"
@@ -900,12 +1066,84 @@ public class WindowController {
             if (!gameViewModel.isMyTurn()) {
                 tileButton.setDisable(true);
             }
+
             tileButton.setOnAction(event -> {
-                // Disable the tile button upon selection
-                tileButton.setDisable(true);
-                resetTurnButton.setDisable(false);
-                // Add the tile value to the word
-                gameViewModel.addToWord(letter);
+                if (!placementCelles.isEmpty()) {
+                    Pane cellPane = placementCelles.pop();
+                    cellPane.getStyleClass().add("character");
+                    cellPane.setStyle("-fx-background-image: url('tiles/" + letter + ".png');"
+                            + "-fx-background-size: cover; -fx-border-color: yellow; -fx-border-style: solid inside;");
+
+                    // Disable the tile button upon selection
+                    tileButton.setDisable(true);
+                    resetTurnButton.setDisable(false);
+
+                    // Add the tile value to the word
+                    gameViewModel.addToWord(letter);
+                }
+                // boolean isVer = gameViewModel.isWordVertical();
+                // if (isVer) {
+
+                // } else {
+
+                // }
+                // // Find the current word index
+                // int currRow, currCol;
+                // if (isVer) {
+                // currRow = gameViewModel.getFirstSelectedCellRow() + this.tileIndex;
+                // currCol = gameViewModel.getFirstSelectedCellCol();
+                // } else {
+                // currRow = gameViewModel.getFirstSelectedCellRow();
+                // currCol = gameViewModel.getFirstSelectedCellCol() + this.tileIndex;
+                // }
+
+                // int wordLength = gameViewModel.getWordLength();
+
+                // if (this.tileIndex < wordLength) {
+
+                // Tile[][] currBoard = gameViewModel.getCurrentBoard();
+
+                // // Find the next empty cell
+                // int i = currRow, j = currCol;
+                // while (currBoard[i][j] != null) {
+                // this.tileIndex++;
+                // if (isVer)
+                // i++;
+                // else
+                // j++;
+                // }
+
+                // // Set the new cell index
+                // if (isVer)
+                // currRow += this.tileIndex;
+                // else
+                // currCol += this.tileIndex;
+
+                // System.out.println("NEW: " + currRow + " " + currCol);
+                // System.out.println("NEW INDEX: " + this.tileIndex);
+                // System.out.println("-------------------------------------------");
+
+                // // Disable the tile button upon selection
+                // tileButton.setDisable(true);
+                // resetTurnButton.setDisable(false);
+
+                // // Add the tile value to the word
+                // gameViewModel.addToWord(letter);
+
+                // // Get the cell at the specified row and column in the GridPane
+                // Node cellNode = getCellFromBoard(currCol, currRow);
+
+                // // Apply styling to the cell
+                // if (cellNode instanceof Pane) {
+                // Pane cellPane = (Pane) cellNode;
+                // this.wordCells.add(cellPane);
+                // cellPane.getStyleClass().add("character");
+                // cellPane.setStyle("-fx-background-image: url('tiles/" + letter + ".png');"
+                // + "-fx-background-size: cover; -fx-border-color: yellow; -fx-border-style:
+                // solid inside;");
+                // }
+                // this.tileIndex++;
+                // }
             });
 
             tilePane.getChildren().add(tileButton);
@@ -917,23 +1155,36 @@ public class WindowController {
         resetTurnButton.setOnAction(event -> {
             // Call the method to handle the "Pass Turn" action
             for (Button tb : tileButtons) {
-                tb.setDisable(false);
+                // tiles buttons
+                tb.setDisable(true);
                 resetTurnButton.setDisable(true);
                 gameViewModel.clearWord();
             }
+            for (Pane cell : placementList) {
+                // Clear all added style classes
+                cell.getStyleClass().clear();
+                // Clear inline styles
+                cell.setStyle("");
+                // Add the default style
+                cell.getStyleClass().add("cell");
+            }
+            placementCelles.clear();
+            placementList.clear();
         });
         // Set the preferred width and height of the button
         resetTurnButton.setPrefWidth(60); // Adjust the width as desired
         resetTurnButton.setPrefHeight(20); // Adjust the height as desired
 
-        Button passTurnButton = new Button("Pass Turn");
+        Button passTurnButton = new Button(
+                "Pass Turn");
         passTurnButton.getStyleClass().add("yellow-button");
         passTurnButton.setOnAction(event -> {
             // Call the method to handle the "Pass Turn" action
             gameViewModel.skipTurn();
         });
 
-        Button challengeButton = new Button("Challenge");
+        Button challengeButton = new Button(
+                "Challenge");
         challengeButton.getStyleClass().add("green-button");
         challengeButton.setDisable(true);
         challengeButton.setOnAction(event -> {
@@ -946,7 +1197,8 @@ public class WindowController {
             passTurnButton.setDisable(true);
         }
 
-        Button quitGameButton = new Button("Quit Game");
+        Button quitGameButton = new Button(
+                "Quit Game");
         quitGameButton.getStyleClass().add("red-button");
         quitGameButton.setOnAction(event -> {
             // Call the method to handle the "Quit Game" action
@@ -965,13 +1217,13 @@ public class WindowController {
             challengeButton.setDisable(false);
 
             String word = gameViewModel.getWord();
-            int firstRow = gameViewModel.getFirstSelectedCellRow();
-            int firstCol = gameViewModel.getFirstSelectedCellCol();
-            int lastRow = gameViewModel.getLastSelectedCellRow();
-            int lastCol = gameViewModel.getLastSelectedCellCol();
+            // int firstRow = gameViewModel.getFirstSelectedCellRow();
+            // int firstCol = gameViewModel.getFirstSelectedCellCol();
+            // int lastRow = gameViewModel.getLastSelectedCellRow();
+            // int lastCol = gameViewModel.getLastSelectedCellCol();
 
             // Call the method to handle the "Try Place Word" action with the collected data
-            gameViewModel.tryPlaceWord(word, firstRow, firstCol, lastRow, lastCol);
+            gameViewModel.tryPlaceWord(word);
 
             // gameViewModel.clearPlayerTiles();
             gameViewModel.clearWord();
@@ -982,9 +1234,12 @@ public class WindowController {
         });
         tryPlaceWordButton.setDisable(true);
 
+        // .....................
+        HBox roundButtonsPane = createButtonsPane();
+        // .....................
+
         buttonsBox.getChildren().addAll(messageLabel, tilePane, resetTurnButton, tryPlaceWordButton, passTurnButton,
-                challengeButton,
-                quitGameButton);
+                challengeButton, quitGameButton, roundButtonsPane);
 
         return buttonsBox;
     }
@@ -996,10 +1251,8 @@ public class WindowController {
         roundButtonsPane.setMinHeight(preferredHeight);
         roundButtonsPane.setPrefHeight(preferredHeight);
 
-        Font emojiFont = Font.loadFont(getClass().getResourceAsStream("src\\main\\resources\\seguiemj.ttf"), 24);
-
         Button settingButton = new Button("\uD83D\uDD27"); // Unicode for the wrench symbol
-        settingButton.setFont(emojiFont);
+        settingButton.setFont(EMOJI_FONT);
         settingButton.getStyleClass().add("grey-button");
 
         Button helpButton = new Button("❓"); // Unicode for the help symbol
@@ -1020,6 +1273,7 @@ public class WindowController {
         // Go Back button
         Button goBackButton = new Button("\u2B05");
         goBackButton.getStyleClass().add("green-button");
+        goBackButton.setFont(EMOJI_FONT);
         goBackButton.setOnAction(e -> {
             VBox initialWindowBox = createInitialWindow();
             Scene initialWindowScene = new Scene(initialWindowBox, 600, 480);
@@ -1046,4 +1300,14 @@ public class WindowController {
             return false;
         }
     }
+
+    private Node getCellFromBoard(int row, int col) {
+        for (Node node : gameBoard.getChildren()) {
+            if (GridPane.getRowIndex(node) == row && GridPane.getColumnIndex(node) == col) {
+                return node;
+            }
+        }
+        return null;
+    }
+
 }

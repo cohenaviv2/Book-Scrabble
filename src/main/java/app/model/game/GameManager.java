@@ -2,6 +2,7 @@ package app.model.game;
 
 import java.io.*;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -148,30 +149,30 @@ public class GameManager extends Observable {
         return playersByName.get(name);
     }
 
-    private int getBagCount(){
+    private int getBagCount() {
         return this.gameBag.size();
     }
 
-    public boolean isGameServerConnect(){
-        try {
-            this.gameServerSocket = new Socket(gameServerIP, gameServerPORT);
-            PrintWriter out = new PrintWriter(gameServerSocket.getOutputStream(), true);
-            BufferedReader in = new BufferedReader(new InputStreamReader(gameServerSocket.getInputStream()));
-            out.println("ack");
-            String ans = in.readLine();
-            gameServerSocket.close();
-            out.close();
-            in.close();
-            if(ans.equals("connected")) return true;
-            else{
-                System.out.println("server responde: "+ans);
-                return false;
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    private String sentToGameServer(String query) throws UnknownHostException, IOException {
+        this.gameServerSocket = new Socket(gameServerIP, gameServerPORT);
+        PrintWriter out = new PrintWriter(gameServerSocket.getOutputStream(), true);
+        BufferedReader in = new BufferedReader(new InputStreamReader(gameServerSocket.getInputStream()));
+        out.println(query);
+        String ans = in.readLine();
+        gameServerSocket.close();
+        out.close();
+        in.close();
 
-        
+        return ans;
+    }
+
+    public boolean isGameServerConnect() {
+        try {
+            String ans = sentToGameServer("ack");
+            if (ans.equals("connected"))
+                return true;
+        } catch (IOException e) {
+        }
         return false;
     }
 
@@ -271,13 +272,14 @@ public class GameManager extends Observable {
     private String getPlayersInfoHandler(int guestId, String value) {
         if (value.equals("true")) {
 
-            List<Player> otherPlayerList = this.playersByID.values().stream().filter(player -> player.getID() != guestId)
+            List<Player> otherPlayerList = this.playersByID.values().stream()
+                    .filter(player -> player.getID() != guestId)
                     .collect(Collectors.toList());
 
             Map<String, String> othersInfo = new HashMap<>();
-            
+
             for (Player p : otherPlayerList) {
-                String info = String.valueOf(p.getScore())+":"+String.valueOf(p.isMyTurn());
+                String info = String.valueOf(p.getScore()) + ":" + String.valueOf(p.isMyTurn());
                 othersInfo.put(p.getName(), info);
             }
             try {
@@ -429,9 +431,6 @@ public class GameManager extends Observable {
     }
 
     private String challengeHandler(int playerId, String moveValue) {
-
-        System.out.println("\n\n\n\n\n\n\n\n challenge Handler\n\n\n\n\n\n\n\n");
-
         /*
          * if Active word is NOT activated - can not try challange this word.
          * need to ask the game sever to challenge this word -
@@ -492,9 +491,9 @@ public class GameManager extends Observable {
                 notifyObservers("updateAll");
 
                 this.turnManager.nextTurn();
-                return "skipTurn";
+                return MethodInvoker.skipTurn;
             } else {
-                return "false";
+                return MethodInvoker.skipTurn;
             }
         } else {
             return "false";
@@ -511,41 +510,26 @@ public class GameManager extends Observable {
         //
         String queryWord = gameBoard.wordToString(word);
 
+        String ans = null;
+
+        String req = "Q," + getGameBooks() + queryWord;
+
         try {
-            this.gameServerSocket = new Socket(gameServerIP, gameServerPORT);
-            System.out.println("\n\nconnected to orcale game server: " + gameServerSocket.isConnected());
-            PrintWriter out = new PrintWriter(gameServerSocket.getOutputStream(), true);
-            BufferedReader in = new BufferedReader(new InputStreamReader(gameServerSocket.getInputStream()));
-
-            String req = "Q," + getGameBooks() + queryWord;
-            System.out.println("*\n**\n***\n****\n" + req);
-            out.println(req);
-            String res = in.readLine();
-            System.out.println("\n\n\n SERVER RESPONDE - " + res);
-            if (res.equals("true")) {
-                return true;
-            } else if (res.equals("false")) {
-                return false;
-            } else {
-                // PRINT DEBUG
-                System.out.println("GAME MANAGER: wrong query answer from game server\n");
-            }
-            this.gameServerSocket.close();
-            in.close();
-            out.close();
-
-        } catch (IOException e) {
-            e.printStackTrace();
+            ans = sentToGameServer(req);
+        } catch (IOException e) {}
+        System.out.println("\n\n\n SERVER RESPONDE - " + ans);
+        if (ans.equals("true")) {
+            return true;
+        } else if (ans.equals("false")) {
+            return false;
+        } else {
+            // PRINT DEBUG
+            System.out.println("GAME MANAGER: wrong query answer from game server\n");
+            return false;
         }
-        // PRINT DEBUG
-        System.out.println("GAME MANAGER: cant connect game server\n");
-        return false;
     }
 
     private String challengeToGameServer(ArrayList<Word> turnWords) {
-
-        System.out.println("\n\n\n\n\n\n\n\n challenge To Game Server\n\n\n\n\n\n\n\n");
-
         /*
          * Asks the game server to challenge all the words that was made in this turn
          * game server will perform an I/O search in the game books
@@ -558,39 +542,28 @@ public class GameManager extends Observable {
             words.add(gameBoard.wordToString(w));
         }
 
-        try {
-            for (String cw : words) {
+        String ans = null;
 
-                String req = "C," + getGameBooks() + cw;
+        for (String cw : words) {
 
-                // SET COMM
-                this.gameServerSocket = new Socket(gameServerIP, gameServerPORT);
-                PrintWriter out = new PrintWriter(gameServerSocket.getOutputStream(), true);
-                BufferedReader in = new BufferedReader(new InputStreamReader(gameServerSocket.getInputStream()));
+            String req = "C," + getGameBooks() + cw;
 
-                out.println(req);
-                String ans = in.readLine();
-
-                if (ans.equals("false")) {
-                    this.gameServerSocket.close();
-                    out.close();
-                    in.close();
-                    return "false";
-                }
-                if (!ans.equals("true") && !ans.equals("false")) {
-                    // PRINT DEBUG
-                    System.out.println("GAME MANAGER: wrong challenge answer form game server\n");
-                }
-                this.gameServerSocket.close();
-                in.close();
-                out.close();
+            try {
+                ans = sentToGameServer(req);
+            } catch (IOException e) {
             }
 
-            return "true";
-        } catch (IOException e) {
-            e.printStackTrace();
+            if (ans.equals("false")) {
+                return "false";
+            }
+            if (!ans.equals("true") && !ans.equals("false")) {
+                // PRINT DEBUG
+                System.out.println("GAME MANAGER: wrong challenge answer form game server\n");
+                return "false";
+            }
         }
-        return "gameServerError";
+
+        return "true";
     }
 
     private String skipTurnHandler(int playerId, String moveValue) {

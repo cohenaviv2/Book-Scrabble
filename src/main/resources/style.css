@@ -4,6 +4,7 @@
   -fx-background-image: url("backgrounds/board.png");
   -fx-background-repeat: no-repeat;
   -fx-background-size: contain;
+  -fx-effect: dropshadow(gaussian, #000000, 20, 0, 8, 2);
 }
 
 .wood-background {
@@ -19,10 +20,10 @@
 }
 
 .game-flow-background {
-    -fx-background-image: url("backgrounds/gameFlow.jpg");
-    -fx-background-repeat: no-repeat;
-    -fx-background-size: cover;
-  }
+  -fx-background-image: url("backgrounds/gameFlow.jpg");
+  -fx-background-repeat: no-repeat;
+  -fx-background-size: cover;
+}
 
 /************* BUTTONS *************/
 
@@ -98,6 +99,28 @@
   -fx-background-color: linear-gradient(darkviolet, grey), indigo;
 }
 
+/************* BOARD *************/
+
+.cell {
+  -fx-border-color: transparent;
+  -fx-background-color: transparent;
+}
+
+/* Style for cells with characters */
+.cell.character {
+  -fx-border-color: transparent;
+  -fx-background-size: cover;
+  -fx-border-width: 4px;
+  -fx-border-radius: 5px;
+}
+
+.cell.selected {
+  -fx-alignment: center;
+  -fx-border-color: black;
+  -fx-border-width: 4px;
+  -fx-border-radius: 5px;
+}
+
 /************* GENERAL *************/
 
 .book-scrabble-header {
@@ -130,11 +153,14 @@
 }
 
 .content-label {
-  -fx-font-weight: bold;
+  -fx-font-size: 16px;
+  -fx-font-family: "Arial Unicode MS"; /* Choose a font that supports the Unicode character */
 }
 
 .content-background {
-  -fx-background-color: rgba(201, 126, 27, 0.658);
+  -fx-background-color: rgba(224, 147, 47, 0.856);
+  -fx-border-color: black;
+  -fx-border-width: 3px;
 }
 
 .text-field {
@@ -152,6 +178,6 @@
 }
 
 .minimize-button {
-    -fx-font-size: 18px;
-    -fx-font-family: "Arial Unicode MS"; /* Choose a font that supports the Unicode character */
+  -fx-font-size: 18px;
+  -fx-font-family: "Arial Unicode MS"; /* Choose a font that supports the Unicode character */
 }
