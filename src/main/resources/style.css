@@ -20,7 +20,7 @@
 }
 
 .game-flow-background {
-  -fx-background-image: url("backgrounds/gameFlow.jpg");
+  -fx-background-image: url("backgrounds/main.jpg");
   -fx-background-repeat: no-repeat;
   -fx-background-size: cover;
 }
@@ -101,6 +101,35 @@
 
 /************* BOARD *************/
 
+.score-icon-pane {
+  -fx-border-color: black;
+}
+
+.score-label {
+  -fx-font-size: 40px;
+  -fx-text-fill: rgb(0, 119, 255);
+  -fx-font-weight: bold;
+  -fx-font-family: "Comic Sans MS";
+  -fx-padding: 10px;
+  -fx-effect: dropshadow(gaussian, black, 20, 0, 2, 6);
+}
+
+.turn-label {
+  -fx-font-size: 30px;
+  -fx-font-weight: bold;
+  -fx-font-family: "Comic Sans MS";
+  -fx-padding: 10px;
+  -fx-effect: dropshadow(gaussian, black, 20, 0, 2, 6);
+
+}
+
+.wood-score-board {
+  -fx-background-image: url('wood-board.png');
+  -fx-background-size: cover;
+  -fx-background-repeat: no-repeat;
+}
+
+
 .cell {
   -fx-border-color: transparent;
   -fx-background-color: transparent;
@@ -123,6 +152,16 @@
 
 /************* GENERAL *************/
 
+.tile-button {
+  -fx-background-color: transparent;
+  -fx-background-size: cover;
+}
+
+.tile-button-hover {
+  /* Define the hover effect styles here */
+  -fx-effect: dropshadow(gaussian, rgb(255, 241, 45), 15, 0, 0, 0);
+}
+
 .book-scrabble-header {
   -fx-font-size: 55px;
   -fx-text-fill: antiquewhite;
@@ -130,6 +169,14 @@
   -fx-font-family: "Comic Sans MS";
   -fx-padding: 10px;
   -fx-effect: dropshadow(gaussian, black, 20, 0, 2, 6);
+}
+
+.my-name-label {
+  -fx-font-size: 40px;
+  -fx-font-weight: bold;
+  -fx-font-family: "Comic Sans MS";
+  -fx-text-fill: rgb(202, 202, 202);
+  -fx-effect: dropshadow(gaussian, #000000, 5, 0, 0, 1);
 }
 
 .mode-label {

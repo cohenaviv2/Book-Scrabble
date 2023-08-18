@@ -10,11 +10,19 @@ import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
-
 public class Main extends Application implements Observer {
 
     private GameViewModel gameViewModel;
     private WindowController windowController;
+    private static Main instance; // To hold the Main instance
+
+    public Main() {
+        instance = this;
+    }
+
+    public static Main getInstance() {
+        return instance;
+    }
 
     @Override
     public void start(Stage primaryStage) {
@@ -22,9 +30,8 @@ public class Main extends Application implements Observer {
         Stage prmStage = primaryStage;
 
         this.gameViewModel = new GameViewModel();
-        gameViewModel.addObserver(this);
+        this.gameViewModel.addObserver(this);
         this.windowController = new WindowController(primaryStage, gameViewModel);
-
 
         // Create the first window with Host and Guest buttons
         VBox initialWindowBox = windowController.createInitialWindow();
@@ -41,6 +48,10 @@ public class Main extends Application implements Observer {
 
     public static void main(String[] args) {
         launch(args);
+    }
+
+    public void showAlert(String alert) {
+        this.windowController.showAlert(alert);
     }
 
     @Override

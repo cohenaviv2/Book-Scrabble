@@ -17,7 +17,12 @@ public class ViewModelTest {
         HostModel hm = HostModel.get();
         es.execute(() -> {
             hm.setNumOfPlayers(2);
-            hm.connectMe("Aviv", "localhost", 11224);
+            try {
+                hm.connectMe("Aviv", "localhost", 11224);
+            } catch (Exception e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
             hm.myBooksChoice("Alice in Wonderland");
             hm.ready();
         });

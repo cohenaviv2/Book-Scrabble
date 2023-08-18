@@ -2,8 +2,15 @@ package app.model.game;
 
 import java.util.*;
 
+/*
+ * Represents all of the player's proerties as it will appear on the view side
+ * Each player, whether host or guest, has game properties
+ * 
+ * @author: Aviv Cohen
+ * 
+ */
+
 public class PlayerProperties {
-    // Gameplay
     private static PlayerProperties instance = null;
     private String myName;
     private int myScore;
@@ -12,24 +19,17 @@ public class PlayerProperties {
     private ArrayList<Tile> myHandTiles;
     private ArrayList<Word> myWords;
     private Map<String, String> otherPlayersInfo;
+    private Set<String> gameBookList;
+    private int bagCount;
 
-    private PlayerProperties() {
-        // this.myScore = 0;
-        // this.myTurn = false;
-        // this.myBoard = new Tile[Board.SIZE][Board.SIZE];
-        // this.myHandTiles = new ArrayList<Tile>(7);
-        // this.myWords = new ArrayList<Word>();
-        // this.playersScore = new HashMap<>();
-    }
-
-    public static PlayerProperties get(){
-        if (instance == null){
+    public static PlayerProperties get() {
+        if (instance == null) {
             instance = new PlayerProperties();
         }
         return instance;
     }
-    
-    public void setMyName(String myName){
+
+    public void setMyName(String myName) {
         this.myName = myName;
     }
 
@@ -37,16 +37,8 @@ public class PlayerProperties {
         this.myScore = score;
     }
 
-    public void addScore(int score) {
-        this.myScore += score;
-    }
-
     public void setMyTurn(boolean myTurn) {
         this.myTurn = myTurn;
-    }
-
-    public boolean isMyTurn() {
-        return myTurn;
     }
 
     public void setMyBoard(Tile[][] myBoard) {
@@ -57,12 +49,20 @@ public class PlayerProperties {
         this.myHandTiles = tiles;
     }
 
-    public void updatePlayersScore(String othersScore) {
-        // String[] scores = othersScore.split(":");
-        // for (String s : scores) {
-        //     String[] params = s.split(",");
-        //     this.otherPlayersInfo.put(params[0], Integer.parseInt(params[1]));
-        // }
+    public void setMyWords(ArrayList<Word> myWords) {
+        this.myWords = myWords;
+    }
+
+    public void setPlayersInfo(Map<String, String> playersScore) {
+        this.otherPlayersInfo = playersScore;
+    }
+
+    public void setGameBookList(Set<String> gameBookList) {
+        this.gameBookList = gameBookList;
+    }
+
+    public void setBagCount(int bagCnt) {
+        this.bagCount = bagCnt;
     }
 
     public String getMyName() {
@@ -71,6 +71,10 @@ public class PlayerProperties {
 
     public int getMyScore() {
         return myScore;
+    }
+
+    public boolean isMyTurn() {
+        return myTurn;
     }
 
     public Tile[][] getMyBoard() {
@@ -89,12 +93,16 @@ public class PlayerProperties {
         return otherPlayersInfo;
     }
 
-    public void setMyWords(ArrayList<Word> myWords) {
-        this.myWords = myWords;
+    public Set<String> getGameBookList() {
+        return gameBookList;
     }
 
-    public void setPlayersInfo(Map<String, String> playersScore) {
-        this.otherPlayersInfo = playersScore;
+    public int getBagCount() {
+        return bagCount;
+    }
+
+    public boolean isInitialized(){
+        return this.myHandTiles!=null&&this.myWords!=null&&this.myBoard!=null&&this.gameBookList!=null&&this.otherPlayersInfo!=null;
     }
 
     private String boardToString() {
@@ -124,7 +132,7 @@ public class PlayerProperties {
     public String toString() {
         String info = "**********PLAYER PROPERTIES***********\n";
         info += "My name: " + myName + "\n";
-        //info += "My id: " + myId + "\n";
+        // info += "My id: " + myId + "\n";
         info += "My score: " + myScore + "\n";
         info += "My word :";
         if (myWords.size() != 0) {
@@ -158,6 +166,11 @@ public class PlayerProperties {
             info += "0\n";
         }
         info += "__________________________________\n";
+        info+="Bag Count: "+getBagCount()+"\n";
+        info+="Books: \n";
+        for(String b : getGameBookList()){
+            info+=b+"\n";
+        }
 
         return info;
     }

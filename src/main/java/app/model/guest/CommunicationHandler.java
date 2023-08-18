@@ -6,10 +6,7 @@ import java.util.*;
 import java.util.concurrent.*;
 
 import app.model.MethodInvoker;
-import app.model.game.ObjectSerializer;
-import app.model.game.PlayerProperties;
-import app.model.game.Tile;
-import app.model.game.Word;
+import app.model.game.*;
 import app.view_model.MessageReader;
 
 public class CommunicationHandler {
@@ -17,14 +14,16 @@ public class CommunicationHandler {
     BufferedReader in;
     PrintWriter out;
     private int myId;
-    private String quitGameString;
-    ExecutorService executorService = Executors.newSingleThreadExecutor();
-    PlayerProperties playerProperties = GuestModel.get().getPlayerProperties();
+    private String QUIT_GAME_QUERY;
+    ExecutorService executorService;
+    PlayerProperties playerProperties;
 
-    public CommunicationHandler(String ipString, int port) throws IOException {
+    public CommunicationHandler(String ipString, int port) throws Exception {
         this.hostSocket = new Socket(ipString, port);
         this.in = new BufferedReader(new InputStreamReader(this.hostSocket.getInputStream()));
         this.out = new PrintWriter(this.hostSocket.getOutputStream(), true);
+        this.executorService = Executors.newSingleThreadExecutor();
+        this.playerProperties = GuestModel.get().getPlayerProperties();
     }
 
     public void sendMessage(String modifier, String value) {
@@ -32,60 +31,53 @@ public class CommunicationHandler {
 
     }
 
-    public void connectMe(String name) {
-        try {
-            out.println("0" + "," + MethodInvoker.connectMe + "," + name);
-            String[] ans = in.readLine().split(",");
-            if (!ans[2].equals("0")) {
-                this.myId = Integer.parseInt(ans[2]);
-                this.quitGameString = myId + "," + MethodInvoker.quitGame + "," + "true";
-                // PRINT DEBUG
-                System.out.println("CommHandler: got my id " + myId + ", " + name + " is Connected!");
-            } else {
-                throw new Exception("CommHandler - connectMe: wrong answer from Host server " + ans);
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
+    public void connectMe(String name) throws Exception {
+        out.println("0" + "," + MethodInvoker.connectMe + "," + name);
+        String[] ans = in.readLine().split(",");
+        if (!ans[2].equals("0")) {
+            this.myId = Integer.parseInt(ans[2]);
+            this.QUIT_GAME_QUERY = myId + "," + MethodInvoker.quitGame + "," + "true";
+            // PRINT DEBUG
+            System.out.println("CommHandler: got my id " + myId + ", " + name + " is Connected!");
+        } else {
+            throw new Exception("CommHandler - connectMe: wrong answer from Host server " + ans);
         }
     }
 
-    public void addMyBookChoice(String myBooksSerilized) {
-        try {
-            out.println(myId + "," + MethodInvoker.myBooksChoice + "," + myBooksSerilized);
-            String[] ans = in.readLine().split(",");
-            int id = Integer.parseInt(ans[0]);
-            String modifier = ans[1];
-            String value = ans[2];
-            //System.out.println("\n\n\n\n\n\n\n\n\n\n"+modifier+"\n\n\n\n\n\n\n\n\n\n");
-            if (id == myId && modifier.equals(MethodInvoker.myBooksChoice) && value.equals("true")) {
+    public void addMyBookChoice(String myBooksSerilized) throws Exception {
+        out.println(myId + "," + MethodInvoker.myBooksChoice + "," + myBooksSerilized);
+        String[] ans = in.readLine().split(",");
+        int id = Integer.parseInt(ans[0]);
+        String modifier = ans[1];
+        String value = ans[2];
+        if (id == myId && modifier.equals(MethodInvoker.myBooksChoice) && value.equals("true")) {
 
-                // PRINT DEBUG
-                System.out.println("CommHandler: your book " + myBooksSerilized + " is set up! starting chat...");
-                startUpdateListener();
+            // PRINT DEBUG
+            System.out.println("CommHandler: your book list is set up! starting chat...");
+            startUpdateListener();
 
-            } else {
-                // PRINT DEBUG
-                // System.out.println("CommHandler - addBookHandler: wrong answer from Host
-                // server " + ans);
-                throw new Exception("CommHandler - addBookHandler: wrong answer from Host server " + ans);
+        } else {
+            // PRINT DEBUG
+            // System.out.println("CommHandler - addBookHandler: wrong answer from Host
+            // server " + ans);
+            throw new Exception("CommHandler - addBookHandler: wrong answer from Host server " + ans);
 
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
+
     }
 
-    public void startUpdateListener() throws IOException {
-        new Thread(() -> {
+    public void startUpdateListener() throws IOException, ClassNotFoundException {
+        executorService.submit(() -> {
             try {
                 String serverMessage;
-                while (!(serverMessage = in.readLine()).equals(quitGameString)) {
-                    if (serverMessage.equals("updateAll")) {
-                        requestAllStates();
+                while (!(serverMessage = in.readLine()).equals(QUIT_GAME_QUERY)) {
+                    if (serverMessage.equals(MethodInvoker.updateAll)) {
+                        System.out.println("COMM got update");
+                        requestProperties();
                     } else {
-                        if (serverMessage.equals(MethodInvoker.ready))
+                        if (serverMessage.equals(MethodInvoker.ready)) {
                             continue;
+                        }
                         String[] params = serverMessage.split(",");
                         int messageId = Integer.parseInt(params[0]);
                         String modifier = params[1];
@@ -100,29 +92,25 @@ public class CommunicationHandler {
                 // PRINT DEBUG
                 System.out.println("CommHandler: you quit that game");
 
-            } catch (IOException e) {
+            } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
-        }).start();
+        });
 
     }
 
-    private void requestAllStates() {
+    private void requestProperties() {
         sendMessage(MethodInvoker.getCurrentBoard, "true");
         sendMessage(MethodInvoker.isMyTurn, "true");
         sendMessage(MethodInvoker.getMyWords, "true");
         sendMessage(MethodInvoker.getMyTiles, "true");
         sendMessage(MethodInvoker.getMyScore, "true");
         sendMessage(MethodInvoker.getOthersInfo, "true");
-        // while (playerProperties.getMyBoard() == null &&
-        // playerProperties.getMyHandTiles() == null
-        // && playerProperties.getMyWords() == null &&
-        // playerProperties.getPlayersScore() == null)
-        // ;
-        // System.out.println("END OF BUSY WAITING - commHandler");
+        sendMessage(MethodInvoker.getGameBooks, "true");
+        sendMessage(MethodInvoker.getBagCount, "true");
     }
 
-    private void handleResponse(String modifier, String returnedVal) {
+    private void handleResponse(String modifier, String returnedVal) throws IOException, ClassNotFoundException {
         switch (modifier) {
             case MethodInvoker.getOthersInfo:
                 getOtherInfoHandler(returnedVal);
@@ -138,6 +126,12 @@ public class CommunicationHandler {
                 break;
             case MethodInvoker.getMyWords:
                 getMyWordsHandler(returnedVal);
+                break;
+            case MethodInvoker.getGameBooks:
+                getGameBooksHandler(returnedVal);
+                break;
+            case MethodInvoker.getBagCount:
+                getBagCountHandler(returnedVal);
                 break;
             case MethodInvoker.isMyTurn:
                 isMyTurnHandler(returnedVal);
@@ -157,6 +151,31 @@ public class CommunicationHandler {
             default:
                 // PRINT DEBUG
                 System.out.println("CommHandler: wrong instructions operator - " + modifier);
+        }
+    }
+
+    private void getBagCountHandler(String returnedVal) {
+        if (returnedVal.equals("false")) {
+            // PRINT DEBUG
+            System.out.println("CommHandler: cant get bag count");
+        } else {
+            int bagCount = Integer.parseInt(returnedVal);
+            playerProperties.setBagCount(bagCount);
+        }
+        // All props are set
+        System.out.println(this.playerProperties);
+        GuestModel.get().update();
+    }
+
+    private void getGameBooksHandler(String returnedVal) throws ClassNotFoundException, IOException {
+        if (playerProperties.getGameBookList() == null) {
+            if (returnedVal.equals("false")) {
+                // PRINT DEBUG
+                System.out.println("CommHandler: cant get my game books");
+            } else {
+                Set<String> gameBooks = (Set<String>) ObjectSerializer.deserializeObject(returnedVal);
+                playerProperties.setGameBookList(gameBooks);
+            }
         }
     }
 
@@ -214,12 +233,6 @@ public class CommunicationHandler {
             System.out.println("CommHandler: " + returnedVal);
 
             MessageReader.setMsg("Some word is not Dictionary legal\nYou can try Challenge or Pass turn");
-
-        } else if (returnedVal.equals("cantSerialize")) {
-
-            // PRINT DEBUG
-            System.out.println("CommHandler: " + returnedVal);
-
         } else {
             // PRINT DEBUG
             System.out.println("CommHandler: you get points");
@@ -248,37 +261,24 @@ public class CommunicationHandler {
         }
     }
 
-    private void getMyWordsHandler(String returnedVal) {
+    private void getMyWordsHandler(String returnedVal) throws ClassNotFoundException, IOException {
         if (returnedVal.equals("false")) {
             // PRINT DEBUG
             System.out.println("CommHandler: cant get my words");
-        } else if (returnedVal.equals("cantSerialize")) {
-            // PRINT DEBUG
-            System.out.println("CommHandler: cant serialize my words");
         } else {
-            try {
-                ArrayList<Word> word = (ArrayList<Word>) ObjectSerializer.deserializeObject(returnedVal);
-                playerProperties.setMyWords(word);
-            } catch (ClassNotFoundException | IOException e) {
-                e.printStackTrace();
-            }
+            ArrayList<Word> word = (ArrayList<Word>) ObjectSerializer.deserializeObject(returnedVal);
+            playerProperties.setMyWords(word);
+
         }
     }
 
-    private void getMyTilesHandler(String returnedVal) {
+    private void getMyTilesHandler(String returnedVal) throws ClassNotFoundException, IOException {
         if (returnedVal.equals("false")) {
             // PRINT DEBUG
             System.out.println("CommHandler: cant get my tiles");
-        } else if (returnedVal.equals("cantSerialize")) {
-            // PRINT DEBUG
-            System.out.println("CommHandler: cant serialize my tiles");
         } else {
-            try {
-                ArrayList<Tile> tile = (ArrayList<Tile>) ObjectSerializer.deserializeObject(returnedVal);
-                playerProperties.setMyTiles(tile);
-            } catch (ClassNotFoundException | IOException e) {
-                e.printStackTrace();
-            }
+            ArrayList<Tile> tile = (ArrayList<Tile>) ObjectSerializer.deserializeObject(returnedVal);
+            playerProperties.setMyTiles(tile);
         }
     }
 
@@ -292,42 +292,25 @@ public class CommunicationHandler {
         }
     }
 
-    private void getCurrentBoardHandler(String returnedVal) {
+    private void getCurrentBoardHandler(String returnedVal) throws ClassNotFoundException, IOException {
         if (returnedVal.equals("false")) {
             // PRINT DEBUG
             System.out.println("CommHandler: cant get board");
-        } else if (returnedVal.equals("cantSerialize")) {
-            // PRINT DEBUG
-            System.out.println("CommHandler: cant serialize board");
         } else {
-            try {
-                Tile[][] board = (Tile[][]) ObjectSerializer.deserializeObject(returnedVal);
-                playerProperties.setMyBoard(board);
-            } catch (ClassNotFoundException | IOException e) {
-                e.printStackTrace();
-            }
+            Tile[][] board = (Tile[][]) ObjectSerializer.deserializeObject(returnedVal);
+            playerProperties.setMyBoard(board);
         }
     }
 
-    private void getOtherInfoHandler(String returnedVal) {
+    private void getOtherInfoHandler(String returnedVal) throws ClassNotFoundException, IOException {
         if (returnedVal.equals("false")) {
             // PRINT DEBUG
             System.out.println("CommHandler: cant get others Scores");
-        } else if (returnedVal.equals("cantSerialize")) {
-            // PRINT DEBUG
-            System.out.println("CommHandler: " + returnedVal);
         } else {
-            try {
-                Map<String, String> othersScores = (Map<String, String>) ObjectSerializer
-                        .deserializeObject(returnedVal);
-                playerProperties.setPlayersInfo(othersScores);
-            } catch (ClassNotFoundException | IOException e) {
-                e.printStackTrace();
-            }
+            Map<String, String> othersScores = (Map<String, String>) ObjectSerializer
+                    .deserializeObject(returnedVal);
+            playerProperties.setPlayersInfo(othersScores);
         }
-        System.out.println(this.playerProperties);
-        GuestModel.get().update();
-
     }
 
     public void close() {

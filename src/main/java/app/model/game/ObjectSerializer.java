@@ -4,7 +4,7 @@ import java.io.*;
 import java.util.Base64;
 
 public class ObjectSerializer {
-    /**
+    /*
      * The ObjectSerializer class provides static methods to serialize objects into
      * a string representation and deserialize string representations back into objects.
      * It uses Java's built-in serialization mechanism to convert objects into byte arrays 

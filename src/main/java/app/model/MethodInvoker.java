@@ -19,5 +19,6 @@ public class MethodInvoker {
     public static final String getOthersInfo = "getOthersInfo";
     public static final String getBagCount = "getBagCount";
     public static final String getGameBooks = "getGameBooks";
+    public static final String updateAll = "updateAll";
 
 }

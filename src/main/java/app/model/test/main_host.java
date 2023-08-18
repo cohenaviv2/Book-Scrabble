@@ -37,40 +37,51 @@ public class main_host {
         // Set All
         if (pressEnter("PRESS ENTER TO CONNECT", in).equals("")) {
 
-            hm.connectMe("Aviv", "localhost", 11224); // to local game server
-            hm.myBooksChoice("Alice in Wonderland");
-            hm.ready();
+            try {
+                hm.connectMe("Aviv", "localhost", 11224);
+                hm.myBooksChoice("Alice in Wonderland");
+                hm.ready();
+            } catch (Exception e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } // to local game server
         }
 
         String key;
-        while (!(key = pressEnter("PRESS:\n1 - Try place word\n2 - Challange\n3 - Pass turn\n0 - Quit game", in)).equals("0")) {
-            if (key.equals("1")) {
-                String[] line = pressEnter("ENTER WORD LETTERS AND ROW & COL: ", in).split(" ");
-                int row = Integer.parseInt(line[1]);
-                int col = Integer.parseInt(line[2]);
-                Boolean isVer = line[3].equals("t") ? true : false;
-                char[] c = line[0].toCharArray();
-                Tile[] tiles = new Tile[c.length];
-                for (int i=0;i<c.length;i++){
-                    if (c[i] == '_') tiles[i] = null;
-                    for(Tile t : hm.getPlayerProperties().getMyHandTiles()){
-                        if (t.getLetter() == c[i]){
-                            tiles[i] = t;
+        while (!(key = pressEnter("PRESS:\n1 - Try place word\n2 - Challange\n3 - Pass turn\n0 - Quit game", in))
+                .equals("0")) {
+            try {
+                if (key.equals("1")) {
+                    String[] line = pressEnter("ENTER WORD LETTERS AND ROW & COL: ", in).split(" ");
+                    int row = Integer.parseInt(line[1]);
+                    int col = Integer.parseInt(line[2]);
+                    Boolean isVer = line[3].equals("t") ? true : false;
+                    char[] c = line[0].toCharArray();
+                    Tile[] tiles = new Tile[c.length];
+                    for (int i = 0; i < c.length; i++) {
+                        if (c[i] == '_')
+                            tiles[i] = null;
+                        for (Tile t : hm.getPlayerProperties().getMyHandTiles()) {
+                            if (t.getLetter() == c[i]) {
+                                tiles[i] = t;
+                            }
                         }
                     }
+
+                    Word word = new Word(tiles, row, col, isVer);
+
+                    hm.tryPlaceWord(word);
+
+                } else if (key.equals("2")) {
+                    hm.challenge();
+
+                } else if (key.equals("3")) {
+                    hm.skipTurn();
+                } else {
+                    System.out.println("wrong key");
                 }
-
-                Word word = new Word(tiles, row, col, isVer);
-
-                hm.tryPlaceWord(word);
-
-            } else if (key.equals("2")) {
-                hm.challenge();
-
-            } else if (key.equals("3")) {
-                hm.skipTurn();
-            } else {
-                System.out.println("wrong key");
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
 

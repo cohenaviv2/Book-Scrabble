@@ -7,17 +7,19 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import app.model.GameModel;
 import app.model.MethodInvoker;
 import app.model.game.Tile.Bag;
 import app.model.server.RunGameServer;
 
 /*
- * The Game Manager maintains the game board, the bag of tiles, the books
+ * The Game Manager maintains the game board, bag of tiles, book list
  * and the player profile of each participant.
- * Contains a list of books chosen for this game where each player chooses unlimited number of books.
- * Also contains Turn manager.
+ * Game manager is also responsible to communicate with the game server
+ * for checking whether a word is dictionary legal or not.
+ * Additionaly contains turn manager
  * 
- * @authors: Aviv Cohen, Moshe Azachi, Matan Eliyahu
+ * @authors: Aviv Cohen
  * 
  */
 
@@ -29,7 +31,7 @@ public class GameManager extends Observable {
     private Board gameBoard;
     private Bag gameBag;
     private final TurnManager turnManager;
-    private Map<String, String> fullBookList;
+    private final Map<String, String> fullBookList;
     private Set<String> selectedBooks;
     private String gameBooksString;
 
@@ -42,30 +44,18 @@ public class GameManager extends Observable {
 
     // Connectivity
     private Socket gameServerSocket;
-    private final String gameServerIP;
-    private final int gameServerPORT;
+    private final String GAME_SERVER_IP;
+    private final int GAME_SERVER_PORT;
 
     public GameManager() {
-
-        // GAME SERVER'S IP AND PORT FROM ENV FILE
-        this.gameServerIP = RunGameServer.loadProperties().getProperty("GAME_SERVER_IP");
-        this.gameServerPORT = Integer.parseInt(RunGameServer.loadProperties().getProperty("GAME_SERVER_PORT"));
+        // Game server's Ip and Port from env file
+        this.GAME_SERVER_IP = RunGameServer.loadProperties().getProperty("GAME_SERVER_IP");
+        this.GAME_SERVER_PORT = Integer.parseInt(RunGameServer.loadProperties().getProperty("GAME_SERVER_PORT"));
 
         this.gameBoard = Board.getBoard();
         this.gameBag = Tile.Bag.getBag();
         this.turnManager = new TurnManager();
-
-        // initial all game Books from directory
-        this.fullBookList = new HashMap<>(); // book name to path
-        File booksDirectory = new File("src\\main\\resources\\books");
-        File[] txtFiles = booksDirectory.listFiles((dir, name) -> name.endsWith(".txt"));
-        if (txtFiles != null) {
-            for (File file : txtFiles) {
-                String fileName = file.getName().replaceAll(".txt", "");
-                String gameServerPath = "server/books/" + fileName + ".txt"; // GAME SERVER PATH
-                fullBookList.put(fileName, gameServerPath);
-            }
-        }
+        this.fullBookList = GameModel.getFullBookList();
         this.gameBooksString = "";
         this.selectedBooks = new HashSet<>();
         this.playersByID = new HashMap<>();
@@ -82,8 +72,6 @@ public class GameManager extends Observable {
     public void setTotalPlayersCount(int totalPlayers) {
         if (totalPlayers >= 2 && totalPlayers <= 4) {
             this.totalPlayersNum = totalPlayers;
-        } else {
-            System.out.println("Can manage game only with 2-4 players");
         }
     }
 
@@ -133,11 +121,7 @@ public class GameManager extends Observable {
         return gameBooksString;
     }
 
-    public Map<String, String> getFullBookList() {
-        return fullBookList;
-    }
-
-    public int getHostPlayerId() {
+    public int getHostID() {
         return hostPlayer.getID();
     }
 
@@ -149,12 +133,8 @@ public class GameManager extends Observable {
         return playersByName.get(name);
     }
 
-    private int getBagCount() {
-        return this.gameBag.size();
-    }
-
     private String sentToGameServer(String query) throws UnknownHostException, IOException {
-        this.gameServerSocket = new Socket(gameServerIP, gameServerPORT);
+        this.gameServerSocket = new Socket(GAME_SERVER_IP, GAME_SERVER_PORT);
         PrintWriter out = new PrintWriter(gameServerSocket.getOutputStream(), true);
         BufferedReader in = new BufferedReader(new InputStreamReader(gameServerSocket.getInputStream()));
         out.println(query);
@@ -176,7 +156,8 @@ public class GameManager extends Observable {
         return false;
     }
 
-    public String processPlayerInstruction(int guestId, String modifier, String value) {
+    public String processPlayerInstruction(int guestId, String modifier, String value)
+            throws IOException, ClassNotFoundException {
         if (isIdExist(guestId)) {
             // All model cases that indicates some guest instructions
             switch (modifier) {
@@ -185,7 +166,7 @@ public class GameManager extends Observable {
                 case MethodInvoker.ready:
                     return readyHandler(value);
                 case MethodInvoker.getOthersInfo:
-                    return getPlayersInfoHandler(guestId, value);
+                    return playersInfoHandler(guestId, value);
                 case MethodInvoker.getCurrentBoard:
                     return boardHandler(value);
                 case MethodInvoker.getMyScore:
@@ -194,10 +175,14 @@ public class GameManager extends Observable {
                     return tilesHandler(guestId, value);
                 case MethodInvoker.getMyWords:
                     return wordsHandler(guestId, value);
+                case MethodInvoker.getGameBooks:
+                    return gameBooksHandler(guestId, value);
+                case MethodInvoker.getBagCount:
+                    return bagCountHandler(guestId, value);
                 case MethodInvoker.isMyTurn:
                     return myTurnHandler(guestId, value);
                 case MethodInvoker.tryPlaceWord:
-                    return queryHandler(guestId, value);
+                    return placeWordHandler(guestId, value);
                 case MethodInvoker.challenge:
                     return challengeHandler(guestId, value);
                 case MethodInvoker.skipTurn:
@@ -225,31 +210,27 @@ public class GameManager extends Observable {
         return getPlayerByName(guestName).getID();
     }
 
-    public String addBooksHandler(String listOfBooksSer) {
-        try {
-            List<String> playerBookList = (List<String>) ObjectSerializer.deserializeObject(listOfBooksSer);
-
-            for (String book : playerBookList) {
-                if (fullBookList.containsKey(book)) {
-                    this.selectedBooks.add(book);
-                }
+    public String addBooksHandler(String listOfBooksSer) throws ClassNotFoundException, IOException {
+        /*
+         * Adds each books that the guest chosed to the game's book list,
+         * if doesnt exist already
+         */
+        List<String> playerBookList = (List<String>) ObjectSerializer.deserializeObject(listOfBooksSer);
+        for (String book : playerBookList) {
+            if (fullBookList.containsKey(book)) {
+                this.selectedBooks.add(book);
             }
-            // PRINT DEBUG
-            System.out.println("Game Manager: your book " + listOfBooksSer + " is set up!\n");
-
-            return "true";
-
-        } catch (ClassNotFoundException | IOException e) {
         }
-
         // PRINT DEBUG
-        System.out.println("Game Manager: failed to set up this book");
-        return "false";
+        System.out.println("Game Manager: your book list is set up!\n");
+
+        return "true";
+
     }
 
     private String readyHandler(String value) {
         setReady();
-        return "ready";
+        return MethodInvoker.ready;
     }
 
     public void setReady() {
@@ -258,18 +239,18 @@ public class GameManager extends Observable {
             // PRINT DEBUG
             System.out.println("Game Manager: ALL PLAYERS ARE READY TO PLAY! draw tiles...\n");
 
-            // Set the Server's game books List
+            // Set the game server's list of books for query
             for (String book : selectedBooks) {
                 String serverBookPath = fullBookList.get(book);
                 this.gameBooksString += serverBookPath + ",";
             }
 
-            // Draw tiles - Who's playing first
+            // Draw tiles - Decide who's playing first
             turnManager.drawTiles();
         }
     }
 
-    private String getPlayersInfoHandler(int guestId, String value) {
+    private String playersInfoHandler(int guestId, String value) throws IOException {
         if (value.equals("true")) {
 
             List<Player> otherPlayerList = this.playersByID.values().stream()
@@ -282,28 +263,18 @@ public class GameManager extends Observable {
                 String info = String.valueOf(p.getScore()) + ":" + String.valueOf(p.isMyTurn());
                 othersInfo.put(p.getName(), info);
             }
-            try {
-                String sc = ObjectSerializer.serializeObject(othersInfo);
-                return sc;
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return "cantSerialize";
-        } else {
-            return "false";
+            String sc = ObjectSerializer.serializeObject(othersInfo);
+            return sc;
         }
+        return "false";
 
     }
 
-    private String boardHandler(String value) {
+    private String boardHandler(String value) throws IOException {
         if (value.equals("true")) {
-            try {
-                String board = ObjectSerializer.serializeObject(gameBoard.getTiles());
-                return board;
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return "cantSerialize";
+
+            String board = ObjectSerializer.serializeObject(gameBoard.getTiles());
+            return board;
         } else
             return "false";
     }
@@ -315,31 +286,19 @@ public class GameManager extends Observable {
             return "false";
     }
 
-    private String tilesHandler(int guestId, String value) {
+    private String tilesHandler(int guestId, String value) throws IOException {
         if (value.equals("true")) {
-            try {
-                String tilesString = ObjectSerializer.serializeObject(getPlayerByID(guestId).getMyHandTiles());
-                return tilesString;
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            // PRINT DEBUG
-            System.out.println("can not serialize hand tile of " + getPlayerByID(guestId).getName());
-            return "cantSerialize";
+            String tilesString = ObjectSerializer.serializeObject(getPlayerByID(guestId).getMyHandTiles());
+            return tilesString;
         } else
             return "false";
     }
 
-    private String wordsHandler(int guestId, String value) {
+    private String wordsHandler(int guestId, String value) throws IOException {
         if (value.equals("true")) {
             String words;
-            try {
-                words = ObjectSerializer.serializeObject(getPlayerByID(guestId).getMyWords());
-                return words;
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return "cantSerialize";
+            words = ObjectSerializer.serializeObject(getPlayerByID(guestId).getMyWords());
+            return words;
         } else
             return "false";
     }
@@ -370,17 +329,13 @@ public class GameManager extends Observable {
         }
     }
 
-    private String queryHandler(int id, String moveValue) {
-
-        System.out.println("\n\n\n\n\n\n\n\n query Handler\n\n\n\n\n\n\n\n");
-
+    private String placeWordHandler(int id, String moveValue) throws ClassNotFoundException, IOException {
         /*
          * if Active word is activated - can not try place this word.
          * need to check if the guest has all the correct tiles and make the string word
          * to a Word object
          * go to board.tryPlaceWord() - if not board legal - returns -1 (need to try
-         * again), else set Active
-         * word
+         * again), else set Active word
          * if word was dictionary legal : updated score, updated words, pull tiles,
          * change turn...
          * notifyAll to getChanges (turn index, get correct Board, players points and
@@ -393,41 +348,35 @@ public class GameManager extends Observable {
         if (turnManager.getActiveWord() != null) {
             return "false";
         }
-        try {
-            Word queryWord = (Word) ObjectSerializer.deserializeObject(moveValue);
-            Player player = getPlayerByID(id);
-            int score = gameBoard.tryPlaceWord(queryWord);
-            if (score == -1) {
-                return "notBoardLegal";
-            } else if (score == 0) {
-                // some word that was made is not dictionary legal
-                // players can challenge this word or skip turn
-                turnManager.setActiveWord(queryWord);
-                player.setIsActiveWord(true);
-                return "notDictionaryLegal";
-            } else {
-                player.addPoints(score);
-                player.addWords(gameBoard.getTurnWords());
-                for (Tile t : queryWord.getTiles()) {
-                    player.getMyHandTiles().remove(t);
-                }
-                turnManager.pullTiles(id);
-                // send some updated to the players, so they could getChanges():
-                // getCurrentBoard, getMyTiles, getMyWords
-
-                // setChanged();
-                // notifyObservers();
-
-                turnManager.nextTurn();
-
-                String playerScore = String.valueOf(score);
-                return playerScore;
+        Word queryWord = (Word) ObjectSerializer.deserializeObject(moveValue);
+        Player player = getPlayerByID(id);
+        int score = gameBoard.tryPlaceWord(queryWord);
+        if (score == -1) {
+            return "notBoardLegal";
+        } else if (score == 0) {
+            // some word that was made is not dictionary legal
+            // players can challenge this word or skip turn
+            turnManager.setActiveWord(queryWord);
+            player.setIsActiveWord(true);
+            return "notDictionaryLegal";
+        } else {
+            player.addPoints(score);
+            player.addWords(gameBoard.getTurnWords());
+            for (Tile t : queryWord.getTiles()) {
+                player.getMyHandTiles().remove(t);
             }
+            turnManager.pullTiles(id);
+            // send some updated to the players, so they could getChanges():
+            // getCurrentBoard, getMyTiles, getMyWords
 
-        } catch (ClassNotFoundException | IOException e) {
-            e.printStackTrace();
+            // setChanged();
+            // notifyObservers();
+
+            turnManager.nextTurn();
+
+            String playerScore = String.valueOf(score);
+            return playerScore;
         }
-        return "cantSerialize";
     }
 
     private String challengeHandler(int playerId, String moveValue) {
@@ -476,7 +425,7 @@ public class GameManager extends Observable {
                 String playerScore = String.valueOf(score);
                 return playerScore;
 
-            } else if (answer.equals("false")) {
+            } else {
                 // Challenge failed - player loses points
                 // Turn off active word
                 turnManager.setActiveWord(null);
@@ -487,12 +436,10 @@ public class GameManager extends Observable {
                 // send some updated to the players so they could getChanges():
                 // getCurrentBoard, getMyTiles, getMyWord
                 // ???
-                setChanged();
-                notifyObservers("updateAll");
+                // setChanged();
+                // notifyObservers("updateAll");
 
                 this.turnManager.nextTurn();
-                return MethodInvoker.skipTurn;
-            } else {
                 return MethodInvoker.skipTurn;
             }
         } else {
@@ -501,8 +448,9 @@ public class GameManager extends Observable {
     }
 
     protected boolean dictionaryLegal(Word word) {
-        boolean flag = (word == null);
-        System.out.println("\n\n\n\n\n\n\n\n dictionary Legal \n\n word is null : " + flag + "\n\n\n\n\n\n\n\n\n\n");
+
+        System.out.println(
+                "\n\n\n\n\n\n\n\n dictionary Legal \n\n word is null : " + (word == null) + "\n\n\n\n\n\n\n\n\n\n");
 
         /* ask the game server */
         //
@@ -516,17 +464,19 @@ public class GameManager extends Observable {
 
         try {
             ans = sentToGameServer(req);
-        } catch (IOException e) {}
-        System.out.println("\n\n\n SERVER RESPONDE - " + ans);
-        if (ans.equals("true")) {
-            return true;
-        } else if (ans.equals("false")) {
-            return false;
-        } else {
-            // PRINT DEBUG
-            System.out.println("GAME MANAGER: wrong query answer from game server\n");
-            return false;
+            System.out.println("\n\n\n SERVER RESPONDE - " + ans);
+            if (ans.equals("true")) {
+                return true;
+            } else if (ans.equals("false")) {
+                return false;
+            }
+        } catch (IOException e) {
         }
+
+        // PRINT DEBUG
+        System.out.println("GAME MANAGER: wrong query answer from game server\n");
+        return false;
+
     }
 
     private String challengeToGameServer(ArrayList<Word> turnWords) {
@@ -574,6 +524,21 @@ public class GameManager extends Observable {
             }
             this.turnManager.nextTurn();
             return "true";
+        } else
+            return "false";
+    }
+
+    private String bagCountHandler(int guestId, String value) {
+        if (value.equals("true")) {
+            return String.valueOf(this.gameBag.size());
+        } else
+            return "false";
+    }
+
+    private String gameBooksHandler(int guestId, String value) throws IOException {
+        if (value.equals("true")) {
+            String gameBooks = ObjectSerializer.serializeObject(this.selectedBooks);
+            return gameBooks;
         } else
             return "false";
     }
@@ -770,7 +735,6 @@ public class GameManager extends Observable {
             setCurrentTurnIndex(j);
             setChanged();
             notifyObservers();
-            // notifyObservers(nextPlayer.getID() + "yourTurn");
             printTurnInfo();
         }
 

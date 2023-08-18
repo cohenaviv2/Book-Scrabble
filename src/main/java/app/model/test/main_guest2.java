@@ -34,12 +34,12 @@ public class main_guest2 {
             // Connect to the host server:
             try {
                 gm.connectMe("Matan", "localhost", 8040);
-            } catch (IOException e) {
+                gm.myBooksChoice("Moby-Dick");
+                gm.ready();
+            } catch (Exception e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
-            gm.myBooksChoice("Moby-Dick");
-            gm.ready();
 
         }
 
@@ -77,7 +77,9 @@ public class main_guest2 {
 
                 Word word = new Word(tiles, row, col, isVer);
 
-                gm.tryPlaceWord(word);
+                try {
+                    gm.tryPlaceWord(word);
+                } catch (Exception e) {}
 
             } else if (key.equals("2")) {
                 System.out.println("challange"); //

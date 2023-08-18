@@ -8,17 +8,13 @@ import app.model.MethodInvoker;
 import app.model.game.*;
 
 public class GuestModel extends Observable implements GameModel {
-
     private static GuestModel gm = null; // Singleton
     private CommunicationHandler commHandler;
     private PlayerProperties playerProperties;
 
-    private GuestModel() {
-    }
-    
     public static GuestModel get() {
         if (gm == null)
-        gm = new GuestModel();
+            gm = new GuestModel();
         return gm;
     }
 
@@ -26,9 +22,9 @@ public class GuestModel extends Observable implements GameModel {
     public PlayerProperties getPlayerProperties() {
         return PlayerProperties.get();
     }
-    
+
     @Override
-    public void connectMe(String name, String ip, int port) throws IOException {
+    public void connectMe(String name, String ip, int port) throws Exception {
         /*
          * Connects to the host server via socket
          * sets the guest player profile
@@ -43,22 +39,33 @@ public class GuestModel extends Observable implements GameModel {
 
     @Override
     public void myBooksChoice(String bookName) {
-        commHandler.addMyBookChoice(bookName);
+        try {
+            commHandler.addMyBookChoice(bookName);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void ready() {
-        commHandler.sendMessage(MethodInvoker.ready, "true");
+        try {
+            commHandler.sendMessage(MethodInvoker.ready, "true");
+        } catch (Exception e) {
+            e.printStackTrace();
+
+        }
     }
 
     @Override
     public void tryPlaceWord(Word myWord) {
         if (playerProperties.isMyTurn()) {
             try {
-                String word = ObjectSerializer.serializeObject(myWord);
+                String word;
+                word = ObjectSerializer.serializeObject(myWord);
                 commHandler.sendMessage(MethodInvoker.tryPlaceWord, word);
             } catch (IOException e) {
                 e.printStackTrace();
+
             }
         } else
             System.out.println("its not your turn");
@@ -89,46 +96,49 @@ public class GuestModel extends Observable implements GameModel {
         commHandler.close();
     }
 
-
     @Override
     public Map<String, String> getOthersInfo() {
-        // commHandler.sendMessage("getOthersScore", "true");
         return this.playerProperties.getOtherPlayersInfo();
     }
 
     @Override
     public Tile[][] getCurrentBoard() {
-        // commHandler.sendMessage("getCurrentBoard", "true");
         return this.playerProperties.getMyBoard();
     }
 
     @Override
     public int getMyScore() {
-        // commHandler.sendMessage("getMyScore", "true");
         return this.playerProperties.getMyScore();
     }
 
     @Override
     public ArrayList<Tile> getMyTiles() {
-        // commHandler.sendMessage("getMyTiles", "true");
         return this.playerProperties.getMyHandTiles();
     }
 
     @Override
     public ArrayList<Word> getMyWords() {
-        // commHandler.sendMessage("getMyWords", "true");
         return this.playerProperties.getMyWords();
     }
 
     @Override
     public boolean isMyTurn() {
-        // commHandler.sendMessage("isMyTurn", "true");
         return this.playerProperties.isMyTurn();
+    }
+
+    @Override
+    public Set<String> getGameBooks() {
+        return this.playerProperties.getGameBookList();
+    }
+
+    @Override
+    public int getBagCount() {
+        return this.playerProperties.getBagCount();
     }
 
     public void update() {
         setChanged();
-        notifyObservers();   
+        notifyObservers();
     }
 
 }

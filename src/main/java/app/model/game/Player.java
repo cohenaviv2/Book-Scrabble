@@ -4,11 +4,11 @@ import java.util.*;
 
 /*
  * Player profile
- * includes name, id, isHost, score
+ * includes name, id, score
  * contains list of current tiles and all words created so far
  * also contains turn & active word indicators
  * 
- * @authors: Aviv Cohen, Moshe Azachi, Matan Eliyahu
+ * @authors: Aviv Cohen
  * 
  */
 

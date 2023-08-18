@@ -47,7 +47,7 @@ public class GuestHandler implements ClientHandler {
     }
 
     @Override
-    public void handleClient(InputStream inputStream, OutputStream outputStream) {
+    public void handleClient(InputStream inputStream, OutputStream outputStream)  {
         try {
             this.in = new BufferedReader(new InputStreamReader(inputStream));
             this.out = new PrintWriter(outputStream, true);
@@ -56,12 +56,12 @@ public class GuestHandler implements ClientHandler {
             waitingRoom(); // Waiting for all the players to choose book and set Ready
             startChat(); // Starts a chat with the player until quitGame string
 
-        } catch (IOException | InterruptedException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private void connectGuest() throws IOException {
+    private void connectGuest() throws Exception {
         String message = in.readLine();
         String[] params = message.split(",");
         if (params[0].equals("0") && params[1].equals(MethodInvoker.connectMe)) {
@@ -79,7 +79,7 @@ public class GuestHandler implements ClientHandler {
         }
     }
 
-    private void waitingRoom() throws IOException, InterruptedException {
+    private void waitingRoom() throws Exception {
         boolean isBooksSet = false, ready = false;
 
         while (!gameManager.isReadyToPlay()) {
@@ -123,7 +123,7 @@ public class GuestHandler implements ClientHandler {
         }
     }
 
-    private void startChat() throws IOException {
+    private void startChat() throws Exception {
         String guestMessage;
         // START CHAT
         while (!(guestMessage = in.readLine()).equals(quitGameString)) {

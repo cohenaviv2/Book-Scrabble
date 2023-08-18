@@ -1,6 +1,6 @@
 package app.model;
 
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 
 import app.model.game.*;
@@ -12,15 +12,15 @@ import app.model.game.*;
  * 
  */
 
-public interface GameModel{
+public interface GameModel {
 
     // SEND DATA
-    void connectMe(String name, String ip, int port) throws IOException;
+    void connectMe(String name, String ip, int port) throws Exception;
 
-    void myBooksChoice(String bookName);
+    void myBooksChoice(String bookList);
 
     void ready();
-    
+
     void tryPlaceWord(Word myWord);
 
     void challenge();
@@ -33,15 +33,34 @@ public interface GameModel{
     PlayerProperties getPlayerProperties();
 
     Tile[][] getCurrentBoard();
-    
+
     ArrayList<Tile> getMyTiles();
-    
+
     int getMyScore();
-    
+
     ArrayList<Word> getMyWords();
-    
+
     boolean isMyTurn();
 
-    Map<String,String> getOthersInfo();
+    Map<String, String> getOthersInfo();
+
+    Set<String> getGameBooks();
+
+    int getBagCount();
+
+    static Map<String, String> getFullBookList() {
+        // initial all game Books from directory
+        Map<String, String> fullBookList = new HashMap<>(); // book name to path
+        File booksDirectory = new File("src\\main\\resources\\books");
+        File[] txtFiles = booksDirectory.listFiles((dir, name) -> name.endsWith(".txt"));
+        if (txtFiles != null) {
+            for (File file : txtFiles) {
+                String fileName = file.getName().replaceAll(".txt", "");
+                String gameServerPath = "server/books/" + fileName + ".txt"; // GAME SERVER PATH
+                fullBookList.put(fileName, gameServerPath);
+            }
+        }
+        return fullBookList;
+    }
 
 }

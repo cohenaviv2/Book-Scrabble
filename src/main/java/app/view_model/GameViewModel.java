@@ -7,6 +7,7 @@ import app.model.GameModel;
 import app.model.game.*;
 import app.model.guest.GuestModel;
 import app.model.host.HostModel;
+import app.view.Main;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -31,11 +32,7 @@ public class GameViewModel extends Observable implements Observer {
     private int firstCol;
     private int lastRow;
     private int lastCol;
-    private int wordLength;
     private StringBuilder wordBuilder;
-
-    public GameViewModel() {
-    }
 
     public void setGameMode(String MODE, int numOfPlayers) {
         if (MODE.equals("H")) {
@@ -53,29 +50,105 @@ public class GameViewModel extends Observable implements Observer {
     }
 
     public static ObservableList<String> getBookList() {
-        List<String> sortedBookList = new ArrayList<>(GameManager.get().getFullBookList().keySet());
-        Collections.sort(sortedBookList);
-        return FXCollections.observableArrayList(sortedBookList);
+        List<String> bookList = new ArrayList<>(GameModel.getFullBookList().keySet());
+        Collections.shuffle(bookList); // Shuffle the list randomly
+        return FXCollections.observableArrayList(bookList);
     }
 
     public void connectMe(String name, String ip, int port) throws IOException {
-        gameModel.connectMe(name, ip, port);
+        try {
+            gameModel.connectMe(name, ip, port);
+        } catch (Exception e) {
+            System.out.println("VIEW MODEL EXCEPTION");
+            String errorMessage = "An error occurred:\n" + e.getMessage();
+            Main.getInstance().showAlert(errorMessage);
+        }
     }
 
     public void myBookChoice(String bookName) {
-        gameModel.myBooksChoice(bookName);
+        try {
+            gameModel.myBooksChoice(bookName);
+        } catch (Exception e) {
+            e.printStackTrace();
+            String errorMessage = "An error occurred: " + e.getMessage();
+            Main.getInstance().showAlert(errorMessage);
+        }
     }
 
     public void ready() {
-        gameModel.ready();
+        try {
+            gameModel.ready();
+        } catch (Exception e) {
+            e.printStackTrace();
+            String errorMessage = "An error occurred: " + e.getMessage();
+            Main.getInstance().showAlert(errorMessage);
+        }
     }
 
     public Tile[][] getCurrentBoard() {
-        return gameModel.getCurrentBoard();
+        try {
+            return gameModel.getPlayerProperties().getMyBoard();
+        } catch (Exception e) {
+            String errorMessage = "An error occurred: " + e.getMessage();
+            Main.getInstance().showAlert(errorMessage);
+            return null;
+        }
+    }
+
+    public void tryPlaceWord(String word) throws Exception {
+        // Handle the "Try Place Word" action with the collected data
+        System.out.println("Word: " + word);
+        System.out.println(firstRow + "," + firstCol);
+        System.out.println(lastRow + "," + lastCol);
+
+        boolean isVer = isWordVertical();
+        int wordLen = getWordLength();
+        int f_Row = getFirstSelectedCellRow();
+        int f_Col = getFirstSelectedCellCol();
+
+        Tile[] tiles = new Tile[wordLen];
+        int j = 0;
+        for (int i = 0; i < wordLen; i++) {
+            if (isVer) {
+                if (getCurrentBoard()[f_Row + i][f_Col] != null) {
+                    tiles[i] = null;
+                } else {
+                    for (Tile t : gameModel.getMyTiles()) {
+                        if (t.getLetter() == word.toCharArray()[j]) {
+                            tiles[i] = t;
+                            j++;
+                            break;
+                        }
+                    }
+                }
+            } else {
+                if (getCurrentBoard()[f_Row][f_Col + i] != null) {
+                    tiles[i] = null;
+                } else {
+                    for (Tile t : gameModel.getMyTiles()) {
+                        if (t.getLetter() == word.toCharArray()[j]) {
+                            tiles[i] = t;
+                            j++;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        Word queryWord = new Word(tiles, f_Row, f_Col, isVer);
+        System.out.println(queryWord);
+        gameModel.tryPlaceWord(queryWord);
+
     }
 
     public void challenge() {
-        gameModel.challenge();
+        try {
+            gameModel.challenge();
+        } catch (Exception e) {
+            String errorMessage = "An error occurred: " + e.getMessage();
+            Main.getInstance().showAlert(errorMessage);
+        }
     }
 
     public void skipTurn() {
@@ -87,7 +160,7 @@ public class GameViewModel extends Observable implements Observer {
     }
 
     public boolean isMyTurn() {
-        return gameModel.isMyTurn();
+        return gameModel.getPlayerProperties().isMyTurn();
     }
 
     @Override
@@ -95,45 +168,69 @@ public class GameViewModel extends Observable implements Observer {
         if (o == gameModel) {
             // Update the ViewModel's state based on changes in the GameModel
             System.out.println("VIEW-MODEL : GOT UPDATE");
+            try {
+                buttonTiles = FXCollections.observableArrayList();
+                wordBuilder = new StringBuilder();
 
-            buttonTiles = FXCollections.observableArrayList();
-            wordBuilder = new StringBuilder();
+                // My name
+                if (this.myNameView == null) {
+                    this.myNameView = new SimpleStringProperty(gameModel.getPlayerProperties().getMyName());
+                }
 
-            // My name
-            if (this.myNameView == null) {
-                this.myNameView = new SimpleStringProperty(gameModel.getPlayerProperties().getMyName());
+                // My turn
+                boolean myTurn = gameModel.getPlayerProperties().isMyTurn();
+                this.myTurnView = new SimpleStringProperty(String.valueOf(myTurn));
+                if (myTurn)
+                    MessageReader.setMsg("It's your turn!");
+
+                // My tiles
+                List<String> obsTiles = new ArrayList<>();
+                for (Tile t : gameModel.getPlayerProperties().getMyHandTiles()) {
+                    obsTiles.add(String.valueOf(t.getLetter()));
+                    buttonTiles.add(new Button(String.valueOf(t.getLetter())));
+                }
+                this.myTilesView = FXCollections.observableArrayList(obsTiles);
+
+                // My score
+                this.myScoreView = new SimpleStringProperty(
+                        String.valueOf(gameModel.getPlayerProperties().getMyScore()));
+
+                // My words
+                List<String> obsWords = new ArrayList<>();
+                for (Word w : gameModel.getPlayerProperties().getMyWords()) {
+                    obsWords.add(w.toString());
+                }
+                this.myWordsView = FXCollections.observableArrayList(obsWords);
+
+                // Other player's info
+                List<String> obsOthers = new ArrayList<>();
+                Map<String, String> otherInfo = gameModel.getPlayerProperties().getOtherPlayersInfo();
+                for (String n : otherInfo.keySet()) {
+                    obsOthers.add(n + ":" + otherInfo.get(n));
+                }
+                this.othersInfoView = FXCollections.observableArrayList(obsOthers);
+
+                // Game books
+                // if (gameModel.getPlayerProperties().getGameBookList() != null) {
+                // for (String book : gameModel.getPlayerProperties().getGameBookList()) {
+                // System.out.println(book);
+                // }
+                // } else {
+                // System.out.println("22222222222222222222222");
+                // }
+                List<String> gameBookList = new ArrayList<>();
+                for (String book : gameModel.getPlayerProperties().getGameBookList()) {
+                    gameBookList.add(book);
+                }
+                this.othersInfoView = FXCollections.observableArrayList(gameBookList);
+
+                // Bag count
+                this.bagCountView = new SimpleStringProperty(String.valueOf(gameModel.getBagCount()));
+
+            } catch (Exception e) {
+                String errorMessage = "An error occurred: " + e.getMessage();
+                Main.getInstance().showAlert(errorMessage);
             }
-
-            // My turn
-            boolean myTurn = gameModel.isMyTurn();
-            this.myTurnView = new SimpleStringProperty(String.valueOf(myTurn));
-            if (myTurn)
-                MessageReader.setMsg("It's your turn!");
-
-            // My tiles
-            List<String> obsTiles = new ArrayList<>();
-            for (Tile t : gameModel.getMyTiles()) {
-                obsTiles.add(String.valueOf(t.getLetter()));
-                buttonTiles.add(new Button(String.valueOf(t.getLetter())));
-            }
-            this.myTilesView = FXCollections.observableArrayList(obsTiles);
-
-            // My words
-            List<String> obsWords = new ArrayList<>();
-            for (Word w : gameModel.getMyWords()) {
-                obsWords.add(w.toString());
-            }
-            this.myWordsView = FXCollections.observableArrayList(obsWords);
-
-            // Other player's info
-            List<String> obsOthers = new ArrayList<>();
-            for (String n : gameModel.getOthersInfo().keySet()) {
-                obsOthers.add(n + ":" + gameModel.getPlayerProperties().getOtherPlayersInfo().get(n));
-            }
-            this.othersInfoView = FXCollections.observableArrayList(obsOthers);
-
-            this.myScoreView = new SimpleStringProperty(String.valueOf(gameModel.getMyScore()));
-
             setChanged();
             notifyObservers();
 
@@ -142,6 +239,10 @@ public class GameViewModel extends Observable implements Observer {
 
     public ObservableValue<String> getPlayerNameProperty() {
         return myNameView;
+    }
+
+    public ObservableValue<String> getMyTurnView() {
+        return myTurnView;
     }
 
     public ObservableValue<String> getPlayerScoreProperty() {
@@ -189,64 +290,6 @@ public class GameViewModel extends Observable implements Observer {
 
     public void clearWord() {
         wordBuilder.setLength(0);
-    }
-
-    public void tryPlaceWord(String word) {
-        // Handle the "Try Place Word" action with the collected data
-        System.out.println("Word: " + word);
-        System.out.println(firstRow + "," + firstCol);
-        System.out.println(lastRow + "," + lastCol);
-
-        // if (firstRow > lastRow) {
-        // int tmp = firstRow;
-        // firstRow = lastRow;
-        // lastRow = tmp;
-        // }
-        // if (firstCol > lastCol) {
-        // int tmp = firstCol;
-        // firstCol = lastCol;
-        // lastCol = tmp;
-        // }
-
-        boolean isVer = isWordVertical();
-        int wordLen = getWordLength();
-        int f_Row = getFirstSelectedCellRow();
-        int f_Col = getFirstSelectedCellCol();
-
-        Tile[] tiles = new Tile[wordLen];
-        int j = 0;
-        for (int i = 0; i < wordLen; i++) {
-            if (isVer) {
-                if (getCurrentBoard()[f_Row + i][f_Col] != null) {
-                    tiles[i] = null;
-                } else {
-                    for (Tile t : gameModel.getMyTiles()) {
-                        if (t.getLetter() == word.toCharArray()[j]) {
-                            tiles[i] = t;
-                            j++;
-                            break;
-                        }
-                    }
-                }
-            } else {
-                if (getCurrentBoard()[f_Row][f_Col + i] != null) {
-                    tiles[i] = null;
-                } else {
-                    for (Tile t : gameModel.getMyTiles()) {
-                        if (t.getLetter() == word.toCharArray()[j]) {
-                            tiles[i] = t;
-                            j++;
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-
-        Word queryWord = new Word(tiles, f_Row, f_Col, isVer);
-        System.out.println(queryWord);
-        gameModel.tryPlaceWord(queryWord);
-
     }
 
     public void setFirstSelectedCellRow(int firstRow) {

@@ -30,7 +30,7 @@ public class GameManagerTest {
         try {
             myBooksList = ObjectSerializer.serializeObject(myBooks);
             g.addBooksHandler(myBooksList);
-        } catch (IOException e) { }
+        } catch (Exception e) { }
         g.setReady();
         // g.addBookHandler("Frank Herbert - Dune.txt");
         // g.addBookHandler("Harray Potter.txt");
@@ -51,7 +51,7 @@ public class GameManagerTest {
         try {
             String ans = g.processPlayerInstruction(myId, "tryPlaceWord", ObjectSerializer.serializeObject(w));
             System.out.println(ans);
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 

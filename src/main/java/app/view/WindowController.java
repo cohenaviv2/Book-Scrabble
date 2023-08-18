@@ -1,56 +1,29 @@
 package app.view;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Stack;
-
-import app.model.game.ObjectSerializer;
-import app.model.game.Tile;
+import app.model.game.*;
 import app.model.host.HostModel;
-import app.view_model.GameViewModel;
-import app.view_model.MessageReader;
+import java.io.*;
+import java.net.*;
+import java.util.*;
+import app.view_model.*;
 import javafx.application.Platform;
+import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.StringBinding;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TextField;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
+import javafx.scene.control.*;
+import javafx.scene.image.*;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
-import javafx.scene.text.Text;
-import javafx.scene.text.TextAlignment;
-import javafx.scene.text.TextFlow;
-import javafx.stage.Screen;
-import javafx.stage.Stage;
-import javafx.stage.StageStyle;
+import javafx.scene.text.*;
+import javafx.stage.*;
 
 public class WindowController {
 
@@ -66,7 +39,7 @@ public class WindowController {
     private Map<String, String> txtExplanations;
     private List<String> selectedBooks;
     private String MY_BOOKS_SERILIZED;
-    private List<Pane> boundariesCells;
+    private List<Pane> selectedCells;
     private Stack<Pane> placementCelles;
     private List<Pane> placementList;
     private Button tryPlaceWordButton;
@@ -75,6 +48,7 @@ public class WindowController {
     private final String CSS_STYLESHEET = getClass().getResource("/style.css").toExternalForm();
     private final Font EMOJI_FONT = Font.loadFont(getClass().getResourceAsStream("src\\main\\resources\\seguiemj.ttf"),
             24);
+    private final String X = "\u2718";
 
     private double xOffset = 0;
     private double yOffset = 0;
@@ -84,7 +58,7 @@ public class WindowController {
         this.primaryStage = primaryStage;
         this.gameViewModel = gameViewModel;
         this.selectedBooks = new ArrayList<>();
-        this.boundariesCells = new ArrayList<>();
+        this.selectedCells = new ArrayList<>();
         this.placementCelles = new Stack<>();
         this.placementList = new ArrayList<>();
         this.txtExplanations = new HashMap<>();
@@ -134,7 +108,7 @@ public class WindowController {
         osBar.getStyleClass().add("os-bar");
         osBar.setMinHeight(30);
 
-        Button closeButton = new Button("\u2718");
+        Button closeButton = new Button(this.X);
         closeButton.setFont(EMOJI_FONT);
         closeButton.getStyleClass().add("red-button");
         // closeButton.setMinHeight(40);
@@ -166,7 +140,7 @@ public class WindowController {
         return osBar;
     }
 
-    private void openCustomWindow(Node content, String buttonColor, String ButtonText, double customWidth,
+    private Button openCustomWindow(Node content, String buttonColor, String ButtonText, double customWidth,
             double customHeight, boolean isQuitGame) {
         Stage customStage = new Stage();
         customStage.initStyle(StageStyle.UNDECORATED);
@@ -191,6 +165,8 @@ public class WindowController {
         customRoot.setAlignment(Pos.CENTER);
         customRoot.getStyleClass().addAll("content-background");
 
+        Button button;
+
         if (isQuitGame) {
             Button yesButton = new Button("Yes");
             yesButton.getStyleClass().add("blue-button");
@@ -202,11 +178,11 @@ public class WindowController {
                 System.exit(0);
             });
 
-            Button noButton = new Button("No");
-            noButton.getStyleClass().add("red-button");
-            noButton.setOnAction(event -> customStage.close());
+            button = new Button("No");
+            button.getStyleClass().add("red-button");
+            button.setOnAction(event -> customStage.close());
 
-            HBox buttons = new HBox(10, yesButton, noButton);
+            HBox buttons = new HBox(10, yesButton, button);
             buttons.setAlignment(Pos.CENTER);
 
             Text quitGameText = new Text("Are you sure you want to quit game?");
@@ -217,9 +193,11 @@ public class WindowController {
 
             customScene = new Scene(customRoot, customStageWidth, customStageHeight);
         } else {
-            Button button = new Button(ButtonText);
+            button = new Button(ButtonText);
             button.getStyleClass().add(buttonColor + "-button");
-            button.setOnAction(event -> customStage.close());
+            button.setOnAction(event -> {
+                customStage.close();
+            });
 
             StackPane buttonPane = new StackPane(button);
             BorderPane.setAlignment(buttonPane, Pos.TOP_CENTER);
@@ -234,6 +212,8 @@ public class WindowController {
         customScene.setCursor(Cursor.HAND);
         customStage.setScene(customScene);
         customStage.show();
+
+        return button;
     }
 
     public VBox createInitialWindow() {
@@ -278,7 +258,7 @@ public class WindowController {
         VBox centerContent = new VBox(10, hostModeTitle, hostModeText, guestModeTitle, guestModeText);
         centerContent.setAlignment(Pos.CENTER);
 
-        helpButton.setOnAction(e -> openCustomWindow(centerContent, "red", "X", 650, 400, false));
+        helpButton.setOnAction(e -> openCustomWindow(centerContent, "red", this.X, 650, 400, false));
 
         // Event handler for hostButton
         hostButton.setOnAction(event -> {
@@ -412,7 +392,7 @@ public class WindowController {
         loginFormBox.setSpacing(15);
 
         // OS Bar
-        HBox osBar = createOsBar(true);
+        HBox osBar = createOsBar(false);
 
         // My name
         Label nameLabel = new Label("My name:");
@@ -537,9 +517,9 @@ public class WindowController {
         hostModeExp.setTextAlignment(TextAlignment.CENTER);
         // hostModeExp.setFont(new Font(14));
         hostModeExp.getStyleClass().add("content-label");
-        helpButton.setOnAction(e -> openCustomWindow(hostModeExp, "red", "X", 650, 500, false));
+        helpButton.setOnAction(e -> openCustomWindow(hostModeExp, "red", this.X, 650, 500, false));
         Button settingsButton = (Button) roundButtonsPane.getChildren().get(1);
-        settingsButton.setOnAction(e -> openCustomWindow(settings, "red", "X", 500, 750, false));
+        settingsButton.setOnAction(e -> openCustomWindow(settings, "red", this.X, 500, 750, false));
 
         // SET GAME MODE
         gameViewModel.setGameMode(GAME_MODE, numOfPlayersComboBox.getValue());
@@ -680,9 +660,9 @@ public class WindowController {
         Text hostModeExp = new Text(txtExplanations.get("guest-mode"));
         hostModeExp.setTextAlignment(TextAlignment.CENTER);
         hostModeExp.setFont(new Font(14));
-        helpButton.setOnAction(e -> openCustomWindow(hostModeExp, "red", "X", 500, 350, false));
+        helpButton.setOnAction(e -> openCustomWindow(hostModeExp, "red", this.X, 500, 350, false));
         Button settingsButton = (Button) roundButtonsPane.getChildren().get(1);
-        settingsButton.setOnAction(e -> openCustomWindow(settings, "red", "X", 500, 500, false));
+        settingsButton.setOnAction(e -> openCustomWindow(settings, "red", this.X, 500, 500, false));
 
         Label waintingLabel = new Label("");
 
@@ -700,7 +680,7 @@ public class WindowController {
             if (selectedBooks.size() != 0) {
                 // Call the corresponding ViewModel method to handle the "Connect me" action
                 if (CUSTOM_PORT == 0) {
-                    CUSTOM_PORT = HostModel.HOST_PORT;
+                    CUSTOM_PORT = HostModel.HOST_SERVER_PORT;
                 }
                 try {
                     gameViewModel.connectMe(MY_NAME, ip, CUSTOM_PORT);
@@ -797,114 +777,148 @@ public class WindowController {
         VBox sidebar = new VBox(5);
         sidebar.setPadding(new Insets(15));
 
-        // Player Name
-        Label nameLabel = new Label("My Name:");
-        Label nameValueLabel = new Label();
-        nameValueLabel.textProperty().bind(gameViewModel.getPlayerNameProperty());
-        nameLabel.setStyle("-fx-font-size: 14px;");
-        nameValueLabel.setStyle("-fx-font-size: 23px; -fx-font-weight: bold;" +
-                "-fx-background-color: silver; -fx-padding: 5px; -fx-border-radius: 30;" +
-                "-fx-text-fill: black; -fx-effect: dropshadow(gaussian, #000000, 5, 0, 0, 1);");
+        // // Player Name
+        // Label nameLabel = new Label("My Name:");
+        // Label nameValueLabel = new Label();
+        // nameValueLabel.textProperty().bind(gameViewModel.getPlayerNameProperty());
+        // nameLabel.getStyleClass().add("login-label");
+        // nameValueLabel.getStyleClass().add("my-name-label");
 
-        // Player Score
-        Label scoreLabel = new Label("Score:");
-        Label scoreValueLabel = new Label();
-        scoreValueLabel.textProperty().bind(gameViewModel.getPlayerScoreProperty());
-        scoreLabel.setStyle("-fx-font-size: 14px;");
-        scoreValueLabel.setStyle("-fx-font-size: 30px; -fx-font-weight: bold;" +
-                "-fx-background-color: silver; -fx-padding: 5px; -fx-border-radius: 30;" +
-                "-fx-text-fill: navy; -fx-effect: dropshadow(gaussian, #000000, 5, 0, 0, 1);");
-        scoreValueLabel.setTextFill(Color.NAVY);
+        // ImageView turnIcon = new ImageView(new Image("turn-icon.png"));
+        // turnIcon.setFitWidth(40); // Set the desired width
+        // turnIcon.setFitHeight(40);
 
-        // Player Turn
-        Label turnLabel = new Label("My Turn:");
-        Label turnValueLabel = new Label();
+        // HBox nameBox = new HBox();
+        // if(gameViewModel.isMyTurn()){
+        //     nameBox.getChildren().add(turnIcon);
+        // }
+        // nameBox.getChildren().add(nameValueLabel);
+        // nameBox.setAlignment(Pos.CENTER);
 
-        StringBinding turnBinding = Bindings.createStringBinding(() -> {
-            String turn = gameViewModel.getPlayerTurnProperty().getValue();
-            if ("true".equals(turn)) {
-                turnValueLabel.setTextFill(Color.GREEN);
-            } else {
-                turnValueLabel.setTextFill(Color.RED);
-            }
-            return turn;
-        }, gameViewModel.getPlayerTurnProperty());
+        // // Player Score
+        // Label scoreLabel = new Label("Score:");
+        // scoreLabel.getStyleClass().add("login-label");
+        // Label scoreValueLabel = new Label();
+        // scoreValueLabel.textProperty().bind(gameViewModel.getPlayerScoreProperty());
+        // scoreValueLabel.getStyleClass().add("score-label");
+        // ///
+        // ImageView scoreIcon = new ImageView(new Image("star-icon.png"));
+        // scoreIcon.setFitWidth(40); // Set the desired width
+        // scoreIcon.setFitHeight(40);
+        // // iconImageView.setPreserveRatio(true);
+        // HBox scoreBox = new HBox(scoreIcon, scoreValueLabel);
+        // scoreBox.setAlignment(Pos.CENTER);
 
-        turnValueLabel.textProperty().bind(turnBinding);
-        turnLabel.setStyle("-fx-font-size: 14px;");
-        turnValueLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
+        // // Player Turn
+        // Text turnLabel = new Text();
+        // turnLabel.textProperty().bind(gameViewModel.getMyTurnView());
+        // turnLabel.getStyleClass().add("turn-label");
+        // if (gameViewModel.isMyTurn())
+        // turnLabel.setFill(Color.GREENYELLOW);
+        // else
+        // turnLabel.setFill(Color.RED);
+        // ImageView turnIcon = new ImageView(new Image("turn-icon.png"));
+        // turnIcon.setFitWidth(40); // Set the desired width
+        // turnIcon.setFitHeight(40);
+        // // iconImageView.setPreserveRatio(true);
+        // HBox turnBox = new HBox(turnIcon, turnLabel);
+        // turnBox.setAlignment(Pos.CENTER);
+
+        //
+        // VBox myInfoBoard = new VBox(nameBox, scoreBox);
+        // myInfoBoard.getStyleClass().add("wood-score-board");
+        // myInfoBoard.setMinSize(250, 120);
+        // myInfoBoard.setMaxSize(250, 120);
+        // myInfoBoard.setAlignment(Pos.CENTER);
+
+        VBox myInfoBoard = createInfoBoard(gameViewModel.getPlayerNameProperty(), gameViewModel.getPlayerScoreProperty(), gameViewModel.isMyTurn(), false);
+
+        // Bag count
+        Label bagLabel = new Label("Bag:");
+        Label bagValueLabel = new Label();
+        bagValueLabel.textProperty().bind(gameViewModel.getBagCountProperty());
+        bagLabel.getStyleClass().add("login-label");
+        bagValueLabel.getStyleClass().add("score-label");
+        bagValueLabel.setTextFill(Color.NAVY);
+        HBox bagCountBox = new HBox(10, bagLabel, bagValueLabel);
+
+        // // Player Turn
+        // Label turnLabel = new Label("My Turn:");
+        // turnLabel.getStyleClass().add("login-label");
+        // Label turnValueLabel = new Label();
+
+        // StringBinding turnBinding = Bindings.createStringBinding(() -> {
+        // String turn = gameViewModel.getPlayerTurnProperty().getValue();
+        // if ("true".equals(turn)) {
+        // turnValueLabel.setTextFill(Color.GREEN);
+        // } else {
+        // turnValueLabel.setTextFill(Color.RED);
+        // }
+        // return turn;
+        // }, gameViewModel.getPlayerTurnProperty());
+
+        // turnValueLabel.textProperty().bind(turnBinding);
+        // turnLabel.setStyle("-fx-font-size: 14px;");
+        // turnValueLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
+        // HBox turnBox = new HBox(10, turnLabel, turnValueLabel);
+        // turnBox.setAlignment(Pos.CENTER_LEFT);
+
+        // Game Books
+        Label booksLabel = new Label("Game Books:");
+        ListView<String> bookListView = new ListView<>();
+        bookListView.setItems(gameViewModel.getGameBooksProperty());
 
         // Player Words
         Label wordsLabel = new Label("My Words:");
         ListView<String> wordsListView = new ListView<>();
         wordsListView.setItems(gameViewModel.getPlayerWordsProperty());
 
+        // Other players info
         Label othersScoreLabel = new Label("Other Players:");
         othersScoreLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
-
-        // Other players info
         ListView<String> othersScoreListView = new ListView<>();
         othersScoreListView.setItems(gameViewModel.getOthersInfoProperty());
 
-        othersScoreListView.setCellFactory(listView -> new ListCell<String>() {
-            @Override
-            protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setText(null);
-                    setGraphic(null);
-                } else {
-                    String[] info = item.split(":");
-                    String text = info[0] + ": " + info[1];
-                    if (info[2].equals("true"))
-                        text = "\u27A1 " + text;
-                    setText(text);
-                    setStyle(
-                            "-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: white; -fx-background-color: darkblue;");
-                    setPadding(new Insets(5));
-                }
-            }
-        });
+        // othersScoreListView.setCellFactory(listView -> new ListCell<String>() {
+        // @Override
+        // protected void updateItem(String item, boolean empty) {
+        // super.updateItem(item, empty);
+        // if (empty || item == null) {
+        // setText(null);
+        // setGraphic(null);
+        // } else {
+        // String[] info = item.split(":");
+        // String text = info[0] + ": " + info[1];
+        // if (info[2].equals("true"))
+        // text = "\u27A1 " + text;
+        // setText(text);
+        // setStyle(
+        // "-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: white;
+        // -fx-background-color: darkblue;");
+        // setPadding(new Insets(5));
+        // }
+        // }
+        // });
 
         sidebar.getChildren().addAll(
-                nameLabel, nameValueLabel,
-                scoreLabel, scoreValueLabel,
-                turnLabel, turnValueLabel,
-                wordsLabel, wordsListView,
-                // tilesLabel, tilesListView,
-                othersScoreLabel, othersScoreListView);
+                myInfoBoard);
 
         return sidebar;
     }
 
     private GridPane createBoardGridPane() {
         gameBoard = new GridPane();
-        // gridPane.setPrefSize(732, 733); // Set the desired size of the grid
+        gameBoard.getStyleClass().add("board-background");
+        // gameBoard.setPrefSize(732, 733); // Set the desired size of the grid
 
         Tile[][] board = gameViewModel.getCurrentBoard();
         int boardSize = board.length;
-
-        // Set the background image
-        gameBoard.getStyleClass().add("board-background");
 
         for (int row = 0; row < boardSize; row++) {
             for (int col = 0; col < boardSize; col++) {
                 Pane cellPane = new Pane();
                 cellPane.getStyleClass().add("cell");
                 cellPane.setPrefSize(60, 60);
-
-                // Label letterLabel;
-                // if (board[row][col] == null) {
-                // letterLabel = new Label(null);
-                // cellPane.setStyle("-fx-border-color: transparent;");
-                // } else {
-                // letterLabel = new Label(String.valueOf(board[row][col].getLetter()));
-                // cellPane.setStyle("-fx-background-color: transparent; -fx-background-image:
-                // url('tiles/"
-                // + letterLabel.getText() + ".png');" +
-                // "-fx-background-size: cover; -fx-border-color: transparent;
-                // -fx-border-radius: 4px;");
-                // }
 
                 if (board[row][col] != null) {
                     String letter = String.valueOf(board[row][col].getLetter());
@@ -918,74 +932,64 @@ public class WindowController {
                     placementList.clear();
                     //
                     if (gameViewModel.isMyTurn()) {
-                        if (boundariesCells.size() == 0) {
-                            boundariesCells.add(cellPane);
+                        for (Button bt : tileButtons) {
+                            bt.setDisable(true);
+                        }
+                        if (selectedCells.size() == 0) {
+                            resetWordPlacement();
+                            selectedCells.add(cellPane);
                             cellPane.getStyleClass().add("selected");
-                        } else if (boundariesCells.size() == 1) {
-                            if (boundariesCells.contains(cellPane)) {
-                                boundariesCells.remove(cellPane);
+                        } else if (selectedCells.size() == 1) {
+                            if (selectedCells.contains(cellPane)) {
+                                selectedCells.remove(cellPane);
                                 cellPane.getStyleClass().remove("selected");
                             } else {
-                                int firstRow = GridPane.getRowIndex(boundariesCells.get(0));
-                                int firstCol = GridPane.getColumnIndex(boundariesCells.get(0));
+                                int firstRow = GridPane.getRowIndex(selectedCells.get(0));
+                                int firstCol = GridPane.getColumnIndex(selectedCells.get(0));
                                 int lastRow = GridPane.getRowIndex(cellPane);
                                 int lastCol = GridPane.getColumnIndex(cellPane);
+                                // Same row/col only
                                 if (firstRow == lastRow || firstCol == lastCol) {
-                                    boundariesCells.add(cellPane);
+                                    selectedCells.add(cellPane);
                                     cellPane.getStyleClass().add("selected");
                                 }
                             }
-                        } else if (boundariesCells.size() == 2) {
-                            if (boundariesCells.contains(cellPane)) {
-                                boundariesCells.remove(cellPane);
+                        } else if (selectedCells.size() == 2) {
+                            if (selectedCells.contains(cellPane)) {
+                                selectedCells.remove(cellPane);
                                 cellPane.getStyleClass().remove("selected");
                             } else {
                                 // clear all panes
-                                for (Pane cell : boundariesCells) {
+                                for (Pane cell : selectedCells) {
                                     cell.getStyleClass().remove("selected");
                                 }
-                                boundariesCells.clear();
+                                selectedCells.clear();
 
                                 // add the new one
-                                boundariesCells.add(cellPane);
+                                selectedCells.add(cellPane);
                                 cellPane.getStyleClass().add("selected");
                             }
                         }
 
-                        // // Toggle cell selection
-                        // if (selectedCells.contains(cellPane)) {
-                        // selectedCells.remove(cellPane);
-                        // // cellPane.setStyle("-fx-border-color: transparent;");
-                        // cellPane.getStyleClass().remove("selected");
-                        // } else if (selectedCells.size() < 2) {
-                        // selectedCells.add(cellPane);
-                        // // cellPane.setStyle(cellStyle + "-fx-alignment: center;" +
-                        // // "-fx-border-color: black; -fx-border-width: 4px; -fx-border-radius:
-                        // 5px;");
-                        // cellPane.getStyleClass().add("selected");
-                        // } else if (selectedCells.size() == 2 && selectedCells.contains(cellPane)) {
-                        // selectedCells.remove(cellPane);
-                        // cellPane.getStyleClass().remove("selected");
-                        // } else {
-                        // // Un-select one of the selected cells
-                        // Pane selectedCell = selectedCells.get(0);
-                        // selectedCells.remove(selectedCell);
-                        // selectedCell.getStyleClass().remove("selected");
-                        // selectedCells.add(cellPane);
-                        // cellPane.getStyleClass().add("selected");
-                        // }
-
                         // Enable/disable buttons based on the number of selected cells
-                        boolean enableButtons = boundariesCells.size() == 2;
+                        boolean enableButtons = selectedCells.size() == 2;
                         tryPlaceWordButton.setDisable(!enableButtons);
-                        for (Button b : tileButtons) {
-                            b.setDisable(!enableButtons);
-                        }
+
                         if (enableButtons) {
-                            int firstRow = GridPane.getRowIndex(boundariesCells.get(0));
-                            int firstCol = GridPane.getColumnIndex(boundariesCells.get(0));
-                            int lastRow = GridPane.getRowIndex(boundariesCells.get(1));
-                            int lastCol = GridPane.getColumnIndex(boundariesCells.get(1));
+                            for (Button b : tileButtons) {
+                                b.setDisable(false);
+                                b.setOnMouseEntered(e -> {
+                                    b.getStyleClass().add("tile-button-hover");
+                                });
+                                // Remove hover effect when mouse exits the button
+                                b.setOnMouseExited(e -> {
+                                    b.getStyleClass().remove("tile-button-hover");
+                                });
+                            }
+                            int firstRow = GridPane.getRowIndex(selectedCells.get(0));
+                            int firstCol = GridPane.getColumnIndex(selectedCells.get(0));
+                            int lastRow = GridPane.getRowIndex(selectedCells.get(1));
+                            int lastCol = GridPane.getColumnIndex(selectedCells.get(1));
 
                             gameViewModel.setFirstSelectedCellRow(firstRow);
                             gameViewModel.setFirstSelectedCellCol(firstCol);
@@ -998,6 +1002,11 @@ public class WindowController {
                             gameViewModel.clearSelectedCells();
                         }
 
+                    } else {
+                        Text turnText = new Text("It's not your turn to play");
+                        turnText.setFont(Font.font("Arial", FontWeight.BOLD, 16));
+                        turnText.setTextAlignment(TextAlignment.CENTER);
+                        openCustomWindow(turnText, "blue", "OK", 400, 200, false);
                     }
                 });
 
@@ -1008,32 +1017,44 @@ public class WindowController {
         return gameBoard;
     }
 
-    private void setPlacementCells() {
-        Tile[][] board = gameViewModel.getCurrentBoard();
-        int size = gameViewModel.getWordLength();
-        boolean isVer = gameViewModel.isWordVertical();
-        int lastRow = gameViewModel.getLastSelectedCellRow();
-        int lastCol = gameViewModel.getLastSelectedCellCol();
+    private VBox createInfoBoard(ObservableValue<String> name, ObservableValue<String> score, boolean turn, boolean otherPlayer){
+        // Player Name
+        Label nameValueLabel = new Label();
+        nameValueLabel.textProperty().bind(name);
+        nameValueLabel.getStyleClass().add("my-name-label");
 
-        if (isVer) {
-            for (int i = size; i > 0; i--) {
-                if (board[lastRow][lastCol] == null) {
-                    Pane cell = (Pane) getCellFromBoard(lastRow, lastCol);
-                    placementCelles.push(cell);
-                    placementList.add(cell);
-                }
-                lastRow--;
-            }
-        } else {
-            for (int i = size; i > 0; i--) {
-                if (board[lastRow][lastCol] == null) {
-                    Pane cell = (Pane) getCellFromBoard(lastRow, lastCol);
-                    placementCelles.push(cell);
-                    placementList.add(cell);
-                }
-                lastCol--;
-            }
+        ImageView turnIcon = new ImageView(new Image("turn-icon.png"));
+        turnIcon.setFitWidth(40); // Set the desired width
+        turnIcon.setFitHeight(40);
+
+        HBox nameBox = new HBox();
+        if(turn){
+            nameBox.getChildren().add(turnIcon);
         }
+        nameBox.getChildren().add(nameValueLabel);
+        nameBox.setAlignment(Pos.CENTER);
+
+        // Player Score
+        Label scoreLabel = new Label("Score:");
+        scoreLabel.getStyleClass().add("login-label");
+        Label scoreValueLabel = new Label();
+        scoreValueLabel.textProperty().bind(score);
+        scoreValueLabel.getStyleClass().add("score-label");
+        ///
+        ImageView scoreIcon = new ImageView(new Image("star-icon.png"));
+        scoreIcon.setFitWidth(40); // Set the desired width
+        scoreIcon.setFitHeight(40);
+        // iconImageView.setPreserveRatio(true);
+        HBox scoreBox = new HBox(scoreIcon, scoreValueLabel);
+        scoreBox.setAlignment(Pos.CENTER);
+
+        VBox myInfoBoard = new VBox(nameBox, scoreBox);
+        myInfoBoard.getStyleClass().add("wood-score-board");
+        myInfoBoard.setMinSize(250, 120);
+        myInfoBoard.setMaxSize(250, 120);
+        myInfoBoard.setAlignment(Pos.CENTER);
+
+        return myInfoBoard;
     }
 
     private VBox createButtons() {
@@ -1053,15 +1074,15 @@ public class WindowController {
         tilePane.getChildren().clear();
 
         // Create the tile buttons and add them to the FlowPane
-        Button resetTurnButton = new Button("⟲"); // \u2B6F
+        Button resetTurnButton = new Button("\u2B8C"); // \u2B6F ⟲ ⭯
 
         tileButtons = gameViewModel.getButtonTilesProperty();
         for (Button tileButton : tileButtons) {
-            tileButton.setPrefSize(45, 45);
-            tileButton.setStyle("-fx-background-color: transparent; -fx-background-image: url('tiles/"
-                    + tileButton.getText() + ".png');" +
-                    "-fx-background-size: cover;");
             String letter = tileButton.getText();
+            tileButton.setPrefSize(45, 45);
+            tileButton.getStyleClass().add("tile-button");
+            tileButton.setStyle("-fx-background-image: url('tiles/" + letter + ".png');");
+
             tileButton.setText(null);
             if (!gameViewModel.isMyTurn()) {
                 tileButton.setDisable(true);
@@ -1072,78 +1093,17 @@ public class WindowController {
                     Pane cellPane = placementCelles.pop();
                     cellPane.getStyleClass().add("character");
                     cellPane.setStyle("-fx-background-image: url('tiles/" + letter + ".png');"
-                            + "-fx-background-size: cover; -fx-border-color: yellow; -fx-border-style: solid inside;");
+                            + "-fx-border-color: yellow; -fx-border-style: solid inside;");
 
                     // Disable the tile button upon selection
                     tileButton.setDisable(true);
                     resetTurnButton.setDisable(false);
 
+                    // tilePane.getChildren().remove(tileButton);
+
                     // Add the tile value to the word
                     gameViewModel.addToWord(letter);
                 }
-                // boolean isVer = gameViewModel.isWordVertical();
-                // if (isVer) {
-
-                // } else {
-
-                // }
-                // // Find the current word index
-                // int currRow, currCol;
-                // if (isVer) {
-                // currRow = gameViewModel.getFirstSelectedCellRow() + this.tileIndex;
-                // currCol = gameViewModel.getFirstSelectedCellCol();
-                // } else {
-                // currRow = gameViewModel.getFirstSelectedCellRow();
-                // currCol = gameViewModel.getFirstSelectedCellCol() + this.tileIndex;
-                // }
-
-                // int wordLength = gameViewModel.getWordLength();
-
-                // if (this.tileIndex < wordLength) {
-
-                // Tile[][] currBoard = gameViewModel.getCurrentBoard();
-
-                // // Find the next empty cell
-                // int i = currRow, j = currCol;
-                // while (currBoard[i][j] != null) {
-                // this.tileIndex++;
-                // if (isVer)
-                // i++;
-                // else
-                // j++;
-                // }
-
-                // // Set the new cell index
-                // if (isVer)
-                // currRow += this.tileIndex;
-                // else
-                // currCol += this.tileIndex;
-
-                // System.out.println("NEW: " + currRow + " " + currCol);
-                // System.out.println("NEW INDEX: " + this.tileIndex);
-                // System.out.println("-------------------------------------------");
-
-                // // Disable the tile button upon selection
-                // tileButton.setDisable(true);
-                // resetTurnButton.setDisable(false);
-
-                // // Add the tile value to the word
-                // gameViewModel.addToWord(letter);
-
-                // // Get the cell at the specified row and column in the GridPane
-                // Node cellNode = getCellFromBoard(currCol, currRow);
-
-                // // Apply styling to the cell
-                // if (cellNode instanceof Pane) {
-                // Pane cellPane = (Pane) cellNode;
-                // this.wordCells.add(cellPane);
-                // cellPane.getStyleClass().add("character");
-                // cellPane.setStyle("-fx-background-image: url('tiles/" + letter + ".png');"
-                // + "-fx-background-size: cover; -fx-border-color: yellow; -fx-border-style:
-                // solid inside;");
-                // }
-                // this.tileIndex++;
-                // }
             });
 
             tilePane.getChildren().add(tileButton);
@@ -1153,12 +1113,8 @@ public class WindowController {
         resetTurnButton.getStyleClass().add("grey-button");
         resetTurnButton.setDisable(true);
         resetTurnButton.setOnAction(event -> {
-            // Call the method to handle the "Pass Turn" action
             for (Button tb : tileButtons) {
-                // tiles buttons
                 tb.setDisable(true);
-                resetTurnButton.setDisable(true);
-                gameViewModel.clearWord();
             }
             for (Pane cell : placementList) {
                 // Clear all added style classes
@@ -1168,8 +1124,11 @@ public class WindowController {
                 // Add the default style
                 cell.getStyleClass().add("cell");
             }
+            gameViewModel.clearWord();
             placementCelles.clear();
             placementList.clear();
+            selectedCells.clear();
+            resetTurnButton.setDisable(true);
         });
         // Set the preferred width and height of the button
         resetTurnButton.setPrefWidth(60); // Adjust the width as desired
@@ -1217,31 +1176,81 @@ public class WindowController {
             challengeButton.setDisable(false);
 
             String word = gameViewModel.getWord();
-            // int firstRow = gameViewModel.getFirstSelectedCellRow();
-            // int firstCol = gameViewModel.getFirstSelectedCellCol();
-            // int lastRow = gameViewModel.getLastSelectedCellRow();
-            // int lastCol = gameViewModel.getLastSelectedCellCol();
 
             // Call the method to handle the "Try Place Word" action with the collected data
-            gameViewModel.tryPlaceWord(word);
+            try {
+                gameViewModel.tryPlaceWord(word);
+            } catch (Exception e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
 
             // gameViewModel.clearPlayerTiles();
-            gameViewModel.clearWord();
+            resetWordPlacement();
 
             // Clear existing tile buttons
             // tilePane.getChildren().clear();
 
         });
-        tryPlaceWordButton.setDisable(true);
+        tryPlaceWordButton.setDisable(placementCelles.isEmpty());
 
         // .....................
         HBox roundButtonsPane = createButtonsPane();
+        roundButtonsPane.setPrefHeight(100);
+        roundButtonsPane.setAlignment(Pos.BOTTOM_CENTER);
+
         // .....................
 
         buttonsBox.getChildren().addAll(messageLabel, tilePane, resetTurnButton, tryPlaceWordButton, passTurnButton,
                 challengeButton, quitGameButton, roundButtonsPane);
 
         return buttonsBox;
+    }
+
+    private void setPlacementCells() {
+        Tile[][] board = gameViewModel.getCurrentBoard();
+        int size = gameViewModel.getWordLength();
+        boolean isVer = gameViewModel.isWordVertical();
+        int lastRow = gameViewModel.getLastSelectedCellRow();
+        int lastCol = gameViewModel.getLastSelectedCellCol();
+
+        if (isVer) {
+            for (int i = size; i > 0; i--) {
+                if (board[lastRow][lastCol] == null) {
+                    Pane cell = (Pane) getCellFromBoard(lastRow, lastCol);
+                    placementCelles.push(cell);
+                    placementList.add(cell);
+                }
+                lastRow--;
+            }
+        } else {
+            for (int i = size; i > 0; i--) {
+                if (board[lastRow][lastCol] == null) {
+                    Pane cell = (Pane) getCellFromBoard(lastRow, lastCol);
+                    placementCelles.push(cell);
+                    placementList.add(cell);
+                }
+                lastCol--;
+            }
+        }
+    }
+
+    private void resetWordPlacement() {
+        for (Button tb : tileButtons) {
+            tb.setDisable(true);
+        }
+        for (Pane cell : placementList) {
+            // Clear all added style classes
+            cell.getStyleClass().clear();
+            // Clear inline styles
+            cell.setStyle("");
+            // Add the default style
+            cell.getStyleClass().add("cell");
+        }
+        gameViewModel.clearWord();
+        placementCelles.clear();
+        placementList.clear();
+        selectedCells.clear();
     }
 
     private HBox createButtonsPane() {
@@ -1308,6 +1317,22 @@ public class WindowController {
             }
         }
         return null;
+    }
+
+    public void showAlert(String alert) {
+        Text message = new Text(alert);
+        message.setTextAlignment(TextAlignment.CENTER);
+        message.setFont(Font.font("Arial", FontWeight.BOLD, 18));
+        VBox textBox = new VBox(10, message);
+        textBox.setAlignment(Pos.CENTER);
+        Button submitButton = openCustomWindow(textBox, "blue", "OK", 800, 300, false);
+        submitButton.setOnAction(e -> {
+            ///////////////////////////////////////////////////////////////////
+            if (this.GAME_MODE.equals("H")) {
+                showHostLoginForm();
+            } else
+                showGuestLoginForm();
+        });
     }
 
 }
