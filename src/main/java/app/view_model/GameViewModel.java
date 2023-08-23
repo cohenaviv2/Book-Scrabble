@@ -34,11 +34,10 @@ public class GameViewModel extends Observable implements Observer {
     private int lastCol;
     private StringBuilder wordBuilder;
 
-    public void setGameMode(String MODE, int numOfPlayers) {
+    public void setGameMode(String MODE) {
         if (MODE.equals("H")) {
             this.gameModel = HostModel.get();
             HostModel.get().addObserver(this);
-            GameManager.get().setTotalPlayersCount(numOfPlayers);
 
         } else if (MODE.equals("G")) {
             this.gameModel = GuestModel.get();
@@ -49,17 +48,22 @@ public class GameViewModel extends Observable implements Observer {
         }
     }
 
+    public void setTotalPlayersCount(int numOfPlayers) {
+        HostModel.get().setNumOfPlayers(numOfPlayers);
+    }
+
     public static ObservableList<String> getBookList() {
         List<String> bookList = new ArrayList<>(GameModel.getFullBookList().keySet());
         Collections.shuffle(bookList); // Shuffle the list randomly
         return FXCollections.observableArrayList(bookList);
     }
 
-    public void connectMe(String name, String ip, int port) throws IOException {
+    public void connectMe(String name, String ip, int port) {
         try {
             gameModel.connectMe(name, ip, port);
         } catch (Exception e) {
             System.out.println("VIEW MODEL EXCEPTION");
+            e.printStackTrace();
             String errorMessage = "An error occurred:\n" + e.getMessage();
             Main.getInstance().showAlert(errorMessage);
         }
@@ -218,11 +222,8 @@ public class GameViewModel extends Observable implements Observer {
                 // } else {
                 // System.out.println("22222222222222222222222");
                 // }
-                List<String> gameBookList = new ArrayList<>();
-                for (String book : gameModel.getPlayerProperties().getGameBookList()) {
-                    gameBookList.add(book);
-                }
-                this.othersInfoView = FXCollections.observableArrayList(gameBookList);
+                List<String> gameBookList = new ArrayList<>(gameModel.getPlayerProperties().getGameBookList());
+                this.gameBooksView = FXCollections.observableArrayList(gameBookList);
 
                 // Bag count
                 this.bagCountView = new SimpleStringProperty(String.valueOf(gameModel.getBagCount()));

@@ -11,7 +11,7 @@ public class ViewModelTest {
     public static void main(String[] args) {
         // Set GameViewModel
         GameViewModel gvm = new GameViewModel();
-        gvm.setGameMode("G", 0);
+        gvm.setGameMode("G");
         // Set HostModel running the host server in a different thread
         ExecutorService es = Executors.newSingleThreadExecutor();
         HostModel hm = HostModel.get();
@@ -27,12 +27,8 @@ public class ViewModelTest {
             hm.ready();
         });
         // Set guest view-model
-        try {
             gvm.connectMe("Aviv", "localhost", 8040);
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+      
         gvm.myBookChoice("Harray Potter");
         gvm.ready();
 

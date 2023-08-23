@@ -21,7 +21,7 @@ public class main_host {
         System.out.println("********* HOST MODE *********\n");
 
         // Create and start the Game server on port 11224:
-        MyServer gameServer = new MyServer(11224, new BookScrabbleHandler());
+        MyOldServer gameServer = new MyOldServer(11224, new BookScrabbleHandler());
         gameServer.start();
 
         // Create Host model:

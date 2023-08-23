@@ -39,6 +39,19 @@
   -fx-background-color: linear-gradient(blue, grey), navy;
 }
 
+.darkgreen-button {
+  -fx-font-size: 20px;
+  -fx-font-weight: bold;
+  -fx-background-color: linear-gradient(rgb(1, 78, 1), grey), rgb(38, 158, 38);
+  -fx-background-radius: 10;
+  -fx-text-fill: white;
+  -fx-effect: dropshadow(one-pass-box, black, 8, 0, 2, 0);
+}
+.darkgreen-button:hover {
+  -fx-background-color: linear-gradient(rgb(0, 65, 0), grey), rgb(1, 99, 1);
+}
+
+
 .yellow-button {
   -fx-font-size: 20px;
   -fx-font-weight: bold;
@@ -106,12 +119,30 @@
 }
 
 .score-label {
-  -fx-font-size: 40px;
-  -fx-text-fill: rgb(0, 119, 255);
+  -fx-font-size: 50px;
+  -fx-text-fill: rgb(0, 174, 255);
   -fx-font-weight: bold;
   -fx-font-family: "Comic Sans MS";
   -fx-padding: 10px;
-  -fx-effect: dropshadow(gaussian, black, 20, 0, 2, 6);
+  -fx-effect: dropshadow(gaussian, rgb(0, 0, 0), 20, 0, 2, 6);
+}
+
+.other-score-label {
+  -fx-font-size: 40px;
+  -fx-text-fill: rgb(0, 174, 255);
+  -fx-font-weight: bold;
+  -fx-font-family: "Comic Sans MS";
+  -fx-padding: 10px;
+  -fx-effect: dropshadow(gaussian, rgb(0, 0, 0), 20, 0, 2, 6);
+}
+
+.bag-label {
+  -fx-font-size: 35px;
+  -fx-text-fill:rgb(255, 255, 255);
+  -fx-font-weight: bold;
+  -fx-font-family: "Comic Sans MS";
+  -fx-padding: 10px;
+  -fx-effect: dropshadow(gaussian, rgb(0, 0, 0), 20, 0, 2, 6);
 }
 
 .turn-label {
@@ -125,6 +156,24 @@
 
 .wood-score-board {
   -fx-background-image: url('wood-board.png');
+  -fx-background-size: cover;
+  -fx-background-repeat: no-repeat;
+}
+
+.other-score-board{
+  -fx-background-image: url('wood-board.png');
+  -fx-background-size: cover;
+  -fx-background-repeat: no-repeat;
+}
+
+.bag-image {
+  -fx-background-image: url('bag1.png');
+  -fx-background-size: contain;
+  -fx-background-repeat: no-repeat;
+}
+
+.my-words-box {
+  -fx-background-image: url('open-book.png');
   -fx-background-size: cover;
   -fx-background-repeat: no-repeat;
 }
@@ -172,11 +221,19 @@
 }
 
 .my-name-label {
-  -fx-font-size: 40px;
+  -fx-font-size: 35px;
   -fx-font-weight: bold;
   -fx-font-family: "Comic Sans MS";
-  -fx-text-fill: rgb(202, 202, 202);
-  -fx-effect: dropshadow(gaussian, #000000, 5, 0, 0, 1);
+  -fx-text-fill: rgb(21, 21, 20);
+  -fx-effect: dropshadow(gaussian, #464646, 10, 0, 0, 7);
+}
+
+.other-name-label {
+  -fx-font-size: 25px;
+  -fx-font-weight: bold;
+  -fx-font-family: "Comic Sans MS";
+  -fx-text-fill: rgb(245, 245, 245);
+  -fx-effect: dropshadow(gaussian, #1f1f1f, 5, 0, 0, 1);
 }
 
 .mode-label {

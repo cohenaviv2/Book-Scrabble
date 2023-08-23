@@ -56,7 +56,7 @@ public class ServerTest {
 		boolean ok=true;
 		Random r=new Random();
 		int port=6000+r.nextInt(1000);
-		MyServerParallel s=new MyServerParallel(port, new ClientHandler1());
+		MyServer s=new MyServer(port, new ClientHandler1());
 		int c = Thread.activeCount();
 		s.start(); // runs in the background
 		try {
@@ -144,7 +144,7 @@ public class ServerTest {
 		
 		Random r=new Random();
 		int port=6000+r.nextInt(1000);
-		MyServerParallel s=new MyServerParallel(port, new BookScrabbleHandler());
+		MyServer s=new MyServer(port, new BookScrabbleHandler());
 		s.start();
 		runClient(port, "Q,src/main/java/app/model/test/s1.txt,src/main/java/app/model/test/s2.txt,"+s1[1], true); //
 		runClient(port, "Q,src/main/java/app/model/test/s1.txt,src/main/java/app/model/test/s2.txt,"+s2[4], true); //

@@ -15,7 +15,7 @@ import app.model.game.*;
 public interface GameModel {
 
     // SEND DATA
-    void connectMe(String name, String ip, int port) throws Exception;
+    void connectMe(String name, String ip, int port) throws IOException;
 
     void myBooksChoice(String bookList);
 

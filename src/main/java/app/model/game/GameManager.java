@@ -152,6 +152,7 @@ public class GameManager extends Observable {
             if (ans.equals("connected"))
                 return true;
         } catch (IOException e) {
+            e.printStackTrace();
         }
         return false;
     }
@@ -310,23 +311,24 @@ public class GameManager extends Observable {
             return "false";
     }
 
-    public void quitGameHandler(String quitGameID) {
+    public String quitGameHandler(String quitGameID) {
         String[] params = quitGameID.split(",");
         int id = Integer.parseInt(params[0]);
-        String quitMod = params[1];
-        String bool = params[2];
-        if (isIdExist(id) && quitMod.equals(MethodInvoker.quitGame) && bool.equals("true")) {
-            Player p = this.playersByID.get(id);
-            String name = p.getName();
-            // put back player tiles
-            for (Tile t : p.getMyHandTiles()) {
-                this.gameBag.put(t);
-            }
-            this.playersByID.remove(id);
-            this.playersByName.remove(p.getName());
+        String modifier = params[1];
+        String val = params[2];
+        String name = "";
+        if (isIdExist(id) && modifier.equals(MethodInvoker.quitGame) && val.equals("true")) {
+            Player player = this.playersByID.get(id);
+            name = player.getName();
+            turnManager.handlePlayerQuit(player);
             // PRINT DEBUG
-            System.out.println("GameManager: " + name + " has quit the game!");
+            System.out.println("GameManager: " + player.getName() + " has quit the game!");
+
+            // Update the host
+            // setChanged();
+            // notifyObservers();
         }
+        return name;
     }
 
     private String placeWordHandler(int id, String moveValue) throws ClassNotFoundException, IOException {
@@ -658,7 +660,7 @@ public class GameManager extends Observable {
         }
 
         public void pullTiles(int playerId) {
-            /* Completes players hand to 7 Tiles */
+            /* Completes player's hand to 7 Tiles */
             Player p = getPlayerByID(playerId);
 
             while (p.getMyHandTiles().size() < 7) {
@@ -738,6 +740,72 @@ public class GameManager extends Observable {
             printTurnInfo();
         }
 
+        public void handlePlayerQuit(Player quittingPlayer) {
+            boolean flag = false;
+            if (quittingPlayer.getID() == hostPlayer.getID()) {
+                // The host player is quitting, stop the game or perform necessary actions
+
+                stopGame(); // TODO: Implement the logic to stop the game here
+
+            } else {
+                // A guest player is quitting, adjust the turn and notify observers
+                int quittingPlayerIndex = quittingPlayer.getTurnIndex();
+                int currentPlayerIndex = getCurrentTurnIndex();
+                int nextPlayerIndex=0;
+                boolean isTurn = quittingPlayerIndex == currentPlayerIndex;
+
+                // Update the current turn index if the quitting player's turn is ahead in the
+                // cycle
+                if (isTurn) {
+                    nextPlayerIndex = currentPlayerIndex == playersByID.size()-1 ? 0 : currentPlayerIndex;
+                    setCurrentTurnIndex(nextPlayerIndex);
+                } else if (quittingPlayerIndex < currentPlayerIndex) {
+                    setCurrentTurnIndex(currentPlayerIndex-1);
+                } else {
+                    flag=true;
+                }
+
+                // Update the myTurnIndex for the affected players
+                for (Player player : playersByID.values()) {
+                    int playerIndex = player.getTurnIndex();
+                    if (playerIndex > quittingPlayerIndex) {
+                        player.setTurnIndex(playerIndex - 1);
+                    }
+                }
+
+                // Update the myTurn indicators for the affected players
+                if (isTurn) {
+                    Player nextPlayer = getPlayerByIndex(nextPlayerIndex);
+                    nextPlayer.setMyTurn(true);
+                }
+
+                // Remove the player's tiles back to the game bag
+                for (Tile t : quittingPlayer.getMyHandTiles()) {
+                    gameBag.put(t);
+                }
+
+                // Remove the quitting player from the playersByID map
+                playersByID.remove(quittingPlayer.getID());
+                playersByName.remove(quittingPlayer.getName());
+
+                // Notify observers about the turn change and player removal
+                setChanged();
+                notifyObservers();
+                printTurnInfo();
+            }
+        }
+
+        private void stopGame() {
+        }
+
+        private Player getPlayerByIndex(int index) {
+            for (Player p : playersByID.values()) {
+                if (p.getTurnIndex() == index)
+                    return p;
+            }
+            return null;
+        }
+
         public void printTurnInfo() {
             System.out.println("GameManager: Turn information:\n***************************");
             for (Player p : playersByID.values()) {
@@ -759,9 +827,6 @@ public class GameManager extends Observable {
 
         public int getCurrentTurnIndex() {
             return currentTurnIndex;
-        }
-
-        public void close() {
         }
     }
 

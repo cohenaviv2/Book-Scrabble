@@ -13,13 +13,13 @@ public class HostModel extends Observable implements GameModel, Observer {
 
     private static HostModel hm = null; // Singleton
     public static final int HOST_SERVER_PORT = 8040;
-    public MyServerParallel hostServer; // Host server - support connection of up to 3 guests parallel
+    public MyServer hostServer; // Host server - support connection of up to 3 guests parallel
     private GameManager gameManager; // game manager contains all the game data and logic
     private PlayerProperties playerProperties; // All player properties for the game view
 
     private HostModel() {
         /* Sets the host server with default port 8040 */
-        this.hostServer = new MyServerParallel(HOST_SERVER_PORT, new GuestHandler());
+        this.hostServer = new MyServer(HOST_SERVER_PORT, new GuestHandler());
         this.hostServer.start();
         this.gameManager = GameManager.get();
         this.gameManager.addObserver(this);
@@ -49,7 +49,7 @@ public class HostModel extends Observable implements GameModel, Observer {
     }
 
     @Override
-    public void connectMe(String name, String ip, int port) throws Exception {
+    public void connectMe(String name, String ip, int port) {
         /*
          * Sets the game server ip and port (Game Manager)
          * game server is local for now, hence the ip field should be "localhost".
@@ -58,17 +58,29 @@ public class HostModel extends Observable implements GameModel, Observer {
          * also creates host player profile and sets the Game Properties
          */
 
-        // gameManager.setGameServerSocket(ip, port);
-            if (port != 0) {
+        try {
+            try {
+            // gameManager.setGameServerSocket(ip, port);
+            if (port != 0 && port != HostModel.HOST_SERVER_PORT) {
                 this.hostServer.close();
-                this.hostServer = new MyServerParallel(port, new GuestHandler());
-                this.hostServer.start();
+                    this.hostServer = new MyServer(port, new GuestHandler());
+                    this.hostServer.start();
+                }
+            } catch (Exception e) {
+                // Handle the exception that occurred in MyServer creation or start
+                System.err.println("Error while creating or starting MyServer: " + e.getMessage());
+                e.printStackTrace(); // Print the stack trace for debugging
             }
             gameManager.createHostPlayer(name);
             playerProperties = PlayerProperties.get();
             playerProperties.setMyName(name);
 
             System.out.println("HOST: " + name + " is Connected to the game server!");
+        } catch (Exception e) {
+            // Handle other exceptions that might occur during the rest of the method
+            System.err.println("An error occurred: " + e.getMessage());
+            e.printStackTrace(); // Print the stack trace for debugging
+        }
     }
 
     @Override

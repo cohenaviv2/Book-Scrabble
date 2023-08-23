@@ -88,6 +88,7 @@ public class RunGameServer {
             input.close();
 
         } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

@@ -101,10 +101,6 @@ public class PlayerProperties {
         return bagCount;
     }
 
-    public boolean isInitialized(){
-        return this.myHandTiles!=null&&this.myWords!=null&&this.myBoard!=null&&this.gameBookList!=null&&this.otherPlayersInfo!=null;
-    }
-
     private String boardToString() {
         String board = "";
         for (int i = 0; i < this.myBoard.length; i++) {

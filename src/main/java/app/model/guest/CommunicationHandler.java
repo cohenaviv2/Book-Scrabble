@@ -18,7 +18,7 @@ public class CommunicationHandler {
     ExecutorService executorService;
     PlayerProperties playerProperties;
 
-    public CommunicationHandler(String ipString, int port) throws Exception {
+    public CommunicationHandler(String ipString, int port) throws IOException {
         this.hostSocket = new Socket(ipString, port);
         this.in = new BufferedReader(new InputStreamReader(this.hostSocket.getInputStream()));
         this.out = new PrintWriter(this.hostSocket.getOutputStream(), true);
@@ -31,7 +31,7 @@ public class CommunicationHandler {
 
     }
 
-    public void connectMe(String name) throws Exception {
+    public void connectMe(String name) throws IOException {
         out.println("0" + "," + MethodInvoker.connectMe + "," + name);
         String[] ans = in.readLine().split(",");
         if (!ans[2].equals("0")) {
@@ -40,7 +40,7 @@ public class CommunicationHandler {
             // PRINT DEBUG
             System.out.println("CommHandler: got my id " + myId + ", " + name + " is Connected!");
         } else {
-            throw new Exception("CommHandler - connectMe: wrong answer from Host server " + ans);
+            System.err.println("CommHandler - connectMe: wrong answer from Host server " + ans);
         }
     }
 

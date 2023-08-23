@@ -24,7 +24,7 @@ public class GuestModel extends Observable implements GameModel {
     }
 
     @Override
-    public void connectMe(String name, String ip, int port) throws Exception {
+    public void connectMe(String name, String ip, int port) throws IOException {
         /*
          * Connects to the host server via socket
          * sets the guest player profile
