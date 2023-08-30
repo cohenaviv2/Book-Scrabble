@@ -1,6 +1,6 @@
 package app.model;
 
-public class MethodInvoker {
+public class GetMethod {
 
     // Define all game model methods
     public static final String connectMe = "connectMe";
@@ -20,5 +20,6 @@ public class MethodInvoker {
     public static final String getBagCount = "getBagCount";
     public static final String getGameBooks = "getGameBooks";
     public static final String updateAll = "updateAll";
+    public static final String endGame = "endGame";
 
 }

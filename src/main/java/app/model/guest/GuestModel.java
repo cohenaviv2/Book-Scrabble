@@ -4,13 +4,14 @@ import java.io.IOException;
 import java.util.*;
 
 import app.model.GameModel;
-import app.model.MethodInvoker;
+import app.model.GetMethod;
 import app.model.game.*;
 
-public class GuestModel extends Observable implements GameModel {
+public class GuestModel extends Observable implements GameModel, Observer {
     private static GuestModel gm = null; // Singleton
     private CommunicationHandler commHandler;
     private PlayerProperties playerProperties;
+    private boolean isConnected = false;
 
     public static GuestModel get() {
         if (gm == null)
@@ -24,7 +25,7 @@ public class GuestModel extends Observable implements GameModel {
     }
 
     @Override
-    public void connectMe(String name, String ip, int port) throws IOException {
+    public void connectMe(String name, String ip, int port) {
         /*
          * Connects to the host server via socket
          * sets the guest player profile
@@ -32,8 +33,14 @@ public class GuestModel extends Observable implements GameModel {
          */
         playerProperties = PlayerProperties.get();
         playerProperties.setMyName(name);
-        commHandler = new CommunicationHandler(ip, port);
-        commHandler.connectMe(name);
+        try {
+            commHandler = new CommunicationHandler(ip, port);
+            this.commHandler.addObserver(this);
+            commHandler.connectMe(name);
+            setIsConnected(true);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
     }
 
@@ -49,7 +56,7 @@ public class GuestModel extends Observable implements GameModel {
     @Override
     public void ready() {
         try {
-            commHandler.sendMessage(MethodInvoker.ready, "true");
+            commHandler.sendMessage(GetMethod.ready, "true");
         } catch (Exception e) {
             e.printStackTrace();
 
@@ -62,7 +69,7 @@ public class GuestModel extends Observable implements GameModel {
             try {
                 String word;
                 word = ObjectSerializer.serializeObject(myWord);
-                commHandler.sendMessage(MethodInvoker.tryPlaceWord, word);
+                commHandler.sendMessage(GetMethod.tryPlaceWord, word);
             } catch (IOException e) {
                 e.printStackTrace();
 
@@ -75,7 +82,7 @@ public class GuestModel extends Observable implements GameModel {
     @Override
     public void challenge() {
         if (playerProperties.isMyTurn()) {
-            commHandler.sendMessage(MethodInvoker.challenge, "true");
+            commHandler.sendMessage(GetMethod.challenge, "true");
         } else
             System.out.println("its not your turn");
 
@@ -84,7 +91,7 @@ public class GuestModel extends Observable implements GameModel {
     @Override
     public void skipTurn() {
         if (playerProperties.isMyTurn()) {
-            commHandler.sendMessage(MethodInvoker.skipTurn, "true");
+            commHandler.sendMessage(GetMethod.skipTurn, "true");
         } else
             System.out.println("its not your turn");
 
@@ -92,8 +99,14 @@ public class GuestModel extends Observable implements GameModel {
 
     @Override
     public void quitGame() {
-        commHandler.sendMessage(MethodInvoker.quitGame, "true");
-        commHandler.close();
+        if (isConnected) {
+            commHandler.sendMessage(GetMethod.quitGame, "true");
+        }
+        if (commHandler != null){
+            commHandler.close();
+            // System.out.println("Communication Handler is closed.");
+        }
+        // System.out.println("Guest Model: you quit the game.");
     }
 
     @Override
@@ -136,9 +149,27 @@ public class GuestModel extends Observable implements GameModel {
         return this.playerProperties.getBagCount();
     }
 
-    public void update() {
-        setChanged();
-        notifyObservers();
+    @Override
+    public boolean isConnected() {
+        return this.isConnected;
+    }
+
+    // public void update() {
+    // setChanged();
+    // notifyObservers();
+    // }
+
+    @Override
+    public void update(Observable o, Object arg) {
+        if (o == commHandler) {
+            setChanged();
+            notifyObservers(arg);
+            // // System.out.println("\n\n\n\n\n"+(String)arg+"\n\n\n\n\n");
+        }
+    }
+
+    public void setIsConnected(boolean isConnected) {
+        this.isConnected = isConnected;
     }
 
 }

@@ -2,7 +2,7 @@ package app.model.host;
 
 import java.io.*;
 
-import app.model.MethodInvoker;
+import app.model.GetMethod;
 import app.model.game.GameManager;
 import app.model.server.ClientHandler;
 import app.view_model.MessageReader;
@@ -64,18 +64,18 @@ public class GuestHandler implements ClientHandler {
     private void connectGuest() throws Exception {
         String message = in.readLine();
         String[] params = message.split(",");
-        if (params[0].equals("0") && params[1].equals(MethodInvoker.connectMe)) {
+        if (params[0].equals("0") && params[1].equals(GetMethod.connectMe)) {
             String name = params[2];
             this.myId = gameManager.connectGuestHandler(name);
-            this.quitGameString = myId + "," + MethodInvoker.quitGame + "," + "true"; // quit game modifier
+            this.quitGameString = myId + "," + GetMethod.quitGame + "," + "true"; // quit game modifier
             // this.yourTurnString = myId + ",isMyTurn,true"; // my turn modifier
-            String connectionMessage = myId + "," + MethodInvoker.connectMe + "," + myId; // ack & id
+            String connectionMessage = myId + "," + GetMethod.connectMe + "," + myId; // ack & id
             out.println(connectionMessage); // send id
             // PRINT DEBUG
-            System.out.println("GUEST HANDLER: guest " + myId + " connected!\n");
+            // System.out.println("GUEST HANDLER: guest " + myId + " connected!\n");
         } else {
             // PRINT DEBUG
-            System.out.println("GUEST HANDLER: failed to connect guest\n");
+            // System.out.println("GUEST HANDLER: failed to connect guest\n");
         }
     }
 
@@ -88,32 +88,32 @@ public class GuestHandler implements ClientHandler {
                 message = in.readLine();
                 String[] params = message.split(",");
                 int id = Integer.parseInt(params[0]);
-                if (id == myId && params[1].equals(MethodInvoker.myBooksChoice)) {
+                if (id == myId && params[1].equals(GetMethod.myBooksChoice)) {
                     String bookList = params[2];
                     String ans = gameManager.addBooksHandler(bookList);
                     if (ans.equals("true")) {
                         isBooksSet = true;
-                        out.println(myId + "," + MethodInvoker.myBooksChoice + "," + ans);
+                        out.println(myId + "," + GetMethod.myBooksChoice + "," + ans);
                         // PRINT DEBUG
-                        System.out.println("GUEST HANDLER: guest " + myId + " set book choice! \n");
+                        // System.out.println("GUEST HANDLER: guest " + myId + " set book choice! \n");
                     } else {
                         out.println(myId + ",myBookChoice," + ans);
                         // PRINT DEBUG
-                        System.out.println("GuestHandler: cant set guest's book");
+                        // System.out.println("GuestHandler: cant set guest's book");
                     }
                 }
                 if (!ready) {
                     message = in.readLine();
                     params = message.split(",");
                     id = Integer.parseInt(params[0]);
-                    if (id == myId && params[1].equals(MethodInvoker.ready)) {
+                    if (id == myId && params[1].equals(GetMethod.ready)) {
                         if (params[2].equals("true")) {
                             gameManager.setReady();
                             // PRINT DEBUG
-                            System.out.println("GUEST HANDLER: guest " + myId + " is ready to play!\n");
+                            // System.out.println("GUEST HANDLER: guest " + myId + " is ready to play!\n");
                         } else {
                             // PRINT DEBUG
-                            System.out.println("GuestHandler: cant set guest's ready val");
+                            // System.out.println("GuestHandler: cant set guest's ready val");
                         }
                     }
                 }
@@ -143,11 +143,13 @@ public class GuestHandler implements ClientHandler {
         }
         // Guest chose to quit game - chat ended
         String playerName = this.gameManager.getPlayerByID(myId).getName();
+        // Sent quit game query to the guest
         out.println(quitGameString);
+        // Handle quit in game manager
         gameManager.quitGameHandler(quitGameString);
         MessageReader.setMsg(playerName + " has quit the game!");
         // PRINT DEBUG
-        System.out.println("GUEST HANDLER: chat ended, " + myId + " has quit the game\n");
+        // System.out.println("GUEST HANDLER: chat ended, " + myId + " has quit the game\n");
     }
 
     @Override

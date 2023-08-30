@@ -1,9 +1,14 @@
 package app.view_model;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.*;
 
 import app.model.GameModel;
+import app.model.GetMethod;
 import app.model.game.*;
 import app.model.guest.GuestModel;
 import app.model.host.HostModel;
@@ -28,6 +33,9 @@ public class GameViewModel extends Observable implements Observer {
     private ObservableValue<String> bagCountView;
     private ObservableList<String> gameBooksView;
 
+    private String message;
+    private boolean isMessage;
+
     private int firstRow;
     private int firstCol;
     private int lastRow;
@@ -44,8 +52,45 @@ public class GameViewModel extends Observable implements Observer {
             GuestModel.get().addObserver(this);
         } else {
             // PRINT DEBUG
-            System.out.println("WRONG GAME MODE OPERATOR! USE H/G");
+            // System.out.println("WRONG GAME MODE OPERATOR! USE H/G");
         }
+    }
+
+    public boolean isValidPort(String portText) {
+        try {
+            int portNumber = Integer.parseInt(portText);
+            return portNumber >= 0 && portNumber <= 65535 && portText.length() <= 5;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    public String getLocalIpAddress() {
+        String localIp = "";
+        URL connection;
+        try {
+            connection = new URL("http://checkip.amazonaws.com/");
+            URLConnection con = connection.openConnection();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream()));
+            localIp = reader.readLine();
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        }
+        return localIp;
+    }
+
+    public boolean isMessage() {
+        return isMessage;
+    }
+
+    private void setMessage(String msg) {
+        this.isMessage = true;
+        this.message = msg;
+    }
+
+    public String getMessage() {
+        isMessage = false;
+        return message;
     }
 
     public void setTotalPlayersCount(int numOfPlayers) {
@@ -59,14 +104,7 @@ public class GameViewModel extends Observable implements Observer {
     }
 
     public void connectMe(String name, String ip, int port) {
-        try {
-            gameModel.connectMe(name, ip, port);
-        } catch (Exception e) {
-            System.out.println("VIEW MODEL EXCEPTION");
-            e.printStackTrace();
-            String errorMessage = "An error occurred:\n" + e.getMessage();
-            Main.getInstance().showAlert(errorMessage);
-        }
+        gameModel.connectMe(name, ip, port);
     }
 
     public void myBookChoice(String bookName) {
@@ -99,11 +137,11 @@ public class GameViewModel extends Observable implements Observer {
         }
     }
 
-    public void tryPlaceWord(String word) throws Exception {
+    public String tryPlaceWord(String word) {
         // Handle the "Try Place Word" action with the collected data
-        System.out.println("Word: " + word);
-        System.out.println(firstRow + "," + firstCol);
-        System.out.println(lastRow + "," + lastCol);
+        // System.out.println("Word: " + word);
+        // System.out.println(firstRow + "," + firstCol);
+        // System.out.println(lastRow + "," + lastCol);
 
         boolean isVer = isWordVertical();
         int wordLen = getWordLength();
@@ -141,18 +179,15 @@ public class GameViewModel extends Observable implements Observer {
         }
 
         Word queryWord = new Word(tiles, f_Row, f_Col, isVer);
-        System.out.println(queryWord);
+        // System.out.println(queryWord);
         gameModel.tryPlaceWord(queryWord);
+
+        return null;
 
     }
 
     public void challenge() {
-        try {
-            gameModel.challenge();
-        } catch (Exception e) {
-            String errorMessage = "An error occurred: " + e.getMessage();
-            Main.getInstance().showAlert(errorMessage);
-        }
+        gameModel.challenge();
     }
 
     public void skipTurn() {
@@ -167,12 +202,22 @@ public class GameViewModel extends Observable implements Observer {
         return gameModel.getPlayerProperties().isMyTurn();
     }
 
+    public boolean isConnected() {
+        return this.gameModel.isConnected();
+    }
+
     @Override
     public void update(Observable o, Object arg) {
         if (o == gameModel) {
-            // Update the ViewModel's state based on changes in the GameModel
-            System.out.println("VIEW-MODEL : GOT UPDATE");
-            try {
+
+            String updateMsg = (String) arg;
+            System.out.println("\n GVM = " + updateMsg);
+            setMessage(updateMsg);
+
+            if (!updateMsg.startsWith(GetMethod.tryPlaceWord)) {
+
+                // Update the ViewModel's state based on changes in the GameModel
+                // System.out.println("VIEW-MODEL : GOT UPDATE");
                 buttonTiles = FXCollections.observableArrayList();
                 wordBuilder = new StringBuilder();
 
@@ -215,25 +260,21 @@ public class GameViewModel extends Observable implements Observer {
                 this.othersInfoView = FXCollections.observableArrayList(obsOthers);
 
                 // Game books
-                // if (gameModel.getPlayerProperties().getGameBookList() != null) {
-                // for (String book : gameModel.getPlayerProperties().getGameBookList()) {
-                // System.out.println(book);
-                // }
-                // } else {
-                // System.out.println("22222222222222222222222");
-                // }
                 List<String> gameBookList = new ArrayList<>(gameModel.getPlayerProperties().getGameBookList());
                 this.gameBooksView = FXCollections.observableArrayList(gameBookList);
 
                 // Bag count
                 this.bagCountView = new SimpleStringProperty(String.valueOf(gameModel.getBagCount()));
 
-            } catch (Exception e) {
-                String errorMessage = "An error occurred: " + e.getMessage();
-                Main.getInstance().showAlert(errorMessage);
+                // if (message.startsWith(GetMethod.quitGame) ||
+                // message.startsWith(GetMethod.endGame)) {
+                // setMessage(message);
+                // }
+                setChanged();
+                notifyObservers();
+
+                // System.out.println(this.gameModel.getPlayerProperties());
             }
-            setChanged();
-            notifyObservers();
 
         }
     }

@@ -15,7 +15,7 @@ import app.model.game.*;
 public interface GameModel {
 
     // SEND DATA
-    void connectMe(String name, String ip, int port) throws IOException;
+    void connectMe(String name, String ip, int port);
 
     void myBooksChoice(String bookList);
 
@@ -30,6 +30,8 @@ public interface GameModel {
     void quitGame();
 
     // GET DATA
+    boolean isConnected();
+
     PlayerProperties getPlayerProperties();
 
     Tile[][] getCurrentBoard();

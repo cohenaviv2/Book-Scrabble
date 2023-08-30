@@ -30,3 +30,13 @@ game-flow=gdfgdfg
 custom-port=The host server usually runs on a default Port.
 Sometimes the host chooses a custom Port.
 Ask your host if the Port has changed, and if set it here:
+game-server-error=Can not connect to the game server.
+Please check your internet connection, or try again later.
+host-server-error=Some error occurred while running the host server.
+Please check your internet connection, firewall or user permissions.
+guest-socket-error=Some error occurred while connecting to the host.
+Please check if the IP address of the host is correct.
+If so, ask the host if they changed the port
+you can set the port in the settings.
+If you are still having trouble connecting,
+please check your internet connection, firewall or user permissions

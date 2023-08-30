@@ -2,10 +2,12 @@ package app.view;
 
 import java.util.*;
 
+import app.model.GetMethod;
 import app.view_model.GameViewModel;
 import javafx.application.*;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -37,7 +39,10 @@ public class Main extends Application implements Observer {
         VBox initialWindowBox = windowController.createInitialWindow();
         Scene initialWindowScene = new Scene(initialWindowBox, 600, 480);
         initialWindowBox.setCursor(Cursor.HAND);
-        initialWindowBox.getStylesheets().add(windowController.getStyleSheet());
+        initialWindowBox.getStylesheets().add(windowController.CSS_STYLESHEET);
+
+        // Set the application icon
+        primaryStage.getIcons().add(new Image("game-icon.png"));
 
         // Set up the primaryStage
         prmStage.setTitle("Book Scrabble");
@@ -58,8 +63,15 @@ public class Main extends Application implements Observer {
     public void update(Observable o, Object arg) {
         if (o == gameViewModel) {
             // PRINT DEBUG
-            System.out.println("VIEW GOT UPDATE");
+            // System.out.println("VIEW GOT UPDATE");
+            // if (arg != null && arg instanceof String) {
+            //     String message = (String) arg;
+            //     windowController.showAlert(message);
+            // } else {
+            //     windowController.showGameFlowWindow();
+            // }
             windowController.showGameFlowWindow();
+
         }
     }
 }

@@ -104,7 +104,7 @@ public class Tile implements Serializable {
         }
 
         public Tile getTile(char letter) {
-            /* Pulls the requested tile(letter) from the bag */
+            /* Pulls the requested letter tile from the bag */
 
             if ((int) letter < 65 || (int) letter > 90) // must be a Capital letter
                 return null;
@@ -238,6 +238,11 @@ public class Tile implements Serializable {
             }
 
             return size;
+        }
+
+        public void reset(){
+            this.quantities = new int[] { 9, 2, 2, 4, 12, 2, 3, 2, 9, 1, 1, 4, 2, 6, 8, 2, 1, 6, 4, 6, 4, 2, 2, 1, 2,
+                    1 };
         }
 
         public int[] getQuantities() {

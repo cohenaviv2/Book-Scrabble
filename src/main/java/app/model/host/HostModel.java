@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.*;
 
 import app.model.GameModel;
-import app.model.MethodInvoker;
+import app.model.GetMethod;
 import app.model.game.*;
 import app.model.server.*;
 import app.view_model.MessageReader;
@@ -58,29 +58,17 @@ public class HostModel extends Observable implements GameModel, Observer {
          * also creates host player profile and sets the Game Properties
          */
 
-        try {
-            try {
-            // gameManager.setGameServerSocket(ip, port);
-            if (port != 0 && port != HostModel.HOST_SERVER_PORT) {
-                this.hostServer.close();
-                    this.hostServer = new MyServer(port, new GuestHandler());
-                    this.hostServer.start();
-                }
-            } catch (Exception e) {
-                // Handle the exception that occurred in MyServer creation or start
-                System.err.println("Error while creating or starting MyServer: " + e.getMessage());
-                e.printStackTrace(); // Print the stack trace for debugging
-            }
-            gameManager.createHostPlayer(name);
-            playerProperties = PlayerProperties.get();
-            playerProperties.setMyName(name);
-
-            System.out.println("HOST: " + name + " is Connected to the game server!");
-        } catch (Exception e) {
-            // Handle other exceptions that might occur during the rest of the method
-            System.err.println("An error occurred: " + e.getMessage());
-            e.printStackTrace(); // Print the stack trace for debugging
+        if (port != 0 && port != HostModel.HOST_SERVER_PORT) {
+            this.hostServer.close();
+            this.hostServer = new MyServer(port, new GuestHandler());
+            this.hostServer.start();
         }
+        gameManager.createHostPlayer(name);
+        playerProperties = PlayerProperties.get();
+        playerProperties.setMyName(name);
+
+        // System.out.println("HOST: " + name + " is Connected to the game server!");
+
     }
 
     @Override
@@ -90,7 +78,7 @@ public class HostModel extends Observable implements GameModel, Observer {
          * each player chooses one book (Maximum 4)
          */
         try {
-            String ans = gameManager.processPlayerInstruction(gameManager.getHostID(), MethodInvoker.myBooksChoice,
+            String ans = gameManager.processPlayerInstruction(gameManager.getHostID(), GetMethod.myBooksChoice,
                     myBooksSerilized);
         } catch (ClassNotFoundException | IOException e) {
         }
@@ -107,37 +95,40 @@ public class HostModel extends Observable implements GameModel, Observer {
             try {
                 String queryWord = ObjectSerializer.serializeObject(myWord);
                 String ans = gameManager.processPlayerInstruction(gameManager.getHostID(),
-                        MethodInvoker.tryPlaceWord,
+                        GetMethod.tryPlaceWord,
                         queryWord);
+
                 if (ans.equals("false")) {
 
                     // PRINT DEBUG
-                    System.out.println("tryPlaceWord - some error/turn");
+                    // System.out.println("tryPlaceWord - some error/turn");
 
                 } else if (ans.equals("notBoardLegal")) {
 
                     // PRINT DEBUG
-                    System.out.println("Word's not Board legal, Try again");
+                    // System.out.println("Word's not Board legal, Try again");
                     MessageReader.setMsg("notBoardLegal");
 
-                } else if (ans.equals("notDictionaryLegal")) {
+                } else if (ans.startsWith("notDictionaryLegal")) {
 
                     // PRINT DEBUG
-                    System.out.println("Some word is not Dictionary legal\nYou can try Challenge or Pass turn");
+                    // System.out.println("Some word is not Dictionary legal" + ans + "\nYou can try
+                    // Challenge or Pass turn");
 
                     MessageReader.setMsg("notDictionaryLegal");
+
+                    setChanged();
+                    notifyObservers(GetMethod.tryPlaceWord + "," + ans);
 
                 } else if (ans.equals("cantSerialize")) {
 
                     // PRINT DEBUG
-                    System.out.println("tryPlaceWord - cant serialize");
+                    // System.out.println("tryPlaceWord - cant serialize");
 
                 } else {
-
                     // PRINT DEBUG
-                    System.out.println("You got more points!");
+                    // System.out.println("You got more points!");
                     MessageReader.setMsg("You got more points!");
-
                 }
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
@@ -146,27 +137,34 @@ public class HostModel extends Observable implements GameModel, Observer {
 
     }
 
+    public boolean isNumeric(String str) {
+        return str.matches("-?\\d+(\\.\\d+)?");
+    }
+
     @Override
     public void challenge() {
         if (playerProperties.isMyTurn()) {
             try {
-                String ans = gameManager.processPlayerInstruction(gameManager.getHostID(), MethodInvoker.challenge,
+                String ans = gameManager.processPlayerInstruction(gameManager.getHostID(), GetMethod.challenge,
                         "true");
+                // System.out.println("\n\nHostModel - challange ans:" + ans + "\n\n");
+
                 if (ans.equals("false")) {
 
                     // PRINT DEBUG
-                    System.out.println("challenge - some error/turn");
+                    // System.out.println("challenge - some error/turn");
 
                 } else if (ans.equals("skipTurn")) {
 
                     // PRINT DEBUG
-                    System.out.println("some word that was made is not dictionary legal - skiping turn!");
+                    // System.out.println("some word that was made is not dictionary legal - skiping
+                    // turn!");
                     MessageReader.setMsg("Challenge failed, You lose 10 points");
 
                 } else {
 
                     // PRINT DEBUG
-                    System.out.println("Challenge was successful!\nYou got more Points!");
+                    // System.out.println("Challenge was successful!\nYou got more Points!");
                     MessageReader.setMsg("Challenge was successful!\nYou got more Points!");
 
                 }
@@ -179,19 +177,19 @@ public class HostModel extends Observable implements GameModel, Observer {
     public void skipTurn() {
         if (playerProperties.isMyTurn()) {
             try {
-                String ans = gameManager.processPlayerInstruction(gameManager.getHostID(), MethodInvoker.skipTurn,
+                String ans = gameManager.processPlayerInstruction(gameManager.getHostID(), GetMethod.skipTurn,
                         "true");
 
                 if (ans.equals("true")) {
                     // playerProperties.setMyTurn(false);
                     // PRINT DEBUG
-                    System.out.println("Your turn is skipped");
+                    // System.out.println("Your turn is skipped");
                 } else if (ans.equals("false")) {
                     // PRINT DEBUG
-                    System.out.println("Cant skip your turn");
+                    // System.out.println("Cant skip your turn");
                 } else {
                     // PRINT DEBUG
-                    System.out.println("skipTurn - wrong answer from GM");
+                    // System.out.println("skipTurn - wrong answer from GM");
                 }
             } catch (ClassNotFoundException | IOException e) {
             }
@@ -200,8 +198,26 @@ public class HostModel extends Observable implements GameModel, Observer {
 
     @Override
     public void quitGame() {
-        this.hostServer.close();
-        System.out.println("Host server is closed and the host has quit the game");
+        if (this.hostServer.getNumOfClients() > 0) {
+            String quitGameMod = String.valueOf(gameManager.getHostID()) + "," + GetMethod.quitGame + "," + "true";
+            this.gameManager.quitGameHandler(quitGameMod);
+            try {
+                Thread.sleep(4000);
+            } catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            if (this.hostServer.getNumOfClients() == 0) {
+                this.hostServer.close();
+                // System.out.println("Host server is closed and the host has quit the game");
+            } else {
+                System.out
+                        .println("\n\n*** There are still clients connected ! ***\n\n" + hostServer.getNumOfClients());
+            }
+        } else {
+            this.hostServer.close();
+            // System.out.println("Host server is closed and the host has quit the game");
+        }
     }
 
     private void updateProperties() {
@@ -213,17 +229,17 @@ public class HostModel extends Observable implements GameModel, Observer {
         this.playerProperties.setPlayersInfo(getOthersInfo());
         this.playerProperties.setGameBookList(getGameBooks());
         this.playerProperties.setBagCount(getBagCount());
-        System.out.println(playerProperties);
+        // System.out.println(playerProperties);
     }
 
     @Override
     public Map<String, String> getOthersInfo() {
         try {
-            String ans = gameManager.processPlayerInstruction(gameManager.getHostID(), MethodInvoker.getOthersInfo,
+            String ans = gameManager.processPlayerInstruction(gameManager.getHostID(), GetMethod.getOthersInfo,
                     "true");
             if (ans.equals("false")) {
                 // PRINT DEBUG
-                System.out.println("Cant get your others scores");
+                // System.out.println("Cant get your others scores");
                 return null;
             } else {
                 Map<String, String> othersInfo;
@@ -234,7 +250,7 @@ public class HostModel extends Observable implements GameModel, Observer {
             e.printStackTrace();
         }
         // PRINT DEBUG
-        System.out.println("Cant serialize");
+        // System.out.println("Cant serialize");
         return null;
     }
 
@@ -242,7 +258,7 @@ public class HostModel extends Observable implements GameModel, Observer {
     public int getMyScore() {
         String ans;
         try {
-            ans = gameManager.processPlayerInstruction(gameManager.getHostID(), MethodInvoker.getMyScore,
+            ans = gameManager.processPlayerInstruction(gameManager.getHostID(), GetMethod.getMyScore,
                     "true");
             if (ans.equals("false")) {
                 return 0;
@@ -258,7 +274,7 @@ public class HostModel extends Observable implements GameModel, Observer {
     public boolean isMyTurn() {
         String ans;
         try {
-            ans = gameManager.processPlayerInstruction(gameManager.getHostID(), MethodInvoker.isMyTurn,
+            ans = gameManager.processPlayerInstruction(gameManager.getHostID(), GetMethod.isMyTurn,
                     "true");
             if (ans.equals("false")) {
                 return false;
@@ -282,15 +298,15 @@ public class HostModel extends Observable implements GameModel, Observer {
     public Tile[][] getCurrentBoard() {
         String ans;
         try {
-            ans = gameManager.processPlayerInstruction(gameManager.getHostID(), MethodInvoker.getCurrentBoard,
+            ans = gameManager.processPlayerInstruction(gameManager.getHostID(), GetMethod.getCurrentBoard,
                     "true");
             if (ans.equals("false")) {
                 // PRINT DEBUG
-                System.out.println("cant get board");
+                // System.out.println("cant get board");
                 return null;
             } else if (ans.equals("cantSerialize")) {
                 // PRINT DEBUG
-                System.out.println("Cant serialize");
+                // System.out.println("Cant serialize");
                 return null;
             } else {
                 try {
@@ -300,7 +316,7 @@ public class HostModel extends Observable implements GameModel, Observer {
                     e.printStackTrace();
                 }
                 // PRINT DEBUG
-                System.out.println("Cant deserialize");
+                // System.out.println("Cant deserialize");
                 return null;
             }
         } catch (ClassNotFoundException | IOException e) {
@@ -312,15 +328,15 @@ public class HostModel extends Observable implements GameModel, Observer {
     public ArrayList<Tile> getMyTiles() {
         String ans;
         try {
-            ans = gameManager.processPlayerInstruction(gameManager.getHostID(), MethodInvoker.getMyTiles,
+            ans = gameManager.processPlayerInstruction(gameManager.getHostID(), GetMethod.getMyTiles,
                     "true");
             if (ans.equals("false")) {
                 // PRINT DEBUG
-                System.out.println("cant get your tiles");
+                // System.out.println("cant get your tiles");
                 return null;
             } else if (ans.equals("cantSerialize")) {
                 // PRINT DEBUG
-                System.out.println("Cant serialize");
+                // System.out.println("Cant serialize");
                 return null;
             } else {
                 try {
@@ -330,7 +346,7 @@ public class HostModel extends Observable implements GameModel, Observer {
                     e.printStackTrace();
                 }
                 // PRINT DEBUG
-                System.out.println("Cant deserialize");
+                // System.out.println("Cant deserialize");
                 return null;
             }
         } catch (ClassNotFoundException | IOException e) {
@@ -342,15 +358,15 @@ public class HostModel extends Observable implements GameModel, Observer {
     public ArrayList<Word> getMyWords() {
         String ans;
         try {
-            ans = gameManager.processPlayerInstruction(gameManager.getHostID(), MethodInvoker.getMyWords,
+            ans = gameManager.processPlayerInstruction(gameManager.getHostID(), GetMethod.getMyWords,
                     "true");
             if (ans.equals("false")) {
                 // PRINT DEBUG
-                System.out.println("cant get your words");
+                // System.out.println("cant get your words");
                 return null;
             } else if (ans.equals("cantSerialize")) {
                 // PRINT DEBUG
-                System.out.println("Cant serialize");
+                // System.out.println("Cant serialize");
                 return null;
             } else {
                 try {
@@ -360,7 +376,7 @@ public class HostModel extends Observable implements GameModel, Observer {
                     e.printStackTrace();
                 }
                 // PRINT DEBUG
-                System.out.println("Cant deserialize");
+                // System.out.println("Cant deserialize");
                 return null;
             }
         } catch (ClassNotFoundException | IOException e) {
@@ -372,15 +388,15 @@ public class HostModel extends Observable implements GameModel, Observer {
     public Set<String> getGameBooks() {
         String ans;
         try {
-            ans = gameManager.processPlayerInstruction(gameManager.getHostID(), MethodInvoker.getGameBooks,
+            ans = gameManager.processPlayerInstruction(gameManager.getHostID(), GetMethod.getGameBooks,
                     "true");
             if (ans.equals("false")) {
                 // PRINT DEBUG
-                System.out.println("cant get game books");
+                // System.out.println("cant get game books");
                 return null;
             } else if (ans.equals("cantSerialize")) {
                 // PRINT DEBUG
-                System.out.println("Cant serialize");
+                // System.out.println("Cant serialize");
                 return null;
             } else {
                 try {
@@ -390,7 +406,7 @@ public class HostModel extends Observable implements GameModel, Observer {
                     e.printStackTrace();
                 }
                 // PRINT DEBUG
-                System.out.println("Cant deserialize");
+                // System.out.println("Cant deserialize");
                 return null;
             }
         } catch (ClassNotFoundException | IOException e) {
@@ -402,7 +418,7 @@ public class HostModel extends Observable implements GameModel, Observer {
     public int getBagCount() {
         String ans;
         try {
-            ans = gameManager.processPlayerInstruction(gameManager.getHostID(), MethodInvoker.getBagCount,
+            ans = gameManager.processPlayerInstruction(gameManager.getHostID(), GetMethod.getBagCount,
                     "true");
             if (ans.equals("false")) {
                 return 0;
@@ -417,11 +433,26 @@ public class HostModel extends Observable implements GameModel, Observer {
     @Override
     public void update(Observable o, Object arg) {
         if (o == gameManager) {
-            this.hostServer.sendToAll(MethodInvoker.updateAll);
+            String message = (String) arg;
+            this.hostServer.sendToAll(message);
             updateProperties();
             setChanged();
-            notifyObservers();
+            notifyObservers(arg);
         }
+    }
+
+    @Override
+    public boolean isConnected() {
+        if (!this.hostServer.isRunning()) {
+            // PRINT DEBUG
+            // System.out.println("Host Server is not running!");
+            return false;
+        } else if (!isGameServerConnect()) {
+            // PRINT DEBUG
+            // System.out.println("Not connected to the Game Server!");
+            return false;
+        } else
+            return true;
     }
 
 }

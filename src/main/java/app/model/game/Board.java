@@ -17,7 +17,7 @@ public class Board {
 
     private static Board boardInstance = null; // Singleton
     private Square[][] board;
-    public static final int SIZE = 15;
+    private static final int SIZE = 15;
     private boolean starBonusAct;
     private ArrayList<Word> placedWords;
     private ArrayList<Word> turnWords;
@@ -472,7 +472,7 @@ public class Board {
     public String wordToString(Word word) {
         Word fullword = getFullWord(word);
         //
-        System.out.println("full Word - "+fullword);
+        // System.out.println("full Word - "+fullword);
         String w = "";
         for (Tile t : fullword.getTiles()) {
             w += t.getLetter();
@@ -556,7 +556,7 @@ public class Board {
             else
                 placeWord(word);
             this.turnWords.addAll(words);
-            printBoard();
+            // printBoard();
 
             return score;
         }
@@ -607,7 +607,7 @@ public class Board {
         }
     }
 
-    public void clearWords() {
+    public void reset() {
         /* clears all the words on the board */
 
         for (int i = 0; i < SIZE; i++) {

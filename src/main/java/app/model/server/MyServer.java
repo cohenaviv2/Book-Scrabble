@@ -56,6 +56,7 @@ public class MyServer {
                         } finally {
                             try {
                                 aClient.close();
+                                clients.remove(aClient);
 
                             } catch (IOException e) {
                                 e.printStackTrace();
@@ -72,6 +73,10 @@ public class MyServer {
         }
     }
 
+    public boolean isRunning(){
+        return !stop;
+    }
+
     public void sendToAll(String message) {
         for (Socket s : clients) {
             try {
@@ -81,6 +86,10 @@ public class MyServer {
                 e.printStackTrace();
             }
         }
+    }
+
+    public int getNumOfClients(){
+        return this.clients.size();
     }
 
     public void close() {
