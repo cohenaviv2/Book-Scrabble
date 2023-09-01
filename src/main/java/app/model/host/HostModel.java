@@ -78,7 +78,7 @@ public class HostModel extends Observable implements GameModel, Observer {
          * each player chooses one book (Maximum 4)
          */
         try {
-            String ans = gameManager.processPlayerInstruction(gameManager.getHostID(), GetMethod.myBooksChoice,
+            gameManager.processPlayerInstruction(gameManager.getHostID(), GetMethod.myBooksChoice,
                     myBooksSerilized);
         } catch (ClassNotFoundException | IOException e) {
         }
@@ -135,10 +135,6 @@ public class HostModel extends Observable implements GameModel, Observer {
             }
         }
 
-    }
-
-    public boolean isNumeric(String str) {
-        return str.matches("-?\\d+(\\.\\d+)?");
     }
 
     @Override
@@ -201,22 +197,25 @@ public class HostModel extends Observable implements GameModel, Observer {
         if (this.hostServer.getNumOfClients() > 0) {
             String quitGameMod = String.valueOf(gameManager.getHostID()) + "," + GetMethod.quitGame + "," + "true";
             this.gameManager.quitGameHandler(quitGameMod);
-            try {
-                Thread.sleep(4000);
-            } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+            if (hostServer.getNumOfClients() > 0) {
+                try {
+                    Thread.sleep(3000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
             if (this.hostServer.getNumOfClients() == 0) {
                 this.hostServer.close();
-                // System.out.println("Host server is closed and the host has quit the game");
+                setChanged();
+                notifyObservers(GetMethod.endGame + "," + "OK");
+                System.out.println("0 Clients - Host server is closed and the host has quit the game");
             } else {
                 System.out
                         .println("\n\n*** There are still clients connected ! ***\n\n" + hostServer.getNumOfClients());
             }
         } else {
             this.hostServer.close();
-            // System.out.println("Host server is closed and the host has quit the game");
+            System.out.println("No clients - Host server is closed and the host has quit the game");
         }
     }
 
@@ -242,8 +241,8 @@ public class HostModel extends Observable implements GameModel, Observer {
                 // System.out.println("Cant get your others scores");
                 return null;
             } else {
-                Map<String, String> othersInfo;
-                othersInfo = (Map<String, String>) ObjectSerializer.deserializeObject(ans);
+                @SuppressWarnings(value = "unchecked")
+                Map<String, String> othersInfo = (Map<String, String>) ObjectSerializer.deserializeObject(ans);
                 return othersInfo;
             }
         } catch (ClassNotFoundException | IOException e) {
@@ -340,6 +339,7 @@ public class HostModel extends Observable implements GameModel, Observer {
                 return null;
             } else {
                 try {
+                    @SuppressWarnings(value = "unchecked")
                     ArrayList<Tile> tiles = (ArrayList<Tile>) ObjectSerializer.deserializeObject(ans);
                     return tiles;
                 } catch (ClassNotFoundException | IOException e) {
@@ -370,6 +370,7 @@ public class HostModel extends Observable implements GameModel, Observer {
                 return null;
             } else {
                 try {
+                    @SuppressWarnings(value = "unchecked")
                     ArrayList<Word> words = (ArrayList<Word>) ObjectSerializer.deserializeObject(ans);
                     return words;
                 } catch (ClassNotFoundException | IOException e) {
@@ -400,6 +401,7 @@ public class HostModel extends Observable implements GameModel, Observer {
                 return null;
             } else {
                 try {
+                    @SuppressWarnings(value = "unchecked")
                     Set<String> gameBooks = (Set<String>) ObjectSerializer.deserializeObject(ans);
                     return gameBooks;
                 } catch (ClassNotFoundException | IOException e) {
@@ -430,6 +432,10 @@ public class HostModel extends Observable implements GameModel, Observer {
         return 0;
     }
 
+    public void resetGame() {
+        gameManager.resetGame();
+    }
+
     @Override
     public void update(Observable o, Object arg) {
         if (o == gameManager) {
@@ -456,3 +462,4 @@ public class HostModel extends Observable implements GameModel, Observer {
     }
 
 }
+

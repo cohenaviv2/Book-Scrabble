@@ -5,7 +5,6 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.*;
 
-import app.model.game.*;
 import app.model.server.cache.Dictionary;
 
 /*
@@ -114,7 +113,6 @@ public class DictionaryManager {
             try {
                 Thread.sleep(2000);
             } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
 

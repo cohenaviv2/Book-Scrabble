@@ -151,16 +151,16 @@
 
 .score-label {
   -fx-font-size: 50px;
-  -fx-text-fill: rgb(0, 174, 255);
+  /* -fx-text-fill: rgb(0, 174, 255); */
   -fx-font-weight: bold;
   -fx-font-family: "Comic Sans MS";
   -fx-padding: 10px;
-  -fx-effect: dropshadow(gaussian, rgb(0, 0, 0), 20, 0, 2, 6);
+  -fx-effect: dropshadow(gaussian, rgb(59, 59, 59), 25, 0, 2, 6);
 }
 
 .other-score-label {
-  -fx-font-size: 30px;
-  -fx-text-fill: rgb(0, 174, 255);
+  -fx-font-size: 25px;
+  /* -fx-text-fill: rgb(0, 174, 255); */
   -fx-font-weight: bold;
   -fx-font-family: "Comic Sans MS";
   -fx-padding: 10px;
@@ -203,9 +203,16 @@
 }
 
 .my-words-box {
+  -fx-background-image: url("words-board.png");
+  -fx-background-size: contain;
+  -fx-background-repeat: no-repeat;
+}
+
+.message-box {
   -fx-background-image: url("open-book3.png");
   -fx-background-size: cover;
   -fx-background-repeat: no-repeat;
+
 }
 
 .cell {
@@ -215,7 +222,6 @@
 
 /* Style for cells with characters */
 .cell.character {
-  -fx-border-color: transparent;
   -fx-background-size: cover;
   -fx-border-width: 4px;
   -fx-border-radius: 5px;
@@ -226,6 +232,20 @@
   -fx-border-color: black;
   -fx-border-width: 4px;
   -fx-border-radius: 5px;
+}
+
+.title {
+  -fx-text-alignment: center;
+  -fx-font-family: "Arial";
+  -fx-font-weight: bold;
+  -fx-font-size: 24px;
+}
+
+.little-title {
+  -fx-text-alignment: center;
+  -fx-font-family: "Arial";
+  -fx-font-weight: bold;
+  -fx-font-size: 20px;
 }
 
 /************* GENERAL *************/
@@ -297,10 +317,16 @@
   -fx-font-family: "Arial Unicode MS"; /* Choose a font that supports the Unicode character */
 }
 
-.content-background {
+.yellow-content-background {
   -fx-background-color: rgba(224, 147, 47, 0.856);
   -fx-border-color: black;
   -fx-border-width: 3px;
+}
+
+.blue-content-background {
+  -fx-background-color: rgb(0, 174, 255);
+  -fx-border-color: rgb(51, 51, 51);
+  -fx-border-width: 5px;
 }
 
 .text-field {
@@ -326,3 +352,112 @@
 .progress-indicator {
   -fx-progress-color: black; /* Change this to your desired color */
 }
+
+
+/************* LETTERS *************/
+
+/* Generate styles for each uppercase letter */
+.character-A {
+  -fx-background-image: url('tiles/A.png');
+}
+
+.character-B {
+  -fx-background-image: url('tiles/B.png');
+}
+
+.character-C {
+  -fx-background-image: url('tiles/C.png');
+}
+
+.character-D {
+  -fx-background-image: url('tiles/D.png');
+}
+
+.character-E {
+  -fx-background-image: url('tiles/E.png');
+}
+
+.character-F {
+  -fx-background-image: url('tiles/F.png');
+}
+
+.character-G {
+  -fx-background-image: url('tiles/G.png');
+}
+
+.character-H {
+  -fx-background-image: url('tiles/H.png');
+}
+
+.character-I {
+  -fx-background-image: url('tiles/I.png');
+}
+
+.character-J {
+  -fx-background-image: url('tiles/J.png');
+}
+
+.character-K {
+  -fx-background-image: url('tiles/K.png');
+}
+
+.character-L {
+  -fx-background-image: url('tiles/L.png');
+}
+
+.character-M {
+  -fx-background-image: url('tiles/M.png');
+}
+
+.character-N {
+  -fx-background-image: url('tiles/N.png');
+}
+
+.character-O {
+  -fx-background-image: url('tiles/O.png');
+}
+
+.character-P {
+  -fx-background-image: url('tiles/P.png');
+}
+
+.character-Q {
+  -fx-background-image: url('tiles/Q.png');
+}
+
+.character-R {
+  -fx-background-image: url('tiles/R.png');
+}
+
+.character-S {
+  -fx-background-image: url('tiles/S.png');
+}
+
+.character-T {
+  -fx-background-image: url('tiles/T.png');
+}
+
+.character-U {
+  -fx-background-image: url('tiles/U.png');
+}
+
+.character-V {
+  -fx-background-image: url('tiles/V.png');
+}
+
+.character-W {
+  -fx-background-image: url('tiles/W.png');
+}
+
+.character-X {
+  -fx-background-image: url('tiles/X.png');
+}
+
+.character-Y {
+  -fx-background-image: url('tiles/Y.png');
+}
+
+.character-Z {
+  -fx-background-image: url('tiles/Z.png');
+}
+

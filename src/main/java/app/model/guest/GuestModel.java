@@ -104,7 +104,7 @@ public class GuestModel extends Observable implements GameModel, Observer {
         }
         if (commHandler != null){
             commHandler.close();
-            // System.out.println("Communication Handler is closed.");
+            System.out.println("Communication Handler is closed.");
         }
         // System.out.println("Guest Model: you quit the game.");
     }

@@ -2,7 +2,6 @@ package app.view;
 
 import java.util.*;
 
-import app.model.GetMethod;
 import app.view_model.GameViewModel;
 import javafx.application.*;
 import javafx.scene.Cursor;
@@ -16,15 +15,6 @@ public class Main extends Application implements Observer {
 
     private GameViewModel gameViewModel;
     private WindowController windowController;
-    private static Main instance; // To hold the Main instance
-
-    public Main() {
-        instance = this;
-    }
-
-    public static Main getInstance() {
-        return instance;
-    }
 
     @Override
     public void start(Stage primaryStage) {
@@ -42,7 +32,7 @@ public class Main extends Application implements Observer {
         initialWindowBox.getStylesheets().add(windowController.CSS_STYLESHEET);
 
         // Set the application icon
-        primaryStage.getIcons().add(new Image("game-icon.png"));
+        primaryStage.getIcons().add(new Image("icons/game-icon.png"));
 
         // Set up the primaryStage
         prmStage.setTitle("Book Scrabble");
@@ -55,23 +45,10 @@ public class Main extends Application implements Observer {
         launch(args);
     }
 
-    public void showAlert(String alert) {
-        this.windowController.showAlert(alert);
-    }
-
     @Override
     public void update(Observable o, Object arg) {
         if (o == gameViewModel) {
-            // PRINT DEBUG
-            // System.out.println("VIEW GOT UPDATE");
-            // if (arg != null && arg instanceof String) {
-            //     String message = (String) arg;
-            //     windowController.showAlert(message);
-            // } else {
-            //     windowController.showGameFlowWindow();
-            // }
             windowController.showGameFlowWindow();
-
         }
     }
 }

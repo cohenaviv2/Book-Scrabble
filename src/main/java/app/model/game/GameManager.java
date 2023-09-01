@@ -34,6 +34,7 @@ public class GameManager extends Observable {
     private final Map<String, String> fullBookList;
     private Set<String> selectedBooks;
     private String serverBooksString;
+    private boolean gameEnd;
 
     // Participants
     private Player hostPlayer;
@@ -155,7 +156,8 @@ public class GameManager extends Observable {
 
     public String processPlayerInstruction(int guestId, String modifier, String value)
             throws IOException, ClassNotFoundException {
-                // System.out.println("\n GM got message - " + guestId + "," + modifier + "," + value);
+        // System.out.println("\n GM got message - " + guestId + "," + modifier + "," +
+        // value);
         if (isIdExist(guestId)) {
             // All model cases that indicates some guest instructions
             switch (modifier) {
@@ -214,6 +216,7 @@ public class GameManager extends Observable {
          * Adds each books that the guest chosed to the game's book list,
          * if doesnt exist already
          */
+        @SuppressWarnings(value = "unchecked")
         List<String> playerBookList = (List<String>) ObjectSerializer.deserializeObject(listOfBooksSer);
         for (String book : playerBookList) {
             if (fullBookList.containsKey(book)) {
@@ -356,7 +359,7 @@ public class GameManager extends Observable {
         if (score == -1) {
             return "notBoardLegal";
         } else if (score == 0) {
-            // System.out.println("\n\nGame Manager - tryPlace :  not dic legal\n\n");
+            // System.out.println("\n\nGame Manager - tryPlace : not dic legal\n\n");
             // some word that was made is not dictionary legal
             // players can challenge this word or skip turn
             turnManager.setActiveWord(queryWord);
@@ -367,7 +370,8 @@ public class GameManager extends Observable {
             }
             return turnWords;
         } else {
-            // System.out.println("\n\nGame Manager - tryPlace :  got point / is dic legal\n\n");
+            // System.out.println("\n\nGame Manager - tryPlace : got point / is dic
+            // legal\n\n");
 
             player.addPoints(score);
             player.addWords(gameBoard.getTurnWords());
@@ -381,6 +385,7 @@ public class GameManager extends Observable {
             // setChanged();
             // notifyObservers();
 
+            turnManager.resetPasses();
             turnManager.nextTurn();
 
             String playerScore = String.valueOf(score);
@@ -399,7 +404,6 @@ public class GameManager extends Observable {
          * Any way need to turn off Active word.
          * 
          */
-        System.out.println("game-manager challange");
 
         if (moveValue.equals("true")) {
             if (turnManager.getActiveWord() == null || !getPlayerByID(playerId).isActiveWord()) {
@@ -411,7 +415,7 @@ public class GameManager extends Observable {
             Player player = getPlayerByID(playerId);
 
             if (answer.equals("true")) {
-                // System.out.println("\n\nGame Manager - challange :  X2 Points\n\n");
+                // System.out.println("\n\nGame Manager - challange : X2 Points\n\n");
 
                 // Challenge successfull - player get extra points
                 int score = gameBoard.tryPlaceWord(activeWord);
@@ -433,13 +437,14 @@ public class GameManager extends Observable {
                 // setChanged();
                 // notifyObservers();
 
-                this.turnManager.nextTurn();
+                turnManager.resetPasses();
+                turnManager.nextTurn();
 
                 String playerScore = String.valueOf(score);
                 return playerScore;
 
             } else {
-                // System.out.println("\n\nGame Manager - challange :  -10 Points\n\n");
+                // System.out.println("\n\nGame Manager - challange : -10 Points\n\n");
                 // Challenge failed - player loses points
                 // Turn off active word
                 turnManager.setActiveWord(null);
@@ -562,17 +567,20 @@ public class GameManager extends Observable {
     }
 
     private void endGame(boolean isHostQuitGame) {
+        gameEnd = true;
         if (isHostQuitGame) {
             setChanged();
             notifyObservers(GetMethod.endGame + "," + "HOST");
         } else {
-            Player winnerPlayer = playersByID.values().stream().sorted((p1, p2) -> p2.getScore() - p1.getScore())
-                    .findFirst().get();
+            String playersScores = "";
+            for (Player p : playersByID.values()) {
+                playersScores += (p.getName() + "-" + p.getScore() + ":");
+            }
             setChanged();
-            notifyObservers(GetMethod.endGame + "," + winnerPlayer.getName() + "," + winnerPlayer.getScore());
+            notifyObservers(GetMethod.endGame + "," + playersScores);
 
-            // reset the game for new game
-            resetGame();
+            // // reset the game for new game
+            // resetGame();
             // System.out.println("\n\n\n\n\n\n GAME ENDS \n\n\n\n\n\n\n");
         }
     }
@@ -589,101 +597,6 @@ public class GameManager extends Observable {
         this.playersByName.clear();
         this.totalPlayersNum = 0;
         this.readyToPlay.set(0);
-    }
-
-    public static void main(String[] args) {
-        GameManager g = new GameManager();
-        g.createHostPlayer("Aviv");
-        g.createGuestPlayer("Moshe");
-        g.createGuestPlayer("Matan");
-        g.createGuestPlayer("Amit");
-
-        // Test draw tiles Lottery
-        int bagSize = g.gameBag.size();
-        g.turnManager.drawTiles();
-        int newSize;
-        if ((newSize = g.gameBag.size()) != bagSize - 7 * 4) {
-            System.out.println("bag size doesnt match: " + newSize);
-        }
-        // Test next turn
-        g.turnManager.nextTurn();
-        if (g.turnManager.getCurrentTurnIndex() != 1) {
-            System.out.println("wrong turn index");
-        }
-        g.turnManager.nextTurn();
-        if (g.turnManager.getCurrentTurnIndex() != 2) {
-            System.out.println("wrong turn index");
-        }
-        g.turnManager.nextTurn();
-        if (g.turnManager.getCurrentTurnIndex() != 3) {
-            System.out.println("wrong turn index");
-        }
-        g.turnManager.nextTurn();
-        if (g.turnManager.getCurrentTurnIndex() != 0) {
-            System.out.println("wrong turn index");
-        }
-        // Test serialize hand tiles
-        List<Tile> randTiles = new ArrayList<>();
-        System.out.println("before serialize:");
-        for (int i = 0; i < 10; i++) {
-            Tile tt = g.gameBag.getRand();
-            randTiles.add(tt);
-            System.out.print(tt.getLetter() + ",");
-        }
-        System.out.println("\n");
-        try {
-            String tileString = ObjectSerializer.serializeObject(randTiles);
-            List<Tile> tcopy = (List<Tile>) ObjectSerializer.deserializeObject(tileString);
-            System.out.println("after serialize:");
-            for (Tile t : tcopy)
-                System.out.print(t.getLetter() + ",");
-            System.out.println("\n");
-            System.out.println(randTiles.get(0).equals(tcopy.get(0)) + "\n");
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        // Test serialize tiles board
-        Tile[][] board = new Tile[15][15];
-        board[5][7] = g.gameBag.getTile('A');
-        board[6][7] = g.gameBag.getTile('V');
-        board[7][7] = g.gameBag.getTile('I');
-        board[8][7] = g.gameBag.getTile('V');
-
-        System.out.println("before serialize:");
-        for (int i = 0; i < 15; i++) {
-            for (int j = 0; j < 15; j++) {
-                if (board[i][j] == null)
-                    System.out.print("- ");
-                else
-                    System.out.print(board[i][j].getLetter() + " ");
-            }
-            System.out.println();
-        }
-        System.out.println("\n");
-
-        String boardString;
-        try {
-            boardString = ObjectSerializer.serializeObject(board);
-            Tile[][] copyBoard = (Tile[][]) ObjectSerializer.deserializeObject(boardString);
-            System.out.println("after serialize:");
-            for (int i = 0; i < 15; i++) {
-                for (int j = 0; j < 15; j++) {
-                    if (copyBoard[i][j] == null)
-                        System.out.print("- ");
-                    else
-                        System.out.print(copyBoard[i][j].getLetter() + " ");
-                }
-                System.out.println();
-            }
-            System.out.println("\n");
-        } catch (ClassNotFoundException | IOException e) {
-            e.printStackTrace();
-        }
-
-        System.out.println("done");
     }
 
     public class TurnManager {
@@ -736,6 +649,7 @@ public class GameManager extends Observable {
              * Sets all players turn index's and the first player isTurn to true.
              */
 
+            String drawTileString = "";
             // Pull tile for each player
             for (Player p : playersByID.values()) {
                 Tile t = gameBag.getRand();
@@ -769,6 +683,7 @@ public class GameManager extends Observable {
                 p.setTurnIndex(i);
                 // System.out.println(p.getName() + " - " + i + " (" + myTile.getLetter() +
                 // ")");
+                drawTileString += p.getName() + "-" + myTile.letter + ":";
                 gameBag.put(myTile);
                 p.getMyHandTiles().remove(0);
                 turnManager.pullTiles(p.getID());
@@ -777,7 +692,7 @@ public class GameManager extends Observable {
 
             setCurrentTurnIndex(0);
             setChanged();
-            notifyObservers(GetMethod.updateAll);
+            notifyObservers(GetMethod.updateAll + "," + drawTileString);
         }
 
         public void nextTurn() {
@@ -796,10 +711,14 @@ public class GameManager extends Observable {
             // Check rounds
             if (allPlayersPassed()) {
                 this.rounds++;
-                if (rounds >= 4) {
-                    endGame(false);
-                }
                 resetPasses();
+                // passesPerRound.forEach((n, p) -> System.out.println(n.getName() + " : " +
+                // p));
+                // System.out.println("rounds: " + rounds);
+                if (rounds >= 3) {
+                    endGame(false);
+                    return;
+                }
             }
 
             setChanged();
@@ -826,11 +745,6 @@ public class GameManager extends Observable {
             if (quittingPlayer.getID() == hostPlayer.getID()) {
 
                 // The host player is quitting, stop the game or perform necessary actions
-                endGame(true);
-
-            } else if (playersByID.size() == 1) {
-
-                // Host left alone in the game
                 endGame(true);
 
             } else {
@@ -881,8 +795,11 @@ public class GameManager extends Observable {
                 // System.out.println("\n\n");
 
                 // Notify observers about the turn change and player removal
-                setChanged();
-                notifyObservers(GetMethod.quitGame + "," + quittingPlayer.getName() + "," + totalPlayersNum);
+                if (!gameEnd) {
+                    setChanged();
+                    notifyObservers(GetMethod.quitGame + "," + quittingPlayer.getName() + "," + totalPlayersNum);
+                }
+
                 // printTurnInfo();
             }
         }

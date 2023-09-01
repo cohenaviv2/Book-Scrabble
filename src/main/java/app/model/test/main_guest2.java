@@ -37,7 +37,6 @@ public class main_guest2 {
                 gm.myBooksChoice("Moby-Dick");
                 gm.ready();
             } catch (Exception e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
 

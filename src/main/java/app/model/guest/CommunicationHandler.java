@@ -79,8 +79,8 @@ public class CommunicationHandler extends Observable {
 
                     // General update message
                     if (!serverMessage.startsWith(String.valueOf(myId))) {
-                        this.MESSAGE = serverMessage;
-                        if (isHostQuit()) {
+                        MESSAGE = serverMessage;
+                        if (MESSAGE.startsWith(GetMethod.endGame)) {
                             setChanged();
                             notifyObservers(MESSAGE);
                             sendMessage(GetMethod.quitGame, "true");
@@ -104,7 +104,7 @@ public class CommunicationHandler extends Observable {
                     }
                 }
                 // PRINT DEBUG
-                // // System.out.println("CommHandler: chat with host ended");
+                System.out.println("CommHandler: chat with host ended");
 
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
@@ -113,9 +113,6 @@ public class CommunicationHandler extends Observable {
 
     }
 
-    private boolean isHostQuit() {
-        return this.MESSAGE.startsWith(GetMethod.endGame) && this.MESSAGE.split(",")[1].equals("HOST");
-    }
 
     private void requestProperties() {
         sendMessage(GetMethod.getCurrentBoard, "true");
@@ -178,6 +175,7 @@ public class CommunicationHandler extends Observable {
                 // PRINT DEBUG
                 // // System.out.println("CommHandler: cant get my game books");
             } else {
+                @SuppressWarnings (value="unchecked")
                 Set<String> gameBooks = (Set<String>) ObjectSerializer.deserializeObject(returnedVal);
                 playerProperties.setGameBookList(gameBooks);
             }
@@ -239,8 +237,8 @@ public class CommunicationHandler extends Observable {
 
             // PRINT DEBUG
             // // System.out.println("CommHandler: " + returnedVal);
-            MessageReader
-                    .setMsg("Some word is not Dictionary legal" + returnedVal + "\nYou can try Challenge or Pass turn");
+            // MessageReader
+            //         .setMsg("Some word is not Dictionary legal" + returnedVal + "\nYou can try Challenge or Pass turn");
 
             setChanged();
             notifyObservers(GetMethod.tryPlaceWord + "," + returnedVal);
@@ -252,10 +250,6 @@ public class CommunicationHandler extends Observable {
             MessageReader.setMsg("You got more Points!");
 
         }
-    }
-
-    private boolean isNumeric(String str) {
-        return str.matches("-?\\d+(\\.\\d+)?");
     }
 
     private void isMyTurnHandler(String returnedVal) {
@@ -284,6 +278,7 @@ public class CommunicationHandler extends Observable {
             // PRINT DEBUG
             // System.out.println("CommHandler: cant get my words");
         } else {
+            @SuppressWarnings (value="unchecked")
             ArrayList<Word> word = (ArrayList<Word>) ObjectSerializer.deserializeObject(returnedVal);
             playerProperties.setMyWords(word);
 
@@ -295,6 +290,7 @@ public class CommunicationHandler extends Observable {
             // PRINT DEBUG
             // System.out.println("CommHandler: cant get my tiles");
         } else {
+            @SuppressWarnings (value="unchecked")
             ArrayList<Tile> tile = (ArrayList<Tile>) ObjectSerializer.deserializeObject(returnedVal);
             playerProperties.setMyTiles(tile);
         }
@@ -325,6 +321,7 @@ public class CommunicationHandler extends Observable {
             // PRINT DEBUG
             // System.out.println("CommHandler: cant get others Scores");
         } else {
+            @SuppressWarnings (value="unchecked")
             Map<String, String> othersScores = (Map<String, String>) ObjectSerializer
                     .deserializeObject(returnedVal);
             playerProperties.setPlayersInfo(othersScores);

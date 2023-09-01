@@ -42,7 +42,6 @@ public class main_host {
                 hm.myBooksChoice("Alice in Wonderland");
                 hm.ready();
             } catch (Exception e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             } // to local game server
         }

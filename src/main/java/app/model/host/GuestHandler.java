@@ -149,7 +149,7 @@ public class GuestHandler implements ClientHandler {
         gameManager.quitGameHandler(quitGameString);
         MessageReader.setMsg(playerName + " has quit the game!");
         // PRINT DEBUG
-        // System.out.println("GUEST HANDLER: chat ended, " + myId + " has quit the game\n");
+        System.out.println("GUEST HANDLER: chat ended, " + myId + " has quit the game\n");
     }
 
     @Override

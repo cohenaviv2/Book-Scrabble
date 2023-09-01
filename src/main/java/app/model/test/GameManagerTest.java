@@ -1,11 +1,9 @@
 package app.model.test;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import app.model.game.*;
-import app.model.server.*;
 
 public class GameManagerTest {
     public static void main(String[] args) {

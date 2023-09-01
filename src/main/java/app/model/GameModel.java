@@ -17,7 +17,7 @@ public interface GameModel {
     // SEND DATA
     void connectMe(String name, String ip, int port);
 
-    void myBooksChoice(String bookList);
+    void myBooksChoice(String bookList); /* TODO: Change to List/Set */
 
     void ready();
 

@@ -1,6 +1,5 @@
 package app.view_model.test;
 
-import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -20,7 +19,6 @@ public class ViewModelTest {
             try {
                 hm.connectMe("Aviv", "localhost", 11224);
             } catch (Exception e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
             hm.myBooksChoice("Alice in Wonderland");

@@ -12,7 +12,6 @@ import app.model.GetMethod;
 import app.model.game.*;
 import app.model.guest.GuestModel;
 import app.model.host.HostModel;
-import app.view.Main;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -35,6 +34,8 @@ public class GameViewModel extends Observable implements Observer {
 
     private String message;
     private boolean isMessage;
+    private boolean isGameEnd;
+    private String endGameString;
 
     private int firstRow;
     private int firstCol;
@@ -93,6 +94,10 @@ public class GameViewModel extends Observable implements Observer {
         return message;
     }
 
+    public boolean isGameEnd() {
+        return isGameEnd;
+    }
+
     public void setTotalPlayersCount(int numOfPlayers) {
         HostModel.get().setNumOfPlayers(numOfPlayers);
     }
@@ -108,33 +113,15 @@ public class GameViewModel extends Observable implements Observer {
     }
 
     public void myBookChoice(String bookName) {
-        try {
-            gameModel.myBooksChoice(bookName);
-        } catch (Exception e) {
-            e.printStackTrace();
-            String errorMessage = "An error occurred: " + e.getMessage();
-            Main.getInstance().showAlert(errorMessage);
-        }
+        gameModel.myBooksChoice(bookName);
     }
 
     public void ready() {
-        try {
-            gameModel.ready();
-        } catch (Exception e) {
-            e.printStackTrace();
-            String errorMessage = "An error occurred: " + e.getMessage();
-            Main.getInstance().showAlert(errorMessage);
-        }
+        gameModel.ready();
     }
 
     public Tile[][] getCurrentBoard() {
-        try {
-            return gameModel.getPlayerProperties().getMyBoard();
-        } catch (Exception e) {
-            String errorMessage = "An error occurred: " + e.getMessage();
-            Main.getInstance().showAlert(errorMessage);
-            return null;
-        }
+        return gameModel.getPlayerProperties().getMyBoard();
     }
 
     public String tryPlaceWord(String word) {
@@ -206,6 +193,10 @@ public class GameViewModel extends Observable implements Observer {
         return this.gameModel.isConnected();
     }
 
+    public String getEndGameString() {
+        return endGameString;
+    }
+
     @Override
     public void update(Observable o, Object arg) {
         if (o == gameModel) {
@@ -213,6 +204,10 @@ public class GameViewModel extends Observable implements Observer {
             String updateMsg = (String) arg;
             System.out.println("\n GVM = " + updateMsg);
             setMessage(updateMsg);
+
+            if (updateMsg.startsWith(GetMethod.endGame) && !updateMsg.split(",")[1].equals("HOST")) {
+                endGameString = updateMsg.split(",")[1];
+            }
 
             if (!updateMsg.startsWith(GetMethod.tryPlaceWord)) {
 
@@ -270,8 +265,13 @@ public class GameViewModel extends Observable implements Observer {
                 // message.startsWith(GetMethod.endGame)) {
                 // setMessage(message);
                 // }
-                setChanged();
-                notifyObservers();
+                if (!isGameEnd) {
+                    setChanged();
+                    notifyObservers();
+                }
+                if (updateMsg.startsWith(GetMethod.endGame)) {
+                    this.isGameEnd = true;
+                }
 
                 // System.out.println(this.gameModel.getPlayerProperties());
             }
