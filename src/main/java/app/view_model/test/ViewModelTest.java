@@ -21,13 +21,13 @@ public class ViewModelTest {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            hm.myBooksChoice("Alice in Wonderland");
+            hm.myBooksChoice(null);
             hm.ready();
         });
         // Set guest view-model
             gvm.connectMe("Aviv", "localhost", 8040);
       
-        gvm.myBookChoice("Harray Potter");
+        gvm.myBookChoice(null);
         gvm.ready();
 
        

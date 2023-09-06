@@ -39,7 +39,7 @@ public class main_host {
 
             try {
                 hm.connectMe("Aviv", "localhost", 11224);
-                hm.myBooksChoice("Alice in Wonderland");
+                hm.myBooksChoice(null);
                 hm.ready();
             } catch (Exception e) {
                 e.printStackTrace();

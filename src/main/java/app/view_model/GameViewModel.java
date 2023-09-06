@@ -12,7 +12,7 @@ import app.model.GetMethod;
 import app.model.game.*;
 import app.model.guest.GuestModel;
 import app.model.host.HostModel;
-import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.*;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -23,6 +23,7 @@ public class GameViewModel extends Observable implements Observer {
     public GameModel gameModel;
 
     private ObservableValue<String> myNameView;
+    private final IntegerProperty scoreProp = new SimpleIntegerProperty(0);
     private ObservableValue<String> myScoreView;
     private ObservableValue<String> myTurnView;
     private ObservableList<String> myWordsView;
@@ -32,10 +33,10 @@ public class GameViewModel extends Observable implements Observer {
     private ObservableValue<String> bagCountView;
     private ObservableList<String> gameBooksView;
 
-    private String message;
-    private boolean isMessage;
+    private String update;
+    private boolean isUpdate;
     private boolean isGameEnd;
-    private String endGameString;
+    private String finalScores;
 
     private int firstRow;
     private int firstCol;
@@ -80,18 +81,18 @@ public class GameViewModel extends Observable implements Observer {
         return localIp;
     }
 
-    public boolean isMessage() {
-        return isMessage;
+    public boolean isUpdate() {
+        return isUpdate;
     }
 
-    private void setMessage(String msg) {
-        this.isMessage = true;
-        this.message = msg;
+    private void setUpdate(String msg) {
+        this.isUpdate = true;
+        this.update = msg;
     }
 
-    public String getMessage() {
-        isMessage = false;
-        return message;
+    public String getUpdate() {
+        isUpdate = false;
+        return update;
     }
 
     public boolean isGameEnd() {
@@ -112,12 +113,21 @@ public class GameViewModel extends Observable implements Observer {
         gameModel.connectMe(name, ip, port);
     }
 
-    public void myBookChoice(String bookName) {
-        gameModel.myBooksChoice(bookName);
+    public void myBookChoice(List<String> myBooks) {
+        gameModel.myBooksChoice(myBooks);
     }
 
     public void ready() {
         gameModel.ready();
+    }
+
+    public void sendTo(String name, String message) {
+        gameModel.sendTo(name, message);
+    }
+
+    public void sendToAll(String message) {
+        System.out.println("game model - " + message);
+        gameModel.sendToAll(message);
     }
 
     public Tile[][] getCurrentBoard() {
@@ -193,8 +203,8 @@ public class GameViewModel extends Observable implements Observer {
         return this.gameModel.isConnected();
     }
 
-    public String getEndGameString() {
-        return endGameString;
+    public String getFinalScores() {
+        return finalScores;
     }
 
     @Override
@@ -203,78 +213,99 @@ public class GameViewModel extends Observable implements Observer {
 
             String updateMsg = (String) arg;
             System.out.println("\n GVM = " + updateMsg);
-            setMessage(updateMsg);
+            setUpdate(updateMsg);
 
-            if (updateMsg.startsWith(GetMethod.endGame) && !updateMsg.split(",")[1].equals("HOST")) {
-                endGameString = updateMsg.split(",")[1];
-            }
+            // if (updateMsg.startsWith(GetMethod.sendTo)) {
+            //     String values = updateMsg.split(",")[1];
+            //     if(values.split(":").length==3) {
+            //         String name = values.split(":")[0];
+            //         if (name.equals(myNameView.getValue())) {
+            //             setChanged();
+            //             notifyObservers(updateMsg);
+            //         }
+            //     } else {
+            //         String sender = values.split(":")[1];
+            //         if(!sender.equals(myNameView.getValue())){
+            //             setChanged();
+            //             notifyObservers(updateMsg);
+            //         }
+            //     }
 
-            if (!updateMsg.startsWith(GetMethod.tryPlaceWord)) {
-
-                // Update the ViewModel's state based on changes in the GameModel
-                // System.out.println("VIEW-MODEL : GOT UPDATE");
-                buttonTiles = FXCollections.observableArrayList();
-                wordBuilder = new StringBuilder();
-
-                // My name
-                if (this.myNameView == null) {
-                    this.myNameView = new SimpleStringProperty(gameModel.getPlayerProperties().getMyName());
+            // } else {
+                if (updateMsg.startsWith(GetMethod.endGame) && !updateMsg.split(",")[1].equals("HOST")) {
+                    // Game end properly
+                    finalScores = updateMsg.split(",")[1];
                 }
 
-                // My turn
-                boolean myTurn = gameModel.getPlayerProperties().isMyTurn();
-                this.myTurnView = new SimpleStringProperty(String.valueOf(myTurn));
-                if (myTurn)
-                    MessageReader.setMsg("It's your turn!");
+                if (!updateMsg.startsWith(GetMethod.tryPlaceWord)) {
 
-                // My tiles
-                List<String> obsTiles = new ArrayList<>();
-                for (Tile t : gameModel.getPlayerProperties().getMyHandTiles()) {
-                    obsTiles.add(String.valueOf(t.getLetter()));
-                    buttonTiles.add(new Button(String.valueOf(t.getLetter())));
+                    // Update the ViewModel's state based on changes in the GameModel
+                    // System.out.println("VIEW-MODEL : GOT UPDATE");
+                    buttonTiles = FXCollections.observableArrayList();
+                    wordBuilder = new StringBuilder();
+
+                    // My name
+                    if (this.myNameView == null) {
+                        this.myNameView = new SimpleStringProperty(gameModel.getPlayerProperties().getMyName());
+                    }
+
+                    // My turn
+                    boolean myTurn = gameModel.getPlayerProperties().isMyTurn();
+                    this.myTurnView = new SimpleStringProperty(String.valueOf(myTurn));
+                    if (myTurn)
+                        MessageReader.setMsg("It's your turn!");
+
+                    // My tiles
+                    List<String> obsTiles = new ArrayList<>();
+                    for (Tile t : gameModel.getPlayerProperties().getMyHandTiles()) {
+                        obsTiles.add(String.valueOf(t.getLetter()));
+                        buttonTiles.add(new Button(String.valueOf(t.getLetter())));
+                    }
+                    this.myTilesView = FXCollections.observableArrayList(obsTiles);
+
+                    // My score
+                    this.myScoreView = new SimpleStringProperty(
+                            String.valueOf(gameModel.getPlayerProperties().getMyScore()));
+
+                    this.scoreProp.set(gameModel.getPlayerProperties().getMyScore());
+
+                    // My words
+                    List<String> obsWords = new ArrayList<>();
+                    for (Word w : gameModel.getPlayerProperties().getMyWords()) {
+                        obsWords.add(w.toString());
+                    }
+                    this.myWordsView = FXCollections.observableArrayList(obsWords);
+
+                    // Other player's info
+                    List<String> obsOthers = new ArrayList<>();
+                    Map<String, String> otherInfo = gameModel.getPlayerProperties().getOtherPlayersInfo();
+                    for (String n : otherInfo.keySet()) {
+                        obsOthers.add(n + ":" + otherInfo.get(n));
+                    }
+                    this.othersInfoView = FXCollections.observableArrayList(obsOthers);
+
+                    // Game books
+                    List<String> gameBookList = new ArrayList<>(gameModel.getPlayerProperties().getGameBookList());
+                    this.gameBooksView = FXCollections.observableArrayList(gameBookList);
+
+                    // Bag count
+                    this.bagCountView = new SimpleStringProperty(String.valueOf(gameModel.getBagCount()));
+
+                    // if (message.startsWith(GetMethod.quitGame) ||
+                    // message.startsWith(GetMethod.endGame)) {
+                    // setMessage(message);
+                    // }
+                    if (!isGameEnd) {
+                        setChanged();
+                        notifyObservers();
+                    }
+                    if (updateMsg.startsWith(GetMethod.endGame)) {
+                        this.isGameEnd = true;
+                    }
+
+                    // System.out.println(this.gameModel.getPlayerProperties());
                 }
-                this.myTilesView = FXCollections.observableArrayList(obsTiles);
-
-                // My score
-                this.myScoreView = new SimpleStringProperty(
-                        String.valueOf(gameModel.getPlayerProperties().getMyScore()));
-
-                // My words
-                List<String> obsWords = new ArrayList<>();
-                for (Word w : gameModel.getPlayerProperties().getMyWords()) {
-                    obsWords.add(w.toString());
-                }
-                this.myWordsView = FXCollections.observableArrayList(obsWords);
-
-                // Other player's info
-                List<String> obsOthers = new ArrayList<>();
-                Map<String, String> otherInfo = gameModel.getPlayerProperties().getOtherPlayersInfo();
-                for (String n : otherInfo.keySet()) {
-                    obsOthers.add(n + ":" + otherInfo.get(n));
-                }
-                this.othersInfoView = FXCollections.observableArrayList(obsOthers);
-
-                // Game books
-                List<String> gameBookList = new ArrayList<>(gameModel.getPlayerProperties().getGameBookList());
-                this.gameBooksView = FXCollections.observableArrayList(gameBookList);
-
-                // Bag count
-                this.bagCountView = new SimpleStringProperty(String.valueOf(gameModel.getBagCount()));
-
-                // if (message.startsWith(GetMethod.quitGame) ||
-                // message.startsWith(GetMethod.endGame)) {
-                // setMessage(message);
-                // }
-                if (!isGameEnd) {
-                    setChanged();
-                    notifyObservers();
-                }
-                if (updateMsg.startsWith(GetMethod.endGame)) {
-                    this.isGameEnd = true;
-                }
-
-                // System.out.println(this.gameModel.getPlayerProperties());
-            }
+            // }
 
         }
     }
@@ -319,8 +350,11 @@ public class GameViewModel extends Observable implements Observer {
         return buttonTiles;
     }
 
-    ////////////////////////////////// TRY PLACE WORD
-    ////////////////////////////////// ///////////////////////////////////
+    public IntegerProperty playerScoreProperty() {
+        return scoreProp;
+    }
+
+    /**************** Try Place Word ****************/
 
     public String getWord() {
         return wordBuilder.toString();
@@ -348,13 +382,6 @@ public class GameViewModel extends Observable implements Observer {
 
     public void setLastSelectedCellCol(int lastCol) {
         this.lastCol = lastCol;
-    }
-
-    public void clearSelectedCells() {
-        this.firstRow = 7;
-        this.firstCol = 7;
-        this.lastRow = 7;
-        this.lastCol = 7;
     }
 
     public int getFirstSelectedCellRow() {

@@ -41,6 +41,7 @@ public class GameManager extends Observable {
     private Map<Integer, Player> playersByID;
     private Map<String, Player> playersByName;
     private int totalPlayersNum;
+    private boolean gameRunning;
     private volatile AtomicInteger readyToPlay;
 
     // Connectivity
@@ -169,6 +170,10 @@ public class GameManager extends Observable {
                     return playersInfoHandler(guestId, value);
                 case GetMethod.getCurrentBoard:
                     return boardHandler(value);
+                case GetMethod.sendTo:
+                    return sentToHandler(value);
+                case GetMethod.sendToAll:
+                    return sentToAllHandler(value);
                 case GetMethod.getMyScore:
                     return scoreHandler(guestId, value);
                 case GetMethod.getMyTiles:
@@ -204,11 +209,16 @@ public class GameManager extends Observable {
          * Connect handler which use to handle a guset "connectMe" request
          * Sets the guest profile and returns the guest id as response
          */
-        createGuestPlayer(guestName);
-        // PRINT DEBUG
-        // System.out.println("GAME MANAGER: guest " + guestName + " profile was
-        // created!");
-        return getPlayerByName(guestName).getID();
+        if (!gameRunning) {
+            String newName = playersByName.containsKey(guestName) ? guestName + "2" : guestName;
+            createGuestPlayer(newName);
+            // PRINT DEBUG
+            // System.out.println("GAME MANAGER: guest " + guestName + " profile was
+            // created!");
+            return getPlayerByName(newName).getID();
+        } else {
+            return 0;
+        }
     }
 
     public String addBooksHandler(String listOfBooksSer) throws ClassNotFoundException, IOException {
@@ -242,6 +252,8 @@ public class GameManager extends Observable {
             // System.out.println("Game Manager: ALL PLAYERS ARE READY TO PLAY! draw
             // tiles...\n");
 
+            gameRunning = true;
+
             // Set the game server's list of books for query
             for (String book : selectedBooks) {
                 String serverBookPath = fullBookList.get(book);
@@ -251,6 +263,24 @@ public class GameManager extends Observable {
             // Draw tiles - Decide who's playing first
             turnManager.drawTiles();
         }
+    }
+
+    private String sentToHandler(String value) {
+        System.out.println("Game manager - sendTo");
+        String name = value.split(":")[0];
+        if (playersByName.containsKey(name)) {
+            setChanged();
+            notifyObservers(GetMethod.sendTo + "," + value);
+            return "true";
+        }
+        return "false";
+    }
+
+    private String sentToAllHandler(String value) {
+        System.out.println("Game manager - sendToAll");
+        setChanged();
+        notifyObservers(GetMethod.sendToAll + "," + value);
+        return "true";
     }
 
     private String playersInfoHandler(int guestId, String value) throws IOException {
@@ -368,6 +398,8 @@ public class GameManager extends Observable {
             for (Word w : gameBoard.getTurnWords()) {
                 turnWords += (gameBoard.wordToString(w) + ":");
             }
+            // String turnWords =
+            // ObjectSerializer.serializeObject(gameBoard.getTurnWords());
             return turnWords;
         } else {
             // System.out.println("\n\nGame Manager - tryPlace : got point / is dic
@@ -386,7 +418,7 @@ public class GameManager extends Observable {
             // notifyObservers();
 
             turnManager.resetPasses();
-            turnManager.nextTurn();
+            turnManager.nextTurn(true);
 
             String playerScore = String.valueOf(score);
             return playerScore;
@@ -438,7 +470,7 @@ public class GameManager extends Observable {
                 // notifyObservers();
 
                 turnManager.resetPasses();
-                turnManager.nextTurn();
+                turnManager.nextTurn(true);
 
                 String playerScore = String.valueOf(score);
                 return playerScore;
@@ -458,7 +490,7 @@ public class GameManager extends Observable {
                 // setChanged();
                 // notifyObservers("updateAll");
 
-                this.turnManager.nextTurn();
+                turnManager.nextTurn(false);
                 return GetMethod.skipTurn;
             }
         } else {
@@ -545,7 +577,7 @@ public class GameManager extends Observable {
                 p.setIsActiveWord(false);
             }
             turnManager.passesPerRound.replace(p, 1);
-            this.turnManager.nextTurn();
+            this.turnManager.nextTurn(false);
             return "true";
         } else
             return "false";
@@ -683,7 +715,7 @@ public class GameManager extends Observable {
                 p.setTurnIndex(i);
                 // System.out.println(p.getName() + " - " + i + " (" + myTile.getLetter() +
                 // ")");
-                drawTileString += p.getName() + "-" + myTile.letter + ":";
+                drawTileString += p.getName() + "-" + myTile.letter + "_";
                 gameBag.put(myTile);
                 p.getMyHandTiles().remove(0);
                 turnManager.pullTiles(p.getID());
@@ -692,10 +724,10 @@ public class GameManager extends Observable {
 
             setCurrentTurnIndex(0);
             setChanged();
-            notifyObservers(GetMethod.updateAll + "," + drawTileString);
+            notifyObservers(GetMethod.updateAll + "," + "drawTiles:" + drawTileString);
         }
 
-        public void nextTurn() {
+        public void nextTurn(boolean success) {
             /* Set turn to the next player (turn index) */
 
             int i = this.currentTurnIndex;
@@ -721,8 +753,16 @@ public class GameManager extends Observable {
                 }
             }
 
-            setChanged();
-            notifyObservers(GetMethod.updateAll);
+            try {
+                String turnWords = ObjectSerializer.serializeObject(gameBoard.getTurnWords());
+                String update = success ? turnWords : "0";
+                gameBoard.clearTurnWords();
+                setChanged();
+                notifyObservers(GetMethod.updateAll + "," + oldPlayer.getName() + ":" + update);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
             // printTurnInfo();
         }
 

@@ -39,12 +39,15 @@ public class WindowController {
     private Scene gameFlowScene;
     private Map<String, String> txtExplanations;
     private List<String> selectedBooks;
-    private String MY_BOOKS_SERILIZED;
     private List<Pane> selectedCells;
     private Stack<Pane> placementCelles;
     private List<Pane> placementList;
     private Button tryPlaceWordButton;
     private ObservableList<Button> tileButtons;
+    private Button resetTilesButton;
+    private Button sortTilesButton;
+    private List<Word> turnWords = new ArrayList<>();
+    private int totalPlayersNum;
 
     public final String CSS_STYLESHEET = getClass().getResource("/style.css").toExternalForm();
     private final Font EMOJI_FONT = Font.loadFont(getClass().getResourceAsStream("src\\main\\resources\\seguiemj.ttf"),
@@ -152,7 +155,6 @@ public class WindowController {
         initialWindowBox.getStyleClass().add("wood-background");
 
         this.MY_NAME = "";
-        this.MY_BOOKS_SERILIZED = "";
         this.CUSTOM_PORT = 0;
 
         // Styled header label
@@ -191,7 +193,7 @@ public class WindowController {
         VBox centerContent = new VBox(10, hostModeTitle, hostModeText, guestModeTitle, guestModeText);
         centerContent.setAlignment(Pos.CENTER);
 
-        helpButton.setOnAction(e -> openCustomWindow(centerContent, "red", this.X, 720, 500, "yellow"));
+        helpButton.setOnAction(e -> openCustomWindow(centerContent, "red", this.X, 720, 500, "help"));
 
         hostButton.setOnAction(event -> {
             GAME_MODE = "H";
@@ -282,6 +284,9 @@ public class WindowController {
             bookBox.getChildren().addAll(imageView, textFlow);
 
             if (fullBookList) {
+                if (selectedBooks.contains(book)) {
+                    imageView.getStyleClass().add("selected-book-image");
+                }
                 bookBox.setOnMouseClicked(event -> {
                     if (selectedBooks.contains(book)) {
                         selectedBooks.remove(book);
@@ -308,10 +313,6 @@ public class WindowController {
         doneButton.setOnAction(event -> {
             // Handle the action with the selected books
             // e.g., pass the selectedBooks list to the next screen or perform an action
-            try {
-                MY_BOOKS_SERILIZED = ObjectSerializer.serializeObject(this.selectedBooks);
-            } catch (IOException e) {
-            }
 
             bookSelectionStage.close();
         });
@@ -479,7 +480,7 @@ public class WindowController {
         VBox settings = new VBox(5, gameServerSettings, customPortSettings, myIpSettings);
         settings.setAlignment(Pos.CENTER);
 
-        HBox roundButtonsPane = createButtonsPane();
+        HBox roundButtonsPane = createButtonsPane(false);
         Button helpButton = (Button) roundButtonsPane.getChildren().get(0);
         Text hostModeTitle = new Text("Host Mode");
         hostModeTitle.setFont(Font.font("Arial", FontWeight.BOLD, 24));
@@ -488,9 +489,9 @@ public class WindowController {
         hostModeText.setTextAlignment(TextAlignment.CENTER);
         VBox hostModeExp = new VBox(10, hostModeTitle, hostModeText);
         hostModeExp.setAlignment(Pos.CENTER);
-        helpButton.setOnAction(e -> openCustomWindow(hostModeExp, "red", this.X, 700, 400, "yellow"));
+        helpButton.setOnAction(e -> openCustomWindow(hostModeExp, "red", this.X, 700, 400, "help"));
         Button settingsButton = (Button) roundButtonsPane.getChildren().get(1);
-        settingsButton.setOnAction(e -> openCustomWindow(settings, "red", this.X, 600, 850, "yellow"));
+        settingsButton.setOnAction(e -> openCustomWindow(settings, "red", this.X, 600, 850, "settings"));
 
         // Submit buttons
         HBox submitButtons = createSubmitButtons("Start game", 160);
@@ -508,7 +509,7 @@ public class WindowController {
                 // Call the corresponding ViewModel method to handle the "Connect me" action
                 gameViewModel.setTotalPlayersCount(numOfPlayersComboBox.getValue());
                 gameViewModel.connectMe(MY_NAME, "0", CUSTOM_PORT);
-                gameViewModel.myBookChoice(MY_BOOKS_SERILIZED);
+                gameViewModel.myBookChoice(selectedBooks);
                 gameViewModel.ready();
 
                 loginFormBox.setDisable(true);
@@ -618,7 +619,7 @@ public class WindowController {
         settings.setAlignment(Pos.CENTER);
 
         // Round buttons pane
-        HBox roundButtonsPane = createButtonsPane();
+        HBox roundButtonsPane = createButtonsPane(false);
         Button helpButton = (Button) roundButtonsPane.getChildren().get(0);
         Text guestModeTitle = new Text("Guest Mode");
         guestModeTitle.setFont(Font.font("Arial", FontWeight.BOLD, 24));
@@ -627,9 +628,9 @@ public class WindowController {
         guestModeText.setTextAlignment(TextAlignment.CENTER);
         VBox guestModeExp = new VBox(10, guestModeTitle, guestModeText);
         guestModeExp.setAlignment(Pos.CENTER);
-        helpButton.setOnAction(e -> openCustomWindow(guestModeExp, "red", this.X, 700, 400, "yellow"));
+        helpButton.setOnAction(e -> openCustomWindow(guestModeExp, "red", this.X, 700, 400, "help"));
         Button settingsButton = (Button) roundButtonsPane.getChildren().get(1);
-        settingsButton.setOnAction(e -> openCustomWindow(settings, "red", this.X, 500, 500, "yellow"));
+        settingsButton.setOnAction(e -> openCustomWindow(settings, "red", this.X, 500, 500, "settings"));
 
         Label waintingLabel = new Label("");
 
@@ -660,7 +661,7 @@ public class WindowController {
                 if (!gameViewModel.isConnected()) {
                     showConnectionAlert(txtExplanations.get("guest-socket-error"));
                 }
-                gameViewModel.myBookChoice(MY_BOOKS_SERILIZED);
+                gameViewModel.myBookChoice(selectedBooks);
                 gameViewModel.ready();
 
                 loginFormBox.setDisable(true);
@@ -754,7 +755,7 @@ public class WindowController {
     // ALERT WINDOWS
 
     private Button openCustomWindow(Node content, String btnColor, String btnText, double width, double height,
-            String backgroundColor) {
+            String theme) {
         alertStage = new Stage();
         alertStage.initStyle(StageStyle.UNDECORATED);
         alertStage.initModality(Modality.WINDOW_MODAL);
@@ -778,7 +779,7 @@ public class WindowController {
         Scene customScene;
         VBox customRoot = new VBox(30);
         customRoot.setAlignment(Pos.CENTER);
-        customRoot.getStyleClass().addAll(backgroundColor + "-content-background");
+        customRoot.getStyleClass().addAll(theme + "-content-background");
 
         customRoot.getChildren().add(content);
 
@@ -815,7 +816,34 @@ public class WindowController {
         message.setFont(Font.font("Arial", FontWeight.BOLD, 18));
         VBox textBox = new VBox(10, message);
         textBox.setAlignment(Pos.CENTER);
-        return openCustomWindow(textBox, "blue", "OK", 550, 250, "yellow");
+        return openCustomWindow(textBox, "blue", "OK", 550, 250, "alert");
+    }
+
+    public Button showMessage(String sender, String message, boolean toAll) {
+        // Title
+        String title = "Message from " + sender;
+        title += toAll ? " to all:\n\n" : ":\n\n";
+        Text titleText = new Text(title);
+        titleText.setFont(Font.font("Arial", FontWeight.BOLD, 18));
+        // Message
+        Text msgText = new Text(message + "\n\n");
+        msgText.getStyleClass().add("little-title");
+        // Buttons
+        Button okButton = new Button("OK");
+        okButton.getStyleClass().add("blue-button");
+        okButton.setOnAction(e -> alertStage.close());
+        Button sendBackButton = new Button("Reply");
+        sendBackButton.getStyleClass().add("green-button");
+        sendBackButton.setOnAction(e -> {
+            alertStage.close();
+            showMessageWindow(sender);
+        });
+        HBox buttonsBox = new HBox(10, sendBackButton, okButton);
+        buttonsBox.setAlignment(Pos.CENTER);
+
+        VBox textBox = new VBox(10, titleText, msgText, buttonsBox);
+        textBox.setAlignment(Pos.CENTER);
+        return openCustomWindow(textBox, null, null, 550, 300, "message");
     }
 
     private void showWaitingWindow(String text, boolean isQuitButton) {
@@ -829,7 +857,7 @@ public class WindowController {
         VBox waitingBox = new VBox(10, waitingText, progressIndicator);
         waitingBox.setAlignment(Pos.CENTER);
         String buttonColor = isQuitButton ? "red" : null;
-        Button waitingQuitButton = openCustomWindow(waitingBox, buttonColor, "Quit Game", 500, 350, "yellow");
+        Button waitingQuitButton = openCustomWindow(waitingBox, buttonColor, "Quit Game", 500, 350, "alert");
         if (isQuitButton) {
             waitingQuitButton.setOnAction(e -> {
                 this.gameViewModel.quitGame();
@@ -859,7 +887,7 @@ public class WindowController {
                     cantConnectText.setTextAlignment(TextAlignment.CENTER);
                     VBox waitingBox = new VBox(10, errorTitle, cantConnectText);
                     waitingBox.setAlignment(Pos.CENTER);
-                    Button waitingQuitButton = openCustomWindow(waitingBox, "red", "Exit Game", 550, 350, "yellow");
+                    Button waitingQuitButton = openCustomWindow(waitingBox, "red", "Exit Game", 550, 350, "alert");
                     waitingQuitButton.setOnAction(e -> {
                         gameViewModel.quitGame();
                         alertStage.close();
@@ -875,13 +903,47 @@ public class WindowController {
     }
 
     private void checkForMessage() {
-        if (gameViewModel.isMessage()) {
-            String message = gameViewModel.getMessage();
+        if (gameViewModel.isUpdate()) {
+            String message = gameViewModel.getUpdate();
 
             // Draw Tiles
             if (message.startsWith(GetMethod.updateAll) && message.split(",").length > 1) {
-                showDrawTilesWindow(message.split(",")[1]);
-                System.out.println("1");
+                String mod = message.split(",")[1].split(":")[0];
+                String value = message.split(",")[1].split(":")[1];
+                if (mod.equals("drawTiles")) {
+                    showDrawTilesWindow(value);
+                    System.out.println("1");
+                } else if (mod.equals(MY_NAME)) {
+                    if (!value.equals("0")) {
+                        try {
+                            turnWords.clear();
+                            turnWords = (List<Word>) ObjectSerializer.deserializeObject(value);
+                            // highlightCellsForWords(turnWords);
+                        } catch (ClassNotFoundException | IOException e) {
+                            e.printStackTrace();
+                        }
+
+                    } else {
+                        this.turnWords.clear();
+                        System.out.println("not success");
+                    }
+                }
+            }
+
+            // Got message from
+            else if (message.startsWith(GetMethod.sendTo)) {
+                String values = message.split(",")[1];
+                String msg;
+
+                if (values.split(":").length == 3) {
+                    msg = values.split(":")[1];
+                    String sender = values.split(":")[2];
+                    showMessage(sender, msg, false);
+                } else {
+                    msg = values.split(":")[0];
+                    String sender = values.split(":")[1];
+                    showMessage(sender, msg, true);
+                }
             }
 
             // Guest player quit the game
@@ -894,7 +956,7 @@ public class WindowController {
                 if (playersCount == 1) {
                     gameViewModel.quitGame();
                     if (gameViewModel.isGameEnd()) {
-                        showGameEndWindow(gameViewModel.getEndGameString());
+                        showGameEndWindow(gameViewModel.getFinalScores());
                     }
                     showGameEndWindow("All the players left the game");
                 } else {
@@ -930,7 +992,7 @@ public class WindowController {
                 // Game ends properly
                 else {
                     gameViewModel.quitGame();
-                    showGameEndWindow(gameViewModel.getEndGameString());
+                    showGameEndWindow(gameViewModel.getFinalScores());
                 }
             }
 
@@ -959,7 +1021,7 @@ public class WindowController {
         hostQuitText.setTextAlignment(TextAlignment.CENTER);
         VBox alertBox = new VBox(10, hostQuitText);
         alertBox.setAlignment(Pos.CENTER);
-        Button waitingQuitButton = openCustomWindow(alertBox, "red", "Exit Game", 600, 350, "yellow");
+        Button waitingQuitButton = openCustomWindow(alertBox, "red", "Exit Game", 600, 350, "alert");
         waitingQuitButton.setOnAction(e -> {
             alertStage.close();
             primaryStage.close();
@@ -986,7 +1048,6 @@ public class WindowController {
                 primaryStage.close();
                 System.exit(0);
             } else {
-                System.out.println("22222222222222222");
                 alertStage.close();
                 showWaitingWindow("Waiting for all players to disconnect...", false);
             }
@@ -1001,7 +1062,7 @@ public class WindowController {
 
         customRoot.getChildren().addAll(quitGameText, buttons);
 
-        openCustomWindow(customRoot, null, null, 550, 300, "yellow");
+        openCustomWindow(customRoot, null, null, 550, 300, "alert");
     }
 
     private void showGameEndWindow(String text) {
@@ -1069,7 +1130,7 @@ public class WindowController {
 
         customRoot.getChildren().addAll(title, quitGameText, endingText, buttons);
 
-        openCustomWindow(customRoot, null, null, 550, 400, "yellow");
+        openCustomWindow(customRoot, null, null, 550, 400, "alert");
     }
 
     private void showDrawTilesWindow(String drawTilesString) {
@@ -1078,12 +1139,13 @@ public class WindowController {
         String firstName = drawTilesString.split(":")[0].split("-")[0];
         HBox players = new HBox();
         players.setAlignment(Pos.CENTER);
-        for (String s : drawTilesString.split(":")) {
+        for (String s : drawTilesString.split("_")) {
+            this.totalPlayersNum++;
             String name = s.split("-")[0];
             String letter = s.split("-")[1];
             Text nameText = new Text(name);
             nameText.getStyleClass().add("little-title");
-            nameText.setFill(Color.WHITE);
+            nameText.setFill(Color.BROWN);
             nameText.setTextAlignment(TextAlignment.CENTER);
             Button tileButton = new Button();
             tileButton.setPrefSize(45, 45);
@@ -1094,12 +1156,54 @@ public class WindowController {
             playerBox.setPrefSize(100, 100);
             players.getChildren().add(playerBox);
         }
-        Text firstPlayerText = new Text(firstName + " is playing first!");
+        String firstString = firstName.equals(MY_NAME) ? "You play first!" : (firstName + " is playing first!");
+        Text firstPlayerText = new Text(firstString);
         firstPlayerText.setTextAlignment(TextAlignment.CENTER);
         firstPlayerText.setFont(Font.font("Arial", FontWeight.BOLD, 20));
         VBox box = new VBox(40, drawTilesTitle, players, firstPlayerText);
         box.setAlignment(Pos.CENTER);
-        openCustomWindow(box, "darkgreen", "Let's Go", 700, 400, "blue");
+        openCustomWindow(box, "darkgreen", "Let's Go", 700, 400, "drawtiles");
+    }
+
+    private void showMessageWindow(String defaultPlayer) {
+        VBox messagesBox = new VBox(30);
+
+        HBox sendBox = new HBox(10);
+
+        Text sendText = new Text("Send Message to:");
+        sendText.getStyleClass().add("title");
+        // sendText.setTextAlignment(TextAlignment.CENTER);
+        ComboBox<String> players = new ComboBox<>();
+        players.getStyleClass().add("text-field");
+        for (String s : gameViewModel.getOthersInfoProperty()) {
+            String name = s.split(":")[0];
+            players.getItems().add(name);
+        }
+        if(totalPlayersNum > 2){
+            players.getItems().add("All");
+        }
+        players.setValue(defaultPlayer);
+        sendBox.getChildren().addAll(sendText, players);
+        sendBox.setAlignment(Pos.CENTER);
+
+        TextField messageField = new TextField();
+        messageField.getStyleClass().add("text-field");
+        messageField.setMaxWidth(400);
+
+        Button sendButton = new Button("Send");
+        sendButton.getStyleClass().add("darkgreen-button");
+        sendButton.setOnAction(e -> {
+            alertStage.close();
+            String to = players.getValue();
+            if (to.equals("All")) {
+                gameViewModel.sendToAll(messageField.getText());
+            } else {
+                gameViewModel.sendTo(to, messageField.getText());
+            }
+        });
+        messagesBox.getChildren().addAll(sendBox, messageField, sendButton);
+        messagesBox.setAlignment(Pos.CENTER);
+        openCustomWindow(messagesBox, "red", this.X, 600, 400, "message");
     }
 
     // CREATE COMPENENTS
@@ -1108,6 +1212,7 @@ public class WindowController {
 
         VBox sidebar = new VBox(15);
         sidebar.setPadding(new Insets(15));
+        sidebar.setAlignment(Pos.CENTER);
 
         // My Name,Score,Turn Board
         Pane myInfoBoard = createInfoBoard(gameViewModel.getPlayerNameProperty(),
@@ -1200,7 +1305,7 @@ public class WindowController {
 
                 // Create cell
                 Pane cellPane = new Pane();
-                cellPane.getStyleClass().add("cell");
+                cellPane.getStyleClass().add("board-cell");
                 cellPane.setPrefSize(60, 60);
 
                 if (board[row][col] != null) {
@@ -1283,21 +1388,26 @@ public class WindowController {
 
                             setPlacementCells();
 
-                        } else {
-                            gameViewModel.clearSelectedCells();
                         }
+                        // else {
+                        // gameViewModel.clearSelectedCells();
+                        // }
 
                     } else {
                         Text turnText = new Text("It's not your turn to play");
                         turnText.setFont(Font.font("Arial", FontWeight.BOLD, 16));
                         turnText.setTextAlignment(TextAlignment.CENTER);
-                        openCustomWindow(turnText, "blue", "OK", 400, 200, "yellow");
+                        openCustomWindow(turnText, "blue", "OK", 400, 200, "alert");
                     }
                 });
 
                 // Add the cell to the GridPane
                 gameBoard.add(cellPane, col, row);
             }
+        }
+
+        if (turnWords.size() > 0) {
+            highlightCellsForWords(turnWords);
         }
 
         return gameBoard;
@@ -1311,98 +1421,108 @@ public class WindowController {
         // Message board
         Text messageLabel = new Text(MessageReader.getMsg());
         messageLabel.setFill(Color.WHITE);
-        messageLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;"); 
+        messageLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
         HBox messageBox = new HBox(messageLabel);
         messageBox.setPrefSize(150, 100);
         messageBox.setAlignment(Pos.CENTER);
         messageBox.getStyleClass().add("message-box");
 
         // Tile buttons
-        FlowPane tileButtonsPane = new FlowPane(10, 10);
-        tileButtonsPane.setAlignment(Pos.CENTER);
+        FlowPane tileButtonsPane = createTileButtons(false);
 
-        tileButtonsPane.getChildren().clear();
+        // FlowPane tileButtonsPane = new FlowPane(10, 10);
+        // tileButtonsPane.setAlignment(Pos.CENTER);
 
-        Button resetTilesButton = new Button("\u2B8C"); // \u2B6F ⟲ ⭯
-        Button sortTilesButton = new Button("⭰");
+        // tileButtonsPane.getChildren().clear();
 
-        this.tileButtons = gameViewModel.getButtonTilesProperty();
-        for (Button tileButton : tileButtons) {
-            String letter = tileButton.getText();
-            tileButton.setPrefSize(45, 45);
-            tileButton.getStyleClass().add("tile-button");
-            tileButton.setStyle("-fx-background-image: url('tiles/" + letter + ".png');");
+        // resetTilesButton = new Button("\u2B8C"); // \u2B6F ⟲ ⭯
+        // sortTilesButton = new Button("⭰");
 
-            tileButton.setText(null);
-            if (!gameViewModel.isMyTurn()) {
-                tileButton.setDisable(true);
-            }
-            // On tile button click
-            tileButton.setOnAction(event -> {
-                if (!placementCelles.isEmpty()) {
-                    Pane cellPane = placementCelles.pop();
-                    cellPane.getStyleClass().add("character");
-                    cellPane.getStyleClass().add("character-" + letter);
-                    cellPane.setStyle("-fx-border-color: yellow; -fx-border-style: solid inside;");
+        // this.tileButtons = gameViewModel.getButtonTilesProperty();
+        // for (Button tileButton : tileButtons) {
+        // String letter = tileButton.getText();
+        // tileButton.setPrefSize(45, 45);
+        // tileButton.getStyleClass().add("tile-button");
+        // tileButton.setStyle("-fx-background-image: url('tiles/" + letter +
+        // ".png');");
 
-                    // Disable the tile button upon selection
-                    tileButton.setDisable(true);
-                    resetTilesButton.setDisable(false);
-                    sortTilesButton.setDisable(false);
+        // tileButton.setText(null);
+        // if (!gameViewModel.isMyTurn()) {
+        // tileButton.setDisable(true);
+        // }
+        // // On tile button click
+        // tileButton.setOnAction(event -> {
+        // if (!placementCelles.isEmpty()) {
+        // Pane cellPane = placementCelles.pop();
+        // cellPane.getStyleClass().add("character");
+        // cellPane.getStyleClass().add("character-" + letter);
+        // cellPane.setStyle("-fx-border-color: yellow; -fx-border-style: solid
+        // inside;");
 
-                    // tilePane.getChildren().remove(tileButton);
+        // // Disable the tile button upon selection
+        // tileButton.setDisable(true);
+        // resetTilesButton.setDisable(false);
 
-                    // Add the tile value to the word
-                    gameViewModel.addToWord(letter);
-                }
-            });
+        // // tilePane.getChildren().remove(tileButton);
 
-            tileButtonsPane.getChildren().add(tileButton);
-        }
+        // // Add the tile value to the word
+        // gameViewModel.addToWord(letter);
+        // }
+        // });
 
-        // Reset button
-        resetTilesButton.getStyleClass().add("grey-button");
-        resetTilesButton.setDisable(true);
-        resetTilesButton.setOnAction(event -> {
-            for (Button tb : tileButtons) {
-                tb.setDisable(true);
-            }
-            for (Pane cell : placementList) {
-                // Clear all added style classes
-                cell.getStyleClass().clear();
-                cell.getStyleClass().add("cell");
-                // Clear inline styles
-                cell.setStyle("");
-                // Add the default style
-                cell.getStyleClass().add("cell");
-            }
-            gameViewModel.clearWord();
-            placementCelles.clear();
-            placementList.clear();
-            selectedCells.clear();
-            resetTilesButton.setDisable(true);
-        });
-        // Set the preferred width and height of the button
-        resetTilesButton.setPrefWidth(60); // Adjust the width as desired
-        resetTilesButton.setPrefHeight(20); // Adjust the height as desired
+        // tileButtonsPane.getChildren().add(tileButton);
+        // }
 
-        // Sort tiles button
-        sortTilesButton.getStyleClass().add("lightblue-button");
-        sortTilesButton.setDisable(true);
-        sortTilesButton.setOnAction(event -> {
-            sortTilesButton.setDisable(true);
-            // Sort the tileButtons based on their letter labels
-            Collections.sort(tileButtons, Comparator.comparing(Button::getText));
-            for (Button b : tileButtons) {
-                System.out.println(b.getText());
-            }
+        // // Reset button
+        // resetTilesButton = new Button("\u2B8C"); // \u2B6F ⟲ ⭯
+        // resetTilesButton.getStyleClass().add("grey-button");
+        // resetTilesButton.setDisable(true);
+        // resetTilesButton.setOnAction(event -> {
+        // for (Button tb : tileButtons) {
+        // tb.setDisable(true);
+        // }
+        // for (Pane cell : placementList) {
+        // // Clear all added style classes
+        // cell.getStyleClass().clear();
+        // cell.getStyleClass().remove("selected");
+        // cell.getStyleClass().add("board-cell");
+        // // Clear inline styles
+        // cell.setStyle("");
+        // // Add the default style
+        // cell.getStyleClass().add("board-cell");
+        // }
+        // for (Pane c : selectedCells) {
+        // c.getStyleClass().remove("selected");
+        // }
+        // gameViewModel.clearWord();
+        // placementCelles.clear();
+        // placementList.clear();
+        // selectedCells.clear();
+        // resetTilesButton.setDisable(true);
+        // });
+        // // Set the preferred width and height of the button
+        // resetTilesButton.setPrefWidth(60); // Adjust the width as desired
+        // resetTilesButton.setPrefHeight(20); // Adjust the height as desired
 
-            // Remove the existing tileButtons from the tilePane
-            tileButtonsPane.getChildren().clear();
+        // // Sort tiles button
+        // sortTilesButton = new Button("⭰");
+        // sortTilesButton.getStyleClass().add("lightblue-button");
+        // sortTilesButton.setDisable(true);
+        // sortTilesButton.setOnAction(event -> {
+        // sortTilesButton.setDisable(true);
+        // // Sort the tileButtons based on their letter labels
+        // // Collections.sort(tileButtons, Comparator.comparing(Button::getText));
+        // // for (Button b : tileButtons) {
+        // // System.out.println(b.getText());
+        // // }
 
-            // Add the sorted tileButtons back to the tilePane
-            tileButtonsPane.getChildren().addAll(tileButtons);
-        });
+        // // Remove the existing tileButtons from the tilePane
+        // tileButtonsPane.getChildren().clear();
+        // tileButtonsPane.getChildren().add(createTileButtons(true));
+
+        // // Add the sorted tileButtons back to the tilePane
+        // // tileButtonsPane.getChildren().addAll(tileButtons);
+        // });
 
         HBox buttonBox = new HBox(10, sortTilesButton, resetTilesButton);
         buttonBox.setAlignment(Pos.CENTER);
@@ -1471,11 +1591,25 @@ public class WindowController {
         playButtonsBox.setAlignment(Pos.CENTER);
 
         // Round Buttons
-        HBox roundButtonsBox = createButtonsPane();
+        HBox roundButtonsBox = createButtonsPane(true);
         roundButtonsBox.setPrefHeight(120);
         roundButtonsBox.setAlignment(Pos.BOTTOM_CENTER);
 
-        customRoot.getChildren().addAll(messageBox, tileBox, playButtonsBox, roundButtonsBox);
+        // Round buttons pane
+        Button helpButton = (Button) roundButtonsBox.getChildren().get(0);
+        Text gameInstruText = new Text("Guest Mode");
+        gameInstruText.setFont(Font.font("Arial", FontWeight.BOLD, 24));
+        Text explanationText = new Text(txtExplanations.get("game-mode-guest"));
+        explanationText.getStyleClass().add("content-label");
+        explanationText.setTextAlignment(TextAlignment.CENTER);
+        VBox guestModeExp = new VBox(10, gameInstruText, explanationText);
+        guestModeExp.setAlignment(Pos.CENTER);
+        helpButton.setOnAction(e -> openCustomWindow(guestModeExp, "red", this.X, 700, 400, "help"));
+        Button messageButton = (Button) roundButtonsBox.getChildren().get(1);
+
+        messageButton.setOnAction(e -> showMessageWindow("All"));
+
+        customRoot.getChildren().addAll(tileBox, playButtonsBox, roundButtonsBox);
 
         return customRoot;
     }
@@ -1508,7 +1642,7 @@ public class WindowController {
         Label scoreLabel = new Label("Score:");
         scoreLabel.getStyleClass().add("login-label");
         Label scoreValueLabel = new Label();
-        scoreValueLabel.textProperty().bind(score);
+        scoreValueLabel.textProperty().bind(gameViewModel.playerScoreProperty().asString());
         String scoreStyle = otherPlayer ? "other-score-label" : "score-label";
         // Negative score
         if (score.getValue().startsWith("-")) {
@@ -1591,7 +1725,7 @@ public class WindowController {
             // Clear inline styles
             cell.setStyle("");
             // Add the default style
-            cell.getStyleClass().add("cell");
+            cell.getStyleClass().add("board-cell");
         }
         gameViewModel.clearWord();
         placementCelles.clear();
@@ -1599,16 +1733,18 @@ public class WindowController {
         selectedCells.clear();
     }
 
-    private HBox createButtonsPane() {
+    private HBox createButtonsPane(boolean gameFlowWindow) {
         HBox roundButtonsPane = new HBox(10);
         roundButtonsPane.setAlignment(Pos.CENTER);
         double preferredHeight = 70; // Set your desired height here
         roundButtonsPane.setMinHeight(preferredHeight);
         roundButtonsPane.setPrefHeight(preferredHeight);
 
-        Button settingButton = new Button("\uD83D\uDD27"); // Unicode for the wrench symbol
+        String icon = gameFlowWindow ? "\uD83D\uDCE8" : "\uD83D\uDD27";
+        String color = gameFlowWindow ? "gold" : "grey";
+        Button settingButton = new Button(icon); // Unicode for the wrench symbol \uD83D\uDD27
         settingButton.setFont(EMOJI_FONT);
-        settingButton.getStyleClass().add("grey-button");
+        settingButton.getStyleClass().add(color + "-button");
 
         Button helpButton = new Button("❓"); // Unicode for the help symbol
         helpButton.getStyleClass().add("purple-button");
@@ -1650,6 +1786,135 @@ public class WindowController {
             }
         }
         return null;
+    }
+
+    private FlowPane createTileButtons(boolean isSorted) {
+        // Tile buttons
+        FlowPane tileButtonsPane = new FlowPane(10, 10);
+        tileButtonsPane.setAlignment(Pos.CENTER);
+        tileButtonsPane.getChildren().clear();
+
+        resetTilesButton = new Button("\u2B6F"); // \u2B6F ⟲ ⭯
+        sortTilesButton = new Button("⭰");
+
+        this.tileButtons = gameViewModel.getButtonTilesProperty();
+        if (isSorted) {
+            Collections.sort(tileButtons, (b1, b2) -> b1.getText().compareTo(b2.getText()));
+        }
+        for (Button tileButton : tileButtons) {
+            String letter = tileButton.getText();
+            tileButton.setPrefSize(45, 45);
+            tileButton.getStyleClass().add("tile-button");
+            tileButton.setStyle("-fx-background-image: url('tiles/" + letter + ".png');");
+
+            tileButton.setText(null);
+            if (!gameViewModel.isMyTurn()) {
+                tileButton.setDisable(true);
+            }
+            // On tile button click
+            tileButton.setOnAction(event -> {
+                if (!placementCelles.isEmpty()) {
+                    Pane cellPane = placementCelles.pop();
+                    cellPane.getStyleClass().add("character");
+                    cellPane.getStyleClass().add("character-" + letter);
+                    cellPane.setStyle("-fx-border-color: yellow; -fx-border-style: solid inside;");
+
+                    // Disable the tile button upon selection
+                    tileButton.setDisable(true);
+                    resetTilesButton.setDisable(false);
+
+                    // tilePane.getChildren().remove(tileButton);
+
+                    // Add the tile value to the word
+                    gameViewModel.addToWord(letter);
+                }
+            });
+
+            tileButtonsPane.getChildren().add(tileButton);
+        }
+
+        // Reset button
+        resetTilesButton.getStyleClass().add("grey-button");
+        resetTilesButton.setDisable(true);
+        resetTilesButton.setOnAction(event -> {
+            for (Button tb : tileButtons) {
+                tb.setDisable(true);
+            }
+            for (Pane cell : placementList) {
+                // Clear all added style classes
+                cell.getStyleClass().clear();
+                cell.getStyleClass().remove("selected");
+                cell.getStyleClass().add("board-cell");
+                // Clear inline styles
+                cell.setStyle("");
+                // Add the default style
+                cell.getStyleClass().add("board-cell");
+            }
+            for (Pane c : selectedCells) {
+                c.getStyleClass().remove("selected");
+            }
+            gameViewModel.clearWord();
+            placementCelles.clear();
+            placementList.clear();
+            selectedCells.clear();
+            resetTilesButton.setDisable(true);
+        });
+        // Set the preferred width and height of the button
+        resetTilesButton.setPrefWidth(60); // Adjust the width as desired
+        resetTilesButton.setPrefHeight(20); // Adjust the height as desired
+
+        // Sort tiles button
+        sortTilesButton.getStyleClass().add("lightblue-button");
+        // sortTilesButton.setDisable(true);
+        sortTilesButton.setOnAction(event -> {
+            sortTilesButton.setDisable(true);
+            // Sort the tileButtons based on their letter labels
+            // Collections.sort(tileButtons, Comparator.comparing(Button::getText));
+            // for (Button b : tileButtons) {
+            // System.out.println(b.getText());
+            // }
+
+            // Remove the existing tileButtons from the tilePane
+            tileButtonsPane.getChildren().clear();
+            tileButtonsPane.getChildren().add(createTileButtons(true));
+
+            // Add the sorted tileButtons back to the tilePane
+            // tileButtonsPane.getChildren().addAll(tileButtons);
+        });
+        return tileButtonsPane;
+    }
+
+    private void highlightCellsForWords(List<Word> words) {
+        System.out.println("highlight cells, words: " + words.size());
+        List<Pane> panes = new ArrayList<>();
+        for (Word word : words) {
+            int row = word.getRow();
+            int col = word.getCol();
+            boolean isVertical = word.isVertical();
+
+            for (Tile t : word.getTiles()) {
+                Pane cellPane = (Pane) getCellFromBoard(row, col);
+                if (cellPane != null) {
+                    cellPane.getStyleClass().add("marked");
+                    panes.add(cellPane);
+                }
+
+                if (isVertical) {
+                    row++;
+                } else {
+                    col++;
+                }
+            }
+        }
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+
+            @Override
+            public void run() {
+                panes.forEach(p -> p.getStyleClass().remove("marked"));
+            }
+
+        }, 1000);
     }
 
 }

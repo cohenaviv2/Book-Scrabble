@@ -318,7 +318,8 @@ public class Board {
                 if (word.getTiles()[j] == null && this.board[i][word.getCol()].isValue()) // Tile already exist on the
                                                                                           // bboard
                     continue;
-                if (this.board[i][word.getCol() + 1].isValue() || this.board[i][word.getCol() - 1].isValue()) {
+                if ((word.getCol() + 1 < SIZE && this.board[i][word.getCol() + 1].isValue())
+                        || (word.getCol() - 1 >= 0 && this.board[i][word.getCol() - 1].isValue())) {
                     int start, end;
                     for (start = word.getCol() - 1; this.board[i][start].isValue(); --start) /***** */
                         ;
@@ -343,7 +344,9 @@ public class Board {
                 if (word.getTiles()[j] == null && this.board[word.getRow()][i].isValue()) // Tile already exist on the
                                                                                           // board
                     continue;
-                if (this.board[word.getRow() + 1][i].isValue() || this.board[word.getRow() - 1][i].isValue()) {
+                if ((word.getRow() + 1 < SIZE && this.board[word.getRow() + 1][i].isValue())
+                        || (word.getRow() - 1 >= 0 && this.board[word.getRow() - 1][i]
+                                .isValue())) { /************************************************ */
                     int start, end;
                     for (start = word.getRow() - 1; this.board[start][i].isValue(); --start) /***** */
                         ;
@@ -524,23 +527,23 @@ public class Board {
         this.turnWords.clear();
 
         /* word placement contains null - leans on a tile */
-        Word stringWord = null;
+        Word fullWord = null;
         for (Tile t : word.getTiles())
             if (t == null) {
-                stringWord = new Word(getFullWord(word)); /* make the full word */
+                fullWord = new Word(getFullWord(word)); /* make the full word */
                 break;
             }
 
-        if (stringWord == null)
-            stringWord = new Word(word);
+        if (fullWord == null)
+            fullWord = new Word(word);
 
         /* Check parameters */
 
-        if (boardLegal(stringWord)) {
+        if (boardLegal(fullWord)) {
             ArrayList<Word> words = new ArrayList<Word>(getWords(word));
+            this.turnWords.addAll(words);
             for (Word w : words) {
                 if (!dictionaryLegal(w)) {
-                    this.turnWords.addAll(words);
                     return 0;
                 } else {
                     score += getScore(w);
@@ -555,7 +558,7 @@ public class Board {
                 return 0;
             else
                 placeWord(word);
-            this.turnWords.addAll(words);
+            // this.turnWords.addAll(words);
             // printBoard();
 
             return score;
@@ -565,6 +568,10 @@ public class Board {
 
     public ArrayList<Word> getTurnWords() {
         return this.turnWords;
+    }
+
+    public void clearTurnWords() {
+        this.turnWords.clear();
     }
 
     public void printPlacedWords() {

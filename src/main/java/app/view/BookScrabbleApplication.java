@@ -11,7 +11,7 @@ import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
-public class Main extends Application implements Observer {
+public class BookScrabbleApplication extends Application implements Observer {
 
     private GameViewModel gameViewModel;
     private WindowController windowController;

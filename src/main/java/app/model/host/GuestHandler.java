@@ -41,20 +41,25 @@ public class GuestHandler implements ClientHandler {
     private PrintWriter out;
     private int myId;
     private String quitGameString;
+    private boolean flag;
 
     public GuestHandler() {
         this.gameManager = GameManager.get();
     }
 
     @Override
-    public void handleClient(InputStream inputStream, OutputStream outputStream)  {
+    public void handleClient(InputStream inputStream, OutputStream outputStream) {
         try {
             this.in = new BufferedReader(new InputStreamReader(inputStream));
             this.out = new PrintWriter(outputStream, true);
 
             connectGuest();
-            waitingRoom(); // Waiting for all the players to choose book and set Ready
-            startChat(); // Starts a chat with the player until quitGame string
+            if (!flag) {
+                waitingRoom(); // Waiting for all the players to choose book and set Ready
+                startChat(); // Starts a chat with the player until quitGame string
+            } else {
+                close();
+            }
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -67,12 +72,14 @@ public class GuestHandler implements ClientHandler {
         if (params[0].equals("0") && params[1].equals(GetMethod.connectMe)) {
             String name = params[2];
             this.myId = gameManager.connectGuestHandler(name);
+            flag = myId == 0 ? true : false;
             this.quitGameString = myId + "," + GetMethod.quitGame + "," + "true"; // quit game modifier
             // this.yourTurnString = myId + ",isMyTurn,true"; // my turn modifier
             String connectionMessage = myId + "," + GetMethod.connectMe + "," + myId; // ack & id
             out.println(connectionMessage); // send id
             // PRINT DEBUG
             // System.out.println("GUEST HANDLER: guest " + myId + " connected!\n");
+            flag = false;
         } else {
             // PRINT DEBUG
             // System.out.println("GUEST HANDLER: failed to connect guest\n");
@@ -149,7 +156,7 @@ public class GuestHandler implements ClientHandler {
         gameManager.quitGameHandler(quitGameString);
         MessageReader.setMsg(playerName + " has quit the game!");
         // PRINT DEBUG
-        System.out.println("GUEST HANDLER: chat ended, " + myId + " has quit the game\n");
+        System.out.println("\nGUEST HANDLER: chat ended, " + myId + " has quit the game\n");
     }
 
     @Override

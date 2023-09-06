@@ -72,12 +72,13 @@ public class HostModel extends Observable implements GameModel, Observer {
     }
 
     @Override
-    public void myBooksChoice(String myBooksSerilized) {
+    public void myBooksChoice(List<String> myBooks) {
         /*
          * Adds this book to the book list of the game
          * each player chooses one book (Maximum 4)
          */
         try {
+            String myBooksSerilized = ObjectSerializer.serializeObject(myBooks);
             gameManager.processPlayerInstruction(gameManager.getHostID(), GetMethod.myBooksChoice,
                     myBooksSerilized);
         } catch (ClassNotFoundException | IOException e) {
@@ -106,7 +107,7 @@ public class HostModel extends Observable implements GameModel, Observer {
                 } else if (ans.equals("notBoardLegal")) {
 
                     // PRINT DEBUG
-                    // System.out.println("Word's not Board legal, Try again");
+                    System.out.println("Word's not Board legal, Try again");
                     MessageReader.setMsg("notBoardLegal");
 
                 } else if (ans.startsWith("notDictionaryLegal")) {
@@ -208,14 +209,14 @@ public class HostModel extends Observable implements GameModel, Observer {
                 this.hostServer.close();
                 setChanged();
                 notifyObservers(GetMethod.endGame + "," + "OK");
-                System.out.println("0 Clients - Host server is closed and the host has quit the game");
+                System.out.println("\n0 Clients - Host server is closed and the host has quit the game");
             } else {
                 System.out
                         .println("\n\n*** There are still clients connected ! ***\n\n" + hostServer.getNumOfClients());
             }
         } else {
             this.hostServer.close();
-            System.out.println("No clients - Host server is closed and the host has quit the game");
+            System.out.println("\nNo clients - Host server is closed and the host has quit the game");
         }
     }
 
@@ -441,25 +442,43 @@ public class HostModel extends Observable implements GameModel, Observer {
         if (o == gameManager) {
             String message = (String) arg;
             this.hostServer.sendToAll(message);
+            if (message.startsWith(GetMethod.sendTo)) {
+                checkMessage(message);
+            } else {
+                updateProperties();
+                setChanged();
+                notifyObservers(message);
+            }
+        }
+    }
+
+    private void checkMessage(String message) {
+        if ((message.startsWith(GetMethod.sendTo)
+                && message.split(",")[1].split(":")[0].equals(playerProperties.getMyName())) || message.startsWith(GetMethod.sendToAll)) {
             updateProperties();
             setChanged();
-            notifyObservers(arg);
-        }
+            notifyObservers(message);
+        } 
     }
 
     @Override
     public boolean isConnected() {
         if (!this.hostServer.isRunning()) {
-            // PRINT DEBUG
-            // System.out.println("Host Server is not running!");
             return false;
         } else if (!isGameServerConnect()) {
-            // PRINT DEBUG
-            // System.out.println("Not connected to the Game Server!");
             return false;
         } else
             return true;
     }
 
-}
+    @Override
+    public void sendTo(String name, String message) {
+        hostServer.sendToAll(GetMethod.sendTo + "," + name + ":" + message + ":" + playerProperties.getMyName());
+    }
 
+    @Override
+    public void sendToAll(String message) {
+        hostServer.sendToAll(GetMethod.sendToAll + "," + message + ":" + playerProperties.getMyName());
+    }
+
+}

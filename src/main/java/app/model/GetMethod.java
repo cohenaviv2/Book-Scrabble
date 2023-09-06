@@ -9,6 +9,8 @@ public class GetMethod {
     public static final String tryPlaceWord = "tryPlaceWord";
     public static final String challenge = "challenge";
     public static final String skipTurn = "skipTurn";
+    public static final String sendTo = "sendTo";
+    public static final String sendToAll = "sendToAll";
     public static final String quitGame = "quitGame";
     public static final String getPlayerProperties = "getPlayerProperties";
     public static final String getCurrentBoard = "getCurrentBoard";

@@ -17,7 +17,7 @@ public interface GameModel {
     // SEND DATA
     void connectMe(String name, String ip, int port);
 
-    void myBooksChoice(String bookList); /* TODO: Change to List/Set */
+    void myBooksChoice(List<String> bookList);
 
     void ready();
 
@@ -26,6 +26,10 @@ public interface GameModel {
     void challenge();
 
     void skipTurn();
+
+    void sendTo(String name, String message);
+
+    void sendToAll(String message);
 
     void quitGame();
 

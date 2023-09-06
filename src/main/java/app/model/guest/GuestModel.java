@@ -1,11 +1,19 @@
 package app.model.guest;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Observable;
+import java.util.Observer;
+import java.util.Set;
 
 import app.model.GameModel;
 import app.model.GetMethod;
-import app.model.game.*;
+import app.model.game.ObjectSerializer;
+import app.model.game.PlayerProperties;
+import app.model.game.Tile;
+import app.model.game.Word;
 
 public class GuestModel extends Observable implements GameModel, Observer {
     private static GuestModel gm = null; // Singleton
@@ -45,7 +53,7 @@ public class GuestModel extends Observable implements GameModel, Observer {
     }
 
     @Override
-    public void myBooksChoice(String bookName) {
+    public void myBooksChoice(List<String> bookName) {
         try {
             commHandler.addMyBookChoice(bookName);
         } catch (Exception e) {
@@ -102,11 +110,10 @@ public class GuestModel extends Observable implements GameModel, Observer {
         if (isConnected) {
             commHandler.sendMessage(GetMethod.quitGame, "true");
         }
-        if (commHandler != null){
+        if (commHandler != null) {
             commHandler.close();
-            System.out.println("Communication Handler is closed.");
+            System.out.println("\nCommunication Handler is closed.");
         }
-        // System.out.println("Guest Model: you quit the game.");
     }
 
     @Override
@@ -154,22 +161,26 @@ public class GuestModel extends Observable implements GameModel, Observer {
         return this.isConnected;
     }
 
-    // public void update() {
-    // setChanged();
-    // notifyObservers();
-    // }
-
     @Override
     public void update(Observable o, Object arg) {
         if (o == commHandler) {
             setChanged();
             notifyObservers(arg);
-            // // System.out.println("\n\n\n\n\n"+(String)arg+"\n\n\n\n\n");
         }
     }
 
     public void setIsConnected(boolean isConnected) {
         this.isConnected = isConnected;
+    }
+
+    @Override
+    public void sendTo(String name, String message) {
+        commHandler.sendMessage(GetMethod.sendTo, name + ":" + message + ":" + playerProperties.getMyName());
+    }
+
+    @Override
+    public void sendToAll(String message) {
+        commHandler.sendMessage(GetMethod.sendToAll, message + ":" + playerProperties.getMyName());
     }
 
 }

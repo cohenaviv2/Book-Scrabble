@@ -34,7 +34,7 @@ public class main_guest {
             // Connect to the host server:
             try {
                 gm.connectMe("Moshe", "localhost", 8040);
-                gm.myBooksChoice("Harray Potter");
+                gm.myBooksChoice(null);
                 gm.ready();
             } catch (Exception e) {
                 e.printStackTrace();

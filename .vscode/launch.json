@@ -1,392 +1,404 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "type": "java",
-            "name": "GridPaneEffectExample",
-            "request": "launch",
-            "mainClass": "app.view.GridPaneEffectExample",
-            "projectName": "BookScrableApp"
-        },
-        {
-            "type": "java",
-            "name": "WindowController",
-            "request": "launch",
-            "mainClass": "app.view.WindowController",
-            "projectName": "BookScrableApp"
-        },
-        {
-            "type": "java",
-            "name": "LocalGameServer",
-            "request": "launch",
-            "mainClass": "app.view.LocalGameServer",
-            "projectName": "BookScrableApp"
-        },
-        {
-            "type": "java",
-            "name": "DictionaryManager",
-            "request": "launch",
-            "mainClass": "app.model.server.DictionaryManager",
-            "projectName": "BookScrableApp"
-        },
-        {
-            "type": "java",
-            "name": "GameManagerTest",
-            "request": "launch",
-            "mainClass": "app.model.test.GameManagerTest",
-            "projectName": "BookScrableApp"
-        },
-        {
-            "type": "java",
-            "name": "GameManager",
-            "request": "launch",
-            "mainClass": "app.model.game.GameManager",
-            "projectName": "BookScrableApp"
-        },
-        {
-            "type": "java",
-            "name": "RunGameServer",
-            "request": "launch",
-            "mainClass": "app.model.server.RunGameServer",
-            "projectName": "BookScrableApp"
-        },
-        {
-            "type": "java",
-            "name": "Main",
-            "request": "launch",
-            "mainClass": "app.view.Main",
-            "projectName": "BookScrableApp"
-        },
-        {
-            "type": "java",
-            "name": "Main",
-            "request": "launch",
-            "mainClass": "app.view.Main",
-            "projectName": "MyJavaFXApp"
-        },
-        {
-            "type": "java",
-            "name": "RunGameServer",
-            "request": "launch",
-            "mainClass": "app.view.RunGameServer",
-            "projectName": "MyJavaFXApp"
-        },
-        {
-            "type": "java",
-            "name": "LogicTest",
-            "request": "launch",
-            "mainClass": "app.model.test.LogicTest",
-            "projectName": "MyJavaFXApp"
-        },
-        {
-            "type": "java",
-            "name": "ServerTest",
-            "request": "launch",
-            "mainClass": "app.model.test.ServerTest",
-            "projectName": "MyJavaFXApp"
-        },
-        {
-            "type": "java",
-            "name": "CacheTest",
-            "request": "launch",
-            "mainClass": "app.model.test.CacheTest",
-            "projectName": "MyJavaFXApp"
-        },
-        {
-            "type": "java",
-            "name": "GameManager",
-            "request": "launch",
-            "mainClass": "app.model.game.GameManager",
-            "projectName": "MyJavaFXApp"
-        },
-        {
-            "type": "java",
-            "name": "main_guest",
-            "request": "launch",
-            "mainClass": "app.model.test.main_guest",
-            "projectName": "MyJavaFXApp"
-        },
-        {
-            "type": "java",
-            "name": "main_host",
-            "request": "launch",
-            "mainClass": "app.model.test.main_host",
-            "projectName": "MyJavaFXApp"
-        },
-        {
-            "type": "java",
-            "name": "Main",
-            "request": "launch",
-            "mainClass": "com.example.Main",
-            "projectName": "MyJavaFXApp"
-        },
-        {
-            "type": "java",
-            "name": "GameManager",
-            "request": "launch",
-            "mainClass": "app.model.game.GameManager",
-            "projectName": "Book Scrabble_c0c2c55d"
-        },
-        {
-            "type": "java",
-            "name": "RunGameServer",
-            "request": "launch",
-            "mainClass": "app.view.RunGameServer",
-            "projectName": "Book Scrabble_c0c2c55d"
-        },
-        {
-            "type": "java",
-            "name": "main_guest",
-            "request": "launch",
-            "mainClass": "app.model.test.main_guest",
-            "projectName": "Book Scrabble_c0c2c55d"
-        },
-        {
-            "type": "java",
-            "name": "main_host",
-            "request": "launch",
-            "mainClass": "app.model.test.main_host",
-            "projectName": "Book Scrabble_c0c2c55d"
-        },
-        {
-            "type": "java",
-            "name": "Main",
-            "request": "launch",
-            "mainClass": "app.view.Main",
-            "projectName": "Book Scrabble_c0c2c55d"
-        },
-        {
-            "type": "java",
-            "name": "Main",
-            "request": "launch",
-            "mainClass": "app.view_model.Main",
-            "projectName": "Book Scrabble_c0c2c55d"
-        },
-        {
-            "type": "java",
-            "name": "Main",
-            "request": "launch",
-            "mainClass": "view_model.Main",
-            "projectName": "Book Scrabble_c0c2c55d"
-        },
-        {
-            "type": "java",
-            "name": "RunGameServer",
-            "request": "launch",
-            "mainClass": "view.RunGameServer",
-            "projectName": "Book Scrabble_c0c2c55d"
-        },
-        {
-            "type": "java",
-            "name": "main_guest",
-            "request": "launch",
-            "mainClass": "model.test.main_guest",
-            "projectName": "Book Scrabble_c0c2c55d"
-        },
-        {
-            "type": "java",
-            "name": "main_host",
-            "request": "launch",
-            "mainClass": "model.test.main_host",
-            "projectName": "Book Scrabble_c0c2c55d"
-        },
-        {
-            "type": "java",
-            "name": "ViewTest",
-            "request": "launch",
-            "mainClass": "view.test.ViewTest",
-            "projectName": "Book Scrabble_c0c2c55d"
-        },
-        {
-            "type": "java",
-            "name": "ViewModelTest",
-            "request": "launch",
-            "mainClass": "view_model.test.ViewModelTest",
-            "projectName": "Book Scrabble_c0c2c55d"
-        },
-        {
-            "type": "java",
-            "name": "GameViewModel",
-            "request": "launch",
-            "mainClass": "view_model.GameViewModel",
-            "projectName": "Book Scrabble_c0c2c55d"
-        },
-        {
-            "type": "java",
-            "name": "LoginForm",
-            "request": "launch",
-            "mainClass": "view.LoginForm",
-            "projectName": "Book Scrabble_c0c2c55d"
-        },
-        {
-            "type": "java",
-            "name": "GameView",
-            "request": "launch",
-            "mainClass": "view.GameView",
-            "projectName": "Book Scrabble_c0c2c55d"
-        },
-        {
-            "type": "java",
-            "name": "ViewModel",
-            "request": "launch",
-            "mainClass": "view_model.ViewModel",
-            "projectName": "Book Scrabble_c0c2c55d"
-        },
-        {
-            "type": "java",
-            "name": "ModelTest",
-            "request": "launch",
-            "mainClass": "model.test.ModelTest",
-            "projectName": "Book Scrabble_c0c2c55d"
-        },
-        {
-            "type": "java",
-            "name": "DictionaryManager",
-            "request": "launch",
-            "mainClass": "model.server.DictionaryManager",
-            "projectName": "Book Scrabble_c0c2c55d"
-        },
-        {
-            "type": "java",
-            "name": "GameManager",
-            "request": "launch",
-            "mainClass": "model.game.GameManager",
-            "projectName": "Book Scrabble_c0c2c55d"
-        },
-        {
-            "type": "java",
-            "name": "GameManagerTest",
-            "request": "launch",
-            "mainClass": "model.test.GameManagerTest",
-            "projectName": "Book Scrabble_c0c2c55d"
-        },
-        {
-            "type": "java",
-            "name": "GuestModelTest",
-            "request": "launch",
-            "mainClass": "model.test.GuestModelTest",
-            "projectName": "Book Scrabble_c0c2c55d"
-        },
-        {
-            "type": "java",
-            "name": "CommunicationHandler",
-            "request": "launch",
-            "mainClass": "model.guest.CommunicationHandler",
-            "projectName": "Book Scrabble_c0c2c55d"
-        },
-        {
-            "type": "java",
-            "name": "main_guest2",
-            "request": "launch",
-            "mainClass": "model.main_guest2",
-            "projectName": "Book Scrabble_c0c2c55d"
-        },
-        {
-            "type": "java",
-            "name": "main_guest",
-            "request": "launch",
-            "mainClass": "model.main_guest",
-            "projectName": "Book Scrabble_c0c2c55d"
-        },
-        {
-            "type": "java",
-            "name": "main_host",
-            "request": "launch",
-            "mainClass": "model.main_host",
-            "projectName": "Book Scrabble_c0c2c55d"
-        },
-        {
-            "type": "java",
-            "name": "main_host",
-            "request": "launch",
-            "mainClass": "model.host.main_host",
-            "projectName": "Book Scrabble_c0c2c55d"
-        },
-        {
-            "type": "java",
-            "name": "main_guest",
-            "request": "launch",
-            "mainClass": "model.guest.main_guest",
-            "projectName": "Book Scrabble_c0c2c55d"
-        },
-        {
-            "type": "java",
-            "name": "mainTestHost",
-            "request": "launch",
-            "mainClass": "model.server.host.mainTestHost",
-            "projectName": "Book Scrabble_c0c2c55d"
-        },
-        {
-            "type": "java",
-            "name": "mainTestGuest",
-            "request": "launch",
-            "mainClass": "model.guest.mainTestGuest",
-            "projectName": "Book Scrabble_c0c2c55d"
-        },
-        {
-            "type": "java",
-            "name": "mainTestHost",
-            "request": "launch",
-            "mainClass": "model.host.mainTestHost",
-            "projectName": "Book Scrabble_c0c2c55d"
-        },
-        {
-            "type": "java",
-            "name": "Current File",
-            "request": "launch",
-            "mainClass": "${file}"
-        },
-        {
-            "type": "java",
-            "name": "Player",
-            "request": "launch",
-            "mainClass": "model.logic.Player",
-            "projectName": "Book Scrabble_c0c2c55d"
-        },
-        {
-            "type": "java",
-            "name": "mainTestGuest",
-            "request": "launch",
-            "mainClass": "model.mainTestGuest",
-            "projectName": "Book Scrabble_c0c2c55d"
-        },
-        {
-            "type": "java",
-            "name": "mainTestHost",
-            "request": "launch",
-            "mainClass": "model.mainTestHost",
-            "projectName": "Book Scrabble_c0c2c55d"
-        },
-        {
-            "type": "java",
-            "name": "CacheTest",
-            "request": "launch",
-            "mainClass": "model.test.CacheTest",
-            "projectName": "Book Scrabble_c0c2c55d"
-        },
-        {
-            "type": "java",
-            "name": "LogicTest",
-            "request": "launch",
-            "mainClass": "model.test.LogicTest",
-            "projectName": "Book Scrabble_c0c2c55d"
-        },
-        {
-            "type": "java",
-            "name": "LogicTestExt",
-            "request": "launch",
-            "mainClass": "model.test.LogicTestExt",
-            "projectName": "Book Scrabble_c0c2c55d"
-        },
-        {
-            "type": "java",
-            "name": "ServerTest",
-            "request": "launch",
-            "mainClass": "model.test.ServerTest",
-            "projectName": "Book Scrabble_c0c2c55d"
-        }
-    ]
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Run Java Program",
+      "request": "launch",
+      "mainClass": "app.view.BookScrabbleApplication"
+    },
+    {
+      "type": "java",
+      "name": "Launch Java Program",
+      "request": "launch",
+      "mainClass": ""
+    },
+    {
+      "type": "java",
+      "name": "GridPaneEffectExample",
+      "request": "launch",
+      "mainClass": "app.view.GridPaneEffectExample",
+      "projectName": "BookScrableApp"
+    },
+    {
+      "type": "java",
+      "name": "WindowController",
+      "request": "launch",
+      "mainClass": "app.view.WindowController",
+      "projectName": "BookScrableApp"
+    },
+    {
+      "type": "java",
+      "name": "LocalGameServer",
+      "request": "launch",
+      "mainClass": "app.view.LocalGameServer",
+      "projectName": "BookScrableApp"
+    },
+    {
+      "type": "java",
+      "name": "DictionaryManager",
+      "request": "launch",
+      "mainClass": "app.model.server.DictionaryManager",
+      "projectName": "BookScrableApp"
+    },
+    {
+      "type": "java",
+      "name": "GameManagerTest",
+      "request": "launch",
+      "mainClass": "app.model.test.GameManagerTest",
+      "projectName": "BookScrableApp"
+    },
+    {
+      "type": "java",
+      "name": "GameManager",
+      "request": "launch",
+      "mainClass": "app.model.game.GameManager",
+      "projectName": "BookScrableApp"
+    },
+    {
+      "type": "java",
+      "name": "RunGameServer",
+      "request": "launch",
+      "mainClass": "app.model.server.RunGameServer",
+      "projectName": "BookScrableApp"
+    },
+    {
+      "type": "java",
+      "name": "Main",
+      "request": "launch",
+      "mainClass": "app.view.Main",
+      "projectName": "BookScrableApp"
+    },
+    {
+      "type": "java",
+      "name": "Main",
+      "request": "launch",
+      "mainClass": "app.view.Main",
+      "projectName": "MyJavaFXApp"
+    },
+    {
+      "type": "java",
+      "name": "RunGameServer",
+      "request": "launch",
+      "mainClass": "app.view.RunGameServer",
+      "projectName": "MyJavaFXApp"
+    },
+    {
+      "type": "java",
+      "name": "LogicTest",
+      "request": "launch",
+      "mainClass": "app.model.test.LogicTest",
+      "projectName": "MyJavaFXApp"
+    },
+    {
+      "type": "java",
+      "name": "ServerTest",
+      "request": "launch",
+      "mainClass": "app.model.test.ServerTest",
+      "projectName": "MyJavaFXApp"
+    },
+    {
+      "type": "java",
+      "name": "CacheTest",
+      "request": "launch",
+      "mainClass": "app.model.test.CacheTest",
+      "projectName": "MyJavaFXApp"
+    },
+    {
+      "type": "java",
+      "name": "GameManager",
+      "request": "launch",
+      "mainClass": "app.model.game.GameManager",
+      "projectName": "MyJavaFXApp"
+    },
+    {
+      "type": "java",
+      "name": "main_guest",
+      "request": "launch",
+      "mainClass": "app.model.test.main_guest",
+      "projectName": "MyJavaFXApp"
+    },
+    {
+      "type": "java",
+      "name": "main_host",
+      "request": "launch",
+      "mainClass": "app.model.test.main_host",
+      "projectName": "MyJavaFXApp"
+    },
+    {
+      "type": "java",
+      "name": "Main",
+      "request": "launch",
+      "mainClass": "com.example.Main",
+      "projectName": "MyJavaFXApp"
+    },
+    {
+      "type": "java",
+      "name": "GameManager",
+      "request": "launch",
+      "mainClass": "app.model.game.GameManager",
+      "projectName": "Book Scrabble_c0c2c55d"
+    },
+    {
+      "type": "java",
+      "name": "RunGameServer",
+      "request": "launch",
+      "mainClass": "app.view.RunGameServer",
+      "projectName": "Book Scrabble_c0c2c55d"
+    },
+    {
+      "type": "java",
+      "name": "main_guest",
+      "request": "launch",
+      "mainClass": "app.model.test.main_guest",
+      "projectName": "Book Scrabble_c0c2c55d"
+    },
+    {
+      "type": "java",
+      "name": "main_host",
+      "request": "launch",
+      "mainClass": "app.model.test.main_host",
+      "projectName": "Book Scrabble_c0c2c55d"
+    },
+    {
+      "type": "java",
+      "name": "Main",
+      "request": "launch",
+      "mainClass": "app.view.Main",
+      "projectName": "Book Scrabble_c0c2c55d"
+    },
+    {
+      "type": "java",
+      "name": "Main",
+      "request": "launch",
+      "mainClass": "app.view_model.Main",
+      "projectName": "Book Scrabble_c0c2c55d"
+    },
+    {
+      "type": "java",
+      "name": "Main",
+      "request": "launch",
+      "mainClass": "view_model.Main",
+      "projectName": "Book Scrabble_c0c2c55d"
+    },
+    {
+      "type": "java",
+      "name": "RunGameServer",
+      "request": "launch",
+      "mainClass": "view.RunGameServer",
+      "projectName": "Book Scrabble_c0c2c55d"
+    },
+    {
+      "type": "java",
+      "name": "main_guest",
+      "request": "launch",
+      "mainClass": "model.test.main_guest",
+      "projectName": "Book Scrabble_c0c2c55d"
+    },
+    {
+      "type": "java",
+      "name": "main_host",
+      "request": "launch",
+      "mainClass": "model.test.main_host",
+      "projectName": "Book Scrabble_c0c2c55d"
+    },
+    {
+      "type": "java",
+      "name": "ViewTest",
+      "request": "launch",
+      "mainClass": "view.test.ViewTest",
+      "projectName": "Book Scrabble_c0c2c55d"
+    },
+    {
+      "type": "java",
+      "name": "ViewModelTest",
+      "request": "launch",
+      "mainClass": "view_model.test.ViewModelTest",
+      "projectName": "Book Scrabble_c0c2c55d"
+    },
+    {
+      "type": "java",
+      "name": "GameViewModel",
+      "request": "launch",
+      "mainClass": "view_model.GameViewModel",
+      "projectName": "Book Scrabble_c0c2c55d"
+    },
+    {
+      "type": "java",
+      "name": "LoginForm",
+      "request": "launch",
+      "mainClass": "view.LoginForm",
+      "projectName": "Book Scrabble_c0c2c55d"
+    },
+    {
+      "type": "java",
+      "name": "GameView",
+      "request": "launch",
+      "mainClass": "view.GameView",
+      "projectName": "Book Scrabble_c0c2c55d"
+    },
+    {
+      "type": "java",
+      "name": "ViewModel",
+      "request": "launch",
+      "mainClass": "view_model.ViewModel",
+      "projectName": "Book Scrabble_c0c2c55d"
+    },
+    {
+      "type": "java",
+      "name": "ModelTest",
+      "request": "launch",
+      "mainClass": "model.test.ModelTest",
+      "projectName": "Book Scrabble_c0c2c55d"
+    },
+    {
+      "type": "java",
+      "name": "DictionaryManager",
+      "request": "launch",
+      "mainClass": "model.server.DictionaryManager",
+      "projectName": "Book Scrabble_c0c2c55d"
+    },
+    {
+      "type": "java",
+      "name": "GameManager",
+      "request": "launch",
+      "mainClass": "model.game.GameManager",
+      "projectName": "Book Scrabble_c0c2c55d"
+    },
+    {
+      "type": "java",
+      "name": "GameManagerTest",
+      "request": "launch",
+      "mainClass": "model.test.GameManagerTest",
+      "projectName": "Book Scrabble_c0c2c55d"
+    },
+    {
+      "type": "java",
+      "name": "GuestModelTest",
+      "request": "launch",
+      "mainClass": "model.test.GuestModelTest",
+      "projectName": "Book Scrabble_c0c2c55d"
+    },
+    {
+      "type": "java",
+      "name": "CommunicationHandler",
+      "request": "launch",
+      "mainClass": "model.guest.CommunicationHandler",
+      "projectName": "Book Scrabble_c0c2c55d"
+    },
+    {
+      "type": "java",
+      "name": "main_guest2",
+      "request": "launch",
+      "mainClass": "model.main_guest2",
+      "projectName": "Book Scrabble_c0c2c55d"
+    },
+    {
+      "type": "java",
+      "name": "main_guest",
+      "request": "launch",
+      "mainClass": "model.main_guest",
+      "projectName": "Book Scrabble_c0c2c55d"
+    },
+    {
+      "type": "java",
+      "name": "main_host",
+      "request": "launch",
+      "mainClass": "model.main_host",
+      "projectName": "Book Scrabble_c0c2c55d"
+    },
+    {
+      "type": "java",
+      "name": "main_host",
+      "request": "launch",
+      "mainClass": "model.host.main_host",
+      "projectName": "Book Scrabble_c0c2c55d"
+    },
+    {
+      "type": "java",
+      "name": "main_guest",
+      "request": "launch",
+      "mainClass": "model.guest.main_guest",
+      "projectName": "Book Scrabble_c0c2c55d"
+    },
+    {
+      "type": "java",
+      "name": "mainTestHost",
+      "request": "launch",
+      "mainClass": "model.server.host.mainTestHost",
+      "projectName": "Book Scrabble_c0c2c55d"
+    },
+    {
+      "type": "java",
+      "name": "mainTestGuest",
+      "request": "launch",
+      "mainClass": "model.guest.mainTestGuest",
+      "projectName": "Book Scrabble_c0c2c55d"
+    },
+    {
+      "type": "java",
+      "name": "mainTestHost",
+      "request": "launch",
+      "mainClass": "model.host.mainTestHost",
+      "projectName": "Book Scrabble_c0c2c55d"
+    },
+    {
+      "type": "java",
+      "name": "Current File",
+      "request": "launch",
+      "mainClass": "${file}"
+    },
+    {
+      "type": "java",
+      "name": "Player",
+      "request": "launch",
+      "mainClass": "model.logic.Player",
+      "projectName": "Book Scrabble_c0c2c55d"
+    },
+    {
+      "type": "java",
+      "name": "mainTestGuest",
+      "request": "launch",
+      "mainClass": "model.mainTestGuest",
+      "projectName": "Book Scrabble_c0c2c55d"
+    },
+    {
+      "type": "java",
+      "name": "mainTestHost",
+      "request": "launch",
+      "mainClass": "model.mainTestHost",
+      "projectName": "Book Scrabble_c0c2c55d"
+    },
+    {
+      "type": "java",
+      "name": "CacheTest",
+      "request": "launch",
+      "mainClass": "model.test.CacheTest",
+      "projectName": "Book Scrabble_c0c2c55d"
+    },
+    {
+      "type": "java",
+      "name": "LogicTest",
+      "request": "launch",
+      "mainClass": "model.test.LogicTest",
+      "projectName": "Book Scrabble_c0c2c55d"
+    },
+    {
+      "type": "java",
+      "name": "LogicTestExt",
+      "request": "launch",
+      "mainClass": "model.test.LogicTestExt",
+      "projectName": "Book Scrabble_c0c2c55d"
+    },
+    {
+      "type": "java",
+      "name": "ServerTest",
+      "request": "launch",
+      "mainClass": "model.test.ServerTest",
+      "projectName": "Book Scrabble_c0c2c55d"
+    }
+  ]
 }
