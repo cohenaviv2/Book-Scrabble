@@ -21,6 +21,8 @@ public class GuestModel extends Observable implements GameModel, Observer {
     private PlayerProperties playerProperties;
     private boolean isConnected = false;
 
+    private GuestModel(){}
+
     public static GuestModel get() {
         if (gm == null)
             gm = new GuestModel();
@@ -46,6 +48,7 @@ public class GuestModel extends Observable implements GameModel, Observer {
             this.commHandler.addObserver(this);
             commHandler.connectMe(name);
             setIsConnected(true);
+            // System.out.println("guest is connected");
         } catch (IOException e) {
             e.printStackTrace();
         }

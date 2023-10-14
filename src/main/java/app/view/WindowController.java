@@ -311,9 +311,6 @@ public class WindowController {
         doneButton.setPrefHeight(60);
         doneButton.setPrefWidth(120);
         doneButton.setOnAction(event -> {
-            // Handle the action with the selected books
-            // e.g., pass the selectedBooks list to the next screen or perform an action
-
             bookSelectionStage.close();
         });
 
@@ -480,6 +477,7 @@ public class WindowController {
         VBox settings = new VBox(5, gameServerSettings, customPortSettings, myIpSettings);
         settings.setAlignment(Pos.CENTER);
 
+        // Round Buttons
         HBox roundButtonsPane = createButtonsPane(false);
         Button helpButton = (Button) roundButtonsPane.getChildren().get(0);
         Text hostModeTitle = new Text("Host Mode");

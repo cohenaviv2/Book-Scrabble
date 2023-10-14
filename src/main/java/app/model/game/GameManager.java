@@ -681,6 +681,7 @@ public class GameManager extends Observable {
              * Sets all players turn index's and the first player isTurn to true.
              */
 
+             System.out.println();
             String drawTileString = "";
             // Pull tile for each player
             for (Player p : playersByID.values()) {

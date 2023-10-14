@@ -36,7 +36,7 @@ host-server-error=Some error occurred while running the host server.
 Please check your internet connection, firewall or user permissions.
 guest-socket-error=Some error occurred while connecting to the host.
 Please check if the IP address of the host is correct.
-If so, ask the host if they changed the port
-you can set the port in the settings.
+If so, ask the host if they changed the port,
+so you can change it in the settings.
 If you are still having trouble connecting,
-please check your internet connection, firewall or user permissions
+please check your internet connection, firewall or permissions

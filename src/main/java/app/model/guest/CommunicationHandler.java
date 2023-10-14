@@ -40,8 +40,7 @@ public class CommunicationHandler extends Observable {
             this.myId = Integer.parseInt(ans[2]);
             this.QUIT_GAME_QUERY = myId + "," + GetMethod.quitGame + "," + "true";
             // PRINT DEBUG
-            // // System.out.println("CommHandler: got my id " + myId + ", " + name + " is
-            // Connected!");
+            // System.out.println("CommHandler: got my id " + myId + ", " + name + " is Connected!");
             flag = false;
         } else {
             // System.err.println("CommHandler - connectMe: wrong answer from Host server "
@@ -64,14 +63,12 @@ public class CommunicationHandler extends Observable {
             if (id == myId && modifier.equals(GetMethod.myBooksChoice) && value.equals("true")) {
     
                 // PRINT DEBUG
-                // // System.out.println("CommHandler: your book list is set up! starting
-                // chat...");
+                // System.out.println("CommHandler: your book list is set up! starting chat...");
                 startUpdateListener();
     
             } else {
                 // PRINT DEBUG
-                // // System.out.println("CommHandler - addBookHandler: wrong answer from Host
-                // server " + ans);
+                // System.out.println("CommHandler - addBookHandler: wrong answer from Host erver " + ans);
                 // throw new Exception("CommHandler - addBookHandler: wrong answer from Host
                 // server " + ans);
     

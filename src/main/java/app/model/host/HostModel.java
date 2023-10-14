@@ -221,15 +221,23 @@ public class HostModel extends Observable implements GameModel, Observer {
     }
 
     private void updateProperties() {
-        this.playerProperties.setMyBoard(getCurrentBoard());
-        this.playerProperties.setMyTurn(isMyTurn());
-        this.playerProperties.setMyTiles(getMyTiles());
-        this.playerProperties.setMyScore(getMyScore());
-        this.playerProperties.setMyWords(getMyWords());
-        this.playerProperties.setPlayersInfo(getOthersInfo());
-        this.playerProperties.setGameBookList(getGameBooks());
-        this.playerProperties.setBagCount(getBagCount());
+        // this.playerProperties.setMyBoard(getCurrentBoard());
+        // this.playerProperties.setMyTurn(isMyTurn());
+        // this.playerProperties.setMyTiles(getMyTiles());
+        // this.playerProperties.setMyScore(getMyScore());
+        // this.playerProperties.setMyWords(getMyWords());
+        // this.playerProperties.setPlayersInfo(getOthersInfo());
+        // this.playerProperties.setGameBookList(getGameBooks());
+        // this.playerProperties.setBagCount(getBagCount());
         // System.out.println(playerProperties);
+        getCurrentBoard();
+        isMyTurn();
+        getMyTiles();
+        getMyScore();
+        getMyWords();
+        getOthersInfo();
+        getGameBooks();
+        getBagCount();
     }
 
     @Override
@@ -244,7 +252,8 @@ public class HostModel extends Observable implements GameModel, Observer {
             } else {
                 @SuppressWarnings(value = "unchecked")
                 Map<String, String> othersInfo = (Map<String, String>) ObjectSerializer.deserializeObject(ans);
-                return othersInfo;
+                playerProperties.setPlayersInfo(othersInfo);
+                return playerProperties.getOtherPlayersInfo();
             }
         } catch (ClassNotFoundException | IOException e) {
             e.printStackTrace();
@@ -263,7 +272,9 @@ public class HostModel extends Observable implements GameModel, Observer {
             if (ans.equals("false")) {
                 return 0;
             } else {
-                return Integer.parseInt(ans);
+                int score = Integer.parseInt(ans);
+                playerProperties.setMyScore(score);
+                return playerProperties.getMyScore();
             }
         } catch (ClassNotFoundException | IOException e) {
         }
@@ -277,10 +288,15 @@ public class HostModel extends Observable implements GameModel, Observer {
             ans = gameManager.processPlayerInstruction(gameManager.getHostID(), GetMethod.isMyTurn,
                     "true");
             if (ans.equals("false")) {
-                return false;
+                playerProperties.setMyTurn(false);
+                return playerProperties.isMyTurn();
+
             } else if (ans.equals("true")) {
+
                 MessageReader.setMsg("It's your turn!");
-                return true;
+                playerProperties.setMyTurn(true);
+                return playerProperties.isMyTurn();
+
             } else {
                 return false;
             }
@@ -311,7 +327,8 @@ public class HostModel extends Observable implements GameModel, Observer {
             } else {
                 try {
                     Tile[][] board = (Tile[][]) ObjectSerializer.deserializeObject(ans);
-                    return board;
+                    playerProperties.setMyBoard(board);
+                    return playerProperties.getMyBoard();
                 } catch (ClassNotFoundException | IOException e) {
                     e.printStackTrace();
                 }
@@ -342,7 +359,8 @@ public class HostModel extends Observable implements GameModel, Observer {
                 try {
                     @SuppressWarnings(value = "unchecked")
                     ArrayList<Tile> tiles = (ArrayList<Tile>) ObjectSerializer.deserializeObject(ans);
-                    return tiles;
+                    playerProperties.setMyTiles(tiles);
+                    return playerProperties.getMyHandTiles();
                 } catch (ClassNotFoundException | IOException e) {
                     e.printStackTrace();
                 }
@@ -373,7 +391,8 @@ public class HostModel extends Observable implements GameModel, Observer {
                 try {
                     @SuppressWarnings(value = "unchecked")
                     ArrayList<Word> words = (ArrayList<Word>) ObjectSerializer.deserializeObject(ans);
-                    return words;
+                    playerProperties.setMyWords(words);
+                    return playerProperties.getMyWords();
                 } catch (ClassNotFoundException | IOException e) {
                     e.printStackTrace();
                 }
@@ -404,7 +423,8 @@ public class HostModel extends Observable implements GameModel, Observer {
                 try {
                     @SuppressWarnings(value = "unchecked")
                     Set<String> gameBooks = (Set<String>) ObjectSerializer.deserializeObject(ans);
-                    return gameBooks;
+                    playerProperties.setGameBookList(gameBooks);
+                    return playerProperties.getGameBookList();
                 } catch (ClassNotFoundException | IOException e) {
                     e.printStackTrace();
                 }
@@ -426,7 +446,9 @@ public class HostModel extends Observable implements GameModel, Observer {
             if (ans.equals("false")) {
                 return 0;
             } else {
-                return Integer.parseInt(ans);
+                int bagCount = Integer.parseInt(ans);
+                playerProperties.setBagCount(bagCount);
+                return playerProperties.getBagCount();
             }
         } catch (ClassNotFoundException | IOException e) {
         }

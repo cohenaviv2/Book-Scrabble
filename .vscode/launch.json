@@ -6,6 +6,20 @@
   "configurations": [
     {
       "type": "java",
+      "name": "GameView",
+      "request": "launch",
+      "mainClass": "app.view.GameView",
+      "projectName": "BookScrableApp"
+    },
+    {
+      "type": "java",
+      "name": "BookScrabbleApp",
+      "request": "launch",
+      "mainClass": "app.view.BookScrabbleApp",
+      "projectName": "BookScrableApp"
+    },
+    {
+      "type": "java",
       "name": "Run Java Program",
       "request": "launch",
       "mainClass": "app.view.BookScrabbleApplication"
