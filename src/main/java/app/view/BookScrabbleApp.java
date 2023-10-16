@@ -3,6 +3,7 @@ package app.view;
 import java.util.*;
 
 import app.view_model.GameViewModel;
+import app.view_model.ViewModel;
 import javafx.application.*;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
@@ -40,7 +41,8 @@ public class BookScrabbleApp extends Application implements Observer {
         // prmStage.initStyle(StageStyle.UNDECORATED);
         // prmStage.show();
 
-        GameController gameController = new GameController();
+        ViewModel viewModel = new ViewModel();
+        GameController gameController = new GameController(viewModel);
         gameController.showInitialWindow();
     }
 

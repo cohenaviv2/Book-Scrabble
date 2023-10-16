@@ -1,6 +1,9 @@
 package app.model;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 import app.model.game.*;
@@ -54,18 +57,39 @@ public interface GameModel {
 
     int getBagCount();
 
-    static Map<String, String> getFullBookList() {
-        // initial all game Books from directory
+    // static Map<String, String> getFullBookList() {
+    //     // initial all game Books from directory
+    //     Map<String, String> fullBookList = new HashMap<>(); // book name to path
+    //     File booksDirectory = new File("src\\main\\resources\\books");
+    //     File[] txtFiles = booksDirectory.listFiles((dir, name) -> name.endsWith(".txt"));
+    //     if (txtFiles != null) {
+    //         for (File file : txtFiles) {
+    //             String fileName = file.getName().replaceAll(".txt", "");
+    //             String gameServerPath = "server/books/" + fileName + ".txt"; // GAME SERVER PATH
+    //             fullBookList.put(fileName, gameServerPath);
+    //         }
+    //     }
+    //     return fullBookList;
+    // }
+
+        public static Map<String, String> getFullBookList() {
         Map<String, String> fullBookList = new HashMap<>(); // book name to path
-        File booksDirectory = new File("src\\main\\resources\\books");
-        File[] txtFiles = booksDirectory.listFiles((dir, name) -> name.endsWith(".txt"));
-        if (txtFiles != null) {
-            for (File file : txtFiles) {
-                String fileName = file.getName().replaceAll(".txt", "");
-                String gameServerPath = "server/books/" + fileName + ".txt"; // GAME SERVER PATH
-                fullBookList.put(fileName, gameServerPath);
-            }
+        Path booksDirectory = Paths.get("src/main/resources/books");
+
+        try {
+            Files.walk(booksDirectory, 1) // Limit depth to 1 to avoid subdirectories
+                .filter(Files::isRegularFile)
+                .filter(path -> path.getFileName().toString().endsWith(".txt"))
+                .forEach(path -> {
+                    String fileName = path.getFileName().toString().replaceAll(".txt$", "");
+                    String gameServerPath = "server/books/" + fileName + ".txt"; // GAME SERVER PATH
+                    fullBookList.put(fileName, gameServerPath);
+                });
+        } catch (IOException e) {
+            // Handle the exception (e.g., log or throw)
+            e.printStackTrace();
         }
+
         return fullBookList;
     }
 

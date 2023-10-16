@@ -11,16 +11,20 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.*;
+import java.util.stream.Collectors;
+
+import javafx.application.Platform;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 public class ViewModel extends Observable implements Observer {
-    GameModel gameModel;
+    private GameModel gameModel;
 
     private StringProperty myNameProperty;
     private ObjectProperty<Tile[][]> currentBoardProperty;
     private ListProperty<Tile> myTilesProperty;
-    private ListProperty<Word> myWordsProperty;
+    private ListProperty<String> myWordsProperty;
     private IntegerProperty myScoreProperty;
     private BooleanProperty myTurnProperty;
     private MapProperty<String, String> othersInfoProperty;
@@ -29,7 +33,15 @@ public class ViewModel extends Observable implements Observer {
 
     private BooleanProperty connectedProperty;
 
-    public ViewModel(boolean isHost) {
+    private int firstRow;
+    private int firstCol;
+    private int lastRow;
+    private int lastCol;
+    private StringBuilder wordBuilder;
+
+    private boolean isGameEnd;
+
+    public void initialize(boolean isHost) {
         if (isHost) {
             this.gameModel = HostModel.get();
             HostModel.get().addObserver(this);
@@ -47,69 +59,79 @@ public class ViewModel extends Observable implements Observer {
         othersInfoProperty = new SimpleMapProperty<>(FXCollections.observableHashMap());
         gameBooksProperty = new SimpleSetProperty<>(FXCollections.observableSet());
         bagCountProperty = new SimpleIntegerProperty();
+
+        wordBuilder = new StringBuilder();
     }
 
     @Override
     public void update(Observable o, Object arg) {
         if (o == gameModel && arg instanceof String) {
 
-            String message = (String) arg;
+            Platform.runLater(() -> {
+                String message = (String) arg;
 
-            System.out.println(message);
+                System.out.println("View Model : "+message);
 
-            myNameProperty.set(gameModel.getPlayerProperties().getMyName());
-            currentBoardProperty.set(gameModel.getCurrentBoard());
-            myTilesProperty.clear();
-            myTilesProperty.setAll(gameModel.getMyTiles());
-            myScoreProperty.set(gameModel.getMyScore());
-            myWordsProperty.setAll(gameModel.getMyWords());
-            myTurnProperty.set(gameModel.isMyTurn());
-            othersInfoProperty.clear();
-            othersInfoProperty.putAll(gameModel.getOthersInfo());
-            gameBooksProperty.clear();
-            gameBooksProperty.addAll(gameModel.getGameBooks());
-            bagCountProperty.set(gameModel.getBagCount());
+                myNameProperty.set(gameModel.getPlayerProperties().getMyName());
+                currentBoardProperty.set(gameModel.getCurrentBoard());
+                myTilesProperty.setAll(gameModel.getMyTiles());
+                myScoreProperty.set(gameModel.getMyScore());
+                List<String> myWordsList = gameModel.getMyWords().stream().map(w -> w.toString())
+                        .collect(Collectors.toList());
+                myWordsProperty.setAll(myWordsList);
+                myTurnProperty.set(gameModel.isMyTurn());
+                othersInfoProperty.putAll(gameModel.getOthersInfo());
+                gameBooksProperty.addAll(gameModel.getGameBooks());
+                bagCountProperty.set(gameModel.getBagCount());
+
+                setChanged();
+                notifyObservers(message);
+            });
 
         }
     }
 
-    public StringProperty getMyNameProperty() {
+    public boolean isGameEnd() {
+        return isGameEnd;
+    }
+
+    public StringProperty myNameProperty() {
         return myNameProperty;
     }
 
-    public BooleanProperty getConnectedProperty() {
+    public BooleanProperty connectedProperty() {
         return connectedProperty;
     }
 
-    public ObjectProperty<Tile[][]> getCurrentBoardProperty() {
+    public ObjectProperty<Tile[][]> currentBoardProperty() {
         return currentBoardProperty;
     }
 
-    public ListProperty<Tile> getMyTilesProperty() {
+    public ListProperty<Tile> myTilesProperty() {
         return myTilesProperty;
     }
 
-    public IntegerProperty getMyScoreProperty() {
+    public IntegerProperty myScoreProperty() {
         return myScoreProperty;
     }
 
-    public ListProperty<Word> getMyWordsProperty() {
+    public ListProperty<String> myWordsProperty() {
         return myWordsProperty;
     }
 
-    public BooleanProperty getMyTurnProperty() {
+    public BooleanProperty myTurnProperty() {
         return myTurnProperty;
     }
 
-    public MapProperty<String, String> getOthersInfoProperty() {
+    public MapProperty<String, String> othersInfoProperty() {
         return othersInfoProperty;
     }
 
-    public SetProperty<String> getGameBooksProperty() {
+    public SetProperty<String> gameBooksProperty() {
         return gameBooksProperty;
     }
 
-    public IntegerProperty getBagCountProperty() {
+    public IntegerProperty bagCountProperty() {
         return bagCountProperty;
     }
 
@@ -134,8 +156,45 @@ public class ViewModel extends Observable implements Observer {
         gameModel.ready();
     }
 
-    public void tryPlaceWord(Word myWord) {
-        gameModel.tryPlaceWord(myWord);
+    public void tryPlaceWord(String word) {
+        boolean isVer = isWordVertical();
+        int wordLen = getWordLength();
+        int f_Row = getFirstSelectedCellRow();
+        int f_Col = getFirstSelectedCellCol();
+
+        Tile[] tiles = new Tile[wordLen];
+        int j = 0;
+        for (int i = 0; i < wordLen; i++) {
+            if (isVer) {
+                if (gameModel.getCurrentBoard()[f_Row + i][f_Col] != null) {
+                    tiles[i] = null;
+                } else {
+                    for (Tile t : gameModel.getMyTiles()) {
+                        if (t.getLetter() == word.toCharArray()[j]) {
+                            tiles[i] = t;
+                            j++;
+                            break;
+                        }
+                    }
+                }
+            } else {
+                if (gameModel.getCurrentBoard()[f_Row][f_Col + i] != null) {
+                    tiles[i] = null;
+                } else {
+                    for (Tile t : gameModel.getMyTiles()) {
+                        if (t.getLetter() == word.toCharArray()[j]) {
+                            tiles[i] = t;
+                            j++;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        Word queryWord = new Word(tiles, f_Row, f_Col, isVer);
+        // System.out.println(queryWord);
+        gameModel.tryPlaceWord(queryWord);
     }
 
     public void challenge() {
@@ -183,5 +242,66 @@ public class ViewModel extends Observable implements Observer {
             e1.printStackTrace();
         }
         return publicIp;
+    }
+
+    public static ObservableList<String> getBookList() {
+        List<String> bookList = new ArrayList<>(GameModel.getFullBookList().keySet());
+        Collections.shuffle(bookList); // Shuffle the list randomly
+        return FXCollections.observableArrayList(bookList);
+    }
+
+    /**************** Try Place Word ****************/
+
+    public String getWord() {
+        return wordBuilder.toString();
+    }
+
+    public void addToWord(String tileValue) {
+        wordBuilder.append(tileValue);
+    }
+
+    public void clearWord() {
+        wordBuilder.setLength(0);
+    }
+
+    public void setFirstSelectedCellRow(int firstRow) {
+        this.firstRow = firstRow;
+    }
+
+    public void setFirstSelectedCellCol(int firstCol) {
+        this.firstCol = firstCol;
+    }
+
+    public void setLastSelectedCellRow(int lastRow) {
+        this.lastRow = lastRow;
+    }
+
+    public void setLastSelectedCellCol(int lastCol) {
+        this.lastCol = lastCol;
+    }
+
+    public int getFirstSelectedCellRow() {
+        return firstRow < lastRow ? firstRow : lastRow;
+    }
+
+    public int getFirstSelectedCellCol() {
+        return firstCol < lastCol ? firstCol : lastCol;
+    }
+
+    public int getLastSelectedCellRow() {
+        return firstRow > lastRow ? firstRow : lastRow;
+    }
+
+    public int getLastSelectedCellCol() {
+        return firstCol > lastCol ? firstCol : lastCol;
+    }
+
+    public boolean isWordVertical() {
+        return firstCol == lastCol ? true : false;
+    }
+
+    public int getWordLength() {
+        return isWordVertical() ? (getLastSelectedCellRow() - getFirstSelectedCellRow() + 1)
+                : (getLastSelectedCellCol() - getFirstSelectedCellCol() + 1);
     }
 }

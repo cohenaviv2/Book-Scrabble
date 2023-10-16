@@ -167,7 +167,7 @@ public class GameManager extends Observable {
                 case GetMethod.ready:
                     return readyHandler(value);
                 case GetMethod.getOthersInfo:
-                    return playersInfoHandler(guestId, value);
+                    return othersInfoHandler(guestId, value);
                 case GetMethod.getCurrentBoard:
                     return boardHandler(value);
                 case GetMethod.sendTo:
@@ -283,7 +283,7 @@ public class GameManager extends Observable {
         return "true";
     }
 
-    private String playersInfoHandler(int guestId, String value) throws IOException {
+    private String othersInfoHandler(int guestId, String value) throws IOException {
         if (value.equals("true")) {
 
             List<Player> otherPlayerList = this.playersByID.values().stream()

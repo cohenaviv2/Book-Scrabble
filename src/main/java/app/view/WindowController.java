@@ -477,7 +477,7 @@ public class WindowController {
         VBox settings = new VBox(5, gameServerSettings, customPortSettings, myIpSettings);
         settings.setAlignment(Pos.CENTER);
 
-        // Round Buttons
+        // Round
         HBox roundButtonsPane = createButtonsPane(false);
         Button helpButton = (Button) roundButtonsPane.getChildren().get(0);
         Text hostModeTitle = new Text("Host Mode");
