@@ -26,7 +26,27 @@ To get started, you'll need the host's IP address.
 Simply input the host's IP, and you're in.
 No hosting, no setup. Just plug in and play.
 Guest Mode lets you join the action and experience multiplayer excitement.
-game-flow=gdfgdfg
+game-flow-rules=1. Each player randomly draws a tile from the bag.
+2. The order of the players is determined by the order of the letters drawn (from smallest to largest).
+    - If an empty tile is drawn, it is returned to the bag, and another one is drawn.
+3. All the tiles are returned to the bag.
+4. Each player randomly draws 7 tiles.
+5. The first player (the one who drew the smallest letter in the lottery) has to formca legal word that
+    passes through the central slot (the star) on the board.
+    - Only he gets a double score for it.
+    - He replenishes his tiles from the bag to have 7 tiles again.
+6. Gradually, each player, in turn, assembles a legal word from the tiles in their possession.
+    - Like in a crossword puzzle, each word must rest on one of the tiles on the board.
+    - After writing the word, the player adds 7 tiles from the bag.
+    - Their score is accumulated based on all the words created on the board following the placement of the tiles.
+        - Tiles placed on double or triple letter squares will be doubled or tripled in value accordingly.
+        - The word then receives the sum of the tile value.
+        - This amount will be doubled or tripled for each doubling or tripling word slot that the tiles are superimposed on
+          (e.g., it is possible to multiply by 4 or 9 if the word took two double word or triple word slots, respectively).
+        - The above calculation is true for every new word created on the board following the placement in turn.
+7. A player who cannot form a valid word forfeits their turn.
+8. The game will end after N rounds.
+game-flow-how-to-play=Click and mark the first place on the board......
 custom-port=The host server usually runs on a default Port.
 Sometimes the host chooses a custom Port.
 Ask your host if the Port has changed, and if set it here:

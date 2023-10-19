@@ -1,6 +1,7 @@
 package app.view_model;
 
 import app.model.GameModel;
+import app.model.GetMethod;
 import app.model.game.*;
 import app.model.guest.GuestModel;
 import app.model.host.HostModel;
@@ -40,6 +41,7 @@ public class ViewModel extends Observable implements Observer {
     private StringBuilder wordBuilder;
 
     private boolean isGameEnd;
+    private int totalPlayersNum;
 
     public void initialize(boolean isHost) {
         if (isHost) {
@@ -80,6 +82,7 @@ public class ViewModel extends Observable implements Observer {
                         .collect(Collectors.toList());
                 myWordsProperty.setAll(myWordsList);
                 myTurnProperty.set(gameModel.isMyTurn());
+                othersInfoProperty.clear();
                 othersInfoProperty.putAll(gameModel.getOthersInfo());
                 gameBooksProperty.addAll(gameModel.getGameBooks());
                 bagCountProperty.set(gameModel.getBagCount());
@@ -89,6 +92,10 @@ public class ViewModel extends Observable implements Observer {
             });
 
         }
+    }
+
+    public int getTotalPlayersNum() {
+        return totalPlayersNum;
     }
 
     public boolean isGameEnd() {
@@ -141,6 +148,7 @@ public class ViewModel extends Observable implements Observer {
     }
 
     public void setTotalPlayersCount(int numOfPlayers) {
+        this.totalPlayersNum = numOfPlayers;
         HostModel.get().setNumOfPlayers(numOfPlayers);
     }
 

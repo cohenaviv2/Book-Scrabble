@@ -1,4 +1,4 @@
-/************* BACKGROUNDS *************/
+/************ BACKGROUNDS ************/
 
 .board-background {
   -fx-background-image: url("backgrounds/board.png");
@@ -20,7 +20,7 @@
 }
 
 .game-flow-background {
-  -fx-background-image: url("backgrounds/main.jpg");
+  -fx-background-image: url("backgrounds/game-flow-2.jpg");
   -fx-background-repeat: no-repeat;
   -fx-background-size: cover;
 }
@@ -39,6 +39,7 @@
   -fx-background-color: linear-gradient(blue, grey), navy;
 }
 
+
 .dodgerblue-button {
   -fx-font-size: 20px;
   -fx-font-weight: bold;
@@ -51,8 +52,22 @@
   -fx-background-color: linear-gradient(#15395e, grey), #1a5795;
 }
 
+.brown-button {
+  -fx-font-size: 20px;
+  -fx-font-weight: bold;
+  -fx-background-color: linear-gradient(rgb(154, 97, 16), grey),
+    rgb(162, 100, 1);
+  -fx-background-radius: 10;
+  -fx-text-fill: white;
+  -fx-effect: dropshadow(one-pass-box, black, 8, 0, 2, 0);
+}
+.brown-button:hover {
+  -fx-background-color: linear-gradient(rgb(156, 115, 2), grey),
+    rgb(117, 81, 14);
+}
+
 .lightblue-button {
-  -fx-font-size: 19px;
+  -fx-font-size: 20px;
   -fx-font-weight: bold;
   -fx-background-color: linear-gradient(rgb(0, 88, 139), grey), rgb(0, 195, 255);
   -fx-background-radius: 40;
@@ -81,7 +96,7 @@
   -fx-font-weight: bold;
   -fx-background-color: linear-gradient(rgb(187, 128, 19), grey),
     rgb(204, 173, 0);
-  -fx-background-radius: 40;
+  -fx-background-radius: 10;
   -fx-text-fill: white;
   -fx-effect: dropshadow(one-pass-box, black, 8, 0, 2, 0);
 }
@@ -138,6 +153,18 @@
   -fx-background-color: linear-gradient(darkgray, grey), cadetblue;
 }
 
+.black-button {
+  -fx-font-size: 20px;
+  -fx-font-weight: bold;
+  -fx-background-color: linear-gradient(rgb(54, 54, 54), grey), rgb(35, 35, 35);
+  -fx-background-radius: 10;
+  -fx-text-fill: white;
+  -fx-effect: dropshadow(one-pass-box, black, 8, 0, 2, 0);
+}
+.black-button:hover {
+  -fx-background-color: linear-gradient(rgb(101, 101, 101), grey), rgb(39, 60, 61);
+}
+
 .purple-button {
   -fx-font-size: 20px;
   -fx-font-weight: bold;
@@ -148,6 +175,18 @@
 }
 .purple-button:hover {
   -fx-background-color: linear-gradient(darkviolet, grey), indigo;
+}
+
+.olive-button {
+  -fx-font-size: 20px;
+  -fx-font-weight: bold;
+  -fx-background-color: linear-gradient(rgb(20, 114, 30), grey), rgb(8, 61, 13);
+  -fx-background-radius: 40;
+  -fx-text-fill: white;
+  -fx-effect: dropshadow(one-pass-box, black, 8, 0, 2, 0);
+}
+.olive-button:hover {
+  -fx-background-color: linear-gradient(rgb(18, 148, 31), grey), rgb(16, 116, 26);
 }
 
 .glow-button {
@@ -181,8 +220,8 @@
 
 .bag-label {
   -fx-font-size: 30px;
-  -fx-text-fill: rgb(233, 233, 233);
-  -fx-font-weight: bold;
+  -fx-text-fill: rgb(243, 204, 204);
+  /* -fx-font-weight: bold; */
   -fx-font-family: "Comic Sans MS";
   -fx-padding: 10px;
   -fx-effect: dropshadow(gaussian, rgb(0, 0, 0), 20, 0, 2, 6);
@@ -215,7 +254,7 @@
 }
 
 .my-words-box {
-  -fx-background-image: url("words-board2.png");
+  -fx-background-image: url("class-board.jpg");
   -fx-background-size: cover;
   -fx-background-repeat: no-repeat;
 }
@@ -227,10 +266,22 @@
 
 }
 
-.cell {
+/* .cell {
+  -fx-border-color: transparent;
+  -fx-background-color: transparent;
+} */
+
+/* Target the ListView directly */
+#wordsListView {
+  -fx-background-color: transparent;
+}
+
+/* Or, target the cell style only within the ListView */
+#wordsListView .cell {
   -fx-border-color: transparent;
   -fx-background-color: transparent;
 }
+
 
 .board-cell {
   -fx-border-color: transparent;
@@ -250,12 +301,12 @@
   -fx-border-radius: 5px;
 }
 
-.board-cell.marked {
+.board-cell.highlight {
   -fx-alignment: center;
-  -fx-border-color: lightgreen;
+  -fx-border-color: rgb(91, 247, 91);
   -fx-border-width: 4px;
   -fx-border-radius: 5px;
-  -fx-effect: dropshadow(gaussian, rgb(255, 241, 45), 20, 0, 0, 3);
+  -fx-effect: dropshadow(gaussian, rgb(157, 255, 45), 25, 0, 0, 7);
 
 }
 
@@ -361,13 +412,13 @@
 }
 
 .drawtiles-content-background {
-  -fx-background-color: rgb(63, 63, 63);
+  -fx-background-color: rgb(48, 219, 224);
   -fx-border-color: black;
   -fx-border-width: 3px;
 }
 
 .message-content-background {
-  -fx-background-color: rgb(204, 173, 0);
+  -fx-background-color: rgb(8, 61, 13);
   -fx-border-color: black;
   -fx-border-width: 3px;
 }
@@ -402,105 +453,157 @@
 /* Generate styles for each uppercase letter */
 .character-A {
   -fx-background-image: url('tiles/A.png');
+  -fx-background-repeat: no-repeat;
+  -fx-background-size: contain;
 }
 
 .character-B {
   -fx-background-image: url('tiles/B.png');
+  -fx-background-repeat: no-repeat;
+  -fx-background-size: contain;
 }
 
 .character-C {
   -fx-background-image: url('tiles/C.png');
+  -fx-background-repeat: no-repeat;
+  -fx-background-size: contain;
 }
 
 .character-D {
   -fx-background-image: url('tiles/D.png');
+  -fx-background-repeat: no-repeat;
+  -fx-background-size: contain;
 }
 
 .character-E {
   -fx-background-image: url('tiles/E.png');
+  -fx-background-repeat: no-repeat;
+  -fx-background-size: contain;
 }
 
 .character-F {
   -fx-background-image: url('tiles/F.png');
+  -fx-background-repeat: no-repeat;
+  -fx-background-size: contain;
 }
 
 .character-G {
   -fx-background-image: url('tiles/G.png');
+  -fx-background-repeat: no-repeat;
+  -fx-background-size: contain;
 }
 
 .character-H {
   -fx-background-image: url('tiles/H.png');
+  -fx-background-repeat: no-repeat;
+  -fx-background-size: contain;
 }
 
 .character-I {
   -fx-background-image: url('tiles/I.png');
+  -fx-background-repeat: no-repeat;
+  -fx-background-size: contain;
 }
 
 .character-J {
   -fx-background-image: url('tiles/J.png');
+  -fx-background-repeat: no-repeat;
+  -fx-background-size: contain;
 }
 
 .character-K {
   -fx-background-image: url('tiles/K.png');
+  -fx-background-repeat: no-repeat;
+  -fx-background-size: contain;
 }
 
 .character-L {
   -fx-background-image: url('tiles/L.png');
+  -fx-background-repeat: no-repeat;
+  -fx-background-size: contain;
 }
 
 .character-M {
   -fx-background-image: url('tiles/M.png');
+  -fx-background-repeat: no-repeat;
+  -fx-background-size: contain;
 }
 
 .character-N {
   -fx-background-image: url('tiles/N.png');
+  -fx-background-repeat: no-repeat;
+  -fx-background-size: contain;
 }
 
 .character-O {
   -fx-background-image: url('tiles/O.png');
+  -fx-background-repeat: no-repeat;
+  -fx-background-size: contain;
 }
 
 .character-P {
   -fx-background-image: url('tiles/P.png');
+  -fx-background-repeat: no-repeat;
+  -fx-background-size: contain;
 }
 
 .character-Q {
   -fx-background-image: url('tiles/Q.png');
+  -fx-background-repeat: no-repeat;
+  -fx-background-size: contain;
 }
 
 .character-R {
   -fx-background-image: url('tiles/R.png');
+  -fx-background-repeat: no-repeat;
+  -fx-background-size: contain;
 }
 
 .character-S {
   -fx-background-image: url('tiles/S.png');
+  -fx-background-repeat: no-repeat;
+  -fx-background-size: contain;
 }
 
 .character-T {
   -fx-background-image: url('tiles/T.png');
+  -fx-background-repeat: no-repeat;
+  -fx-background-size: contain;
 }
 
 .character-U {
   -fx-background-image: url('tiles/U.png');
+  -fx-background-repeat: no-repeat;
+  -fx-background-size: contain;
 }
 
 .character-V {
   -fx-background-image: url('tiles/V.png');
+  -fx-background-repeat: no-repeat;
+  -fx-background-size: contain;
 }
 
 .character-W {
   -fx-background-image: url('tiles/W.png');
+  -fx-background-repeat: no-repeat;
+  -fx-background-size: contain;
 }
 
 .character-X {
   -fx-background-image: url('tiles/X.png');
+  -fx-background-repeat: no-repeat;
+  -fx-background-size: contain;
 }
 
 .character-Y {
   -fx-background-image: url('tiles/Y.png');
+  -fx-background-repeat: no-repeat;
+  -fx-background-size: contain;
 }
 
 .character-Z {
   -fx-background-image: url('tiles/Z.png');
+  -fx-background-repeat: no-repeat;
+  -fx-background-size: contain;
 }
 

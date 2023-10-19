@@ -1,12 +1,15 @@
 package app.view;
 
 import app.model.GetMethod;
+import app.model.game.ObjectSerializer;
 import app.model.game.Tile;
+import app.model.game.Word;
 import app.view_model.ViewModel;
 import javafx.stage.*;
+
+import java.io.IOException;
 import java.util.*;
 
-import javafx.application.Platform;
 import javafx.scene.*;
 import javafx.scene.control.Button;
 import javafx.scene.input.MouseEvent;
@@ -20,9 +23,11 @@ public class GameController implements Observer {
     protected Stage gameFlowStage;
     protected Stage customStage;
     // Logic
-    protected List<Pane> selectedCells;
-    protected Stack<Pane> placementCelles;
-    protected List<Pane> placementList;
+    private List<String> selectedBooks;
+    private List<Pane> selectedCells;
+    private Stack<Pane> placementCelles;
+    private List<Pane> placementList;
+    private List<Word> turnWords;
     //
     private boolean gameRunning;
     private double xOffset = 0;
@@ -36,14 +41,16 @@ public class GameController implements Observer {
         customStage = new Stage();
         setUpStage(customStage);
         this.gameRunning = false;
+        this.selectedBooks = new ArrayList<>();
         this.selectedCells = new ArrayList<>();
         this.placementCelles = new Stack<>();
         this.placementList = new ArrayList<>();
+        this.turnWords = new ArrayList<>();
     }
 
     private void setUpStage(Stage stage) {
         stage.initStyle(StageStyle.UNDECORATED);
-        stage.getIcons().add(gameView.gameIcon);
+        stage.getIcons().add(gameView.getGameIcon());
         stage.setTitle("Book Scrabble");
 
         if (stage == customStage) {
@@ -92,7 +99,7 @@ public class GameController implements Observer {
         customStage = new Stage();
         setUpStage(customStage);
 
-        VBox bookSelectionBox = gameView.createBookBox(fullBookList);
+        VBox bookSelectionBox = gameView.createBookSelectionBox(fullBookList);
 
         Scene bookSelectionScene = new Scene(bookSelectionBox, 900, 700);
         setUpScene(bookSelectionScene);
@@ -101,24 +108,32 @@ public class GameController implements Observer {
         customStage.show();
     }
 
-    public void showGameFlowWindow(){
-        gameSetupStage.close();
+    public void showGameFlowWindow() {
         customStage.close();
+        gameSetupStage.close();
         gameFlowStage = new Stage();
         setUpStage(gameFlowStage);
-        BorderPane gameFlowBox = gameView.createGameFlowBox();
+
         HBox osBar = gameView.createOsBar(gameFlowStage, true);
+        BorderPane gameFlowBox = gameView.createGameFlowBox();
+        gameFlowBox.setTop(osBar);
+        gameFlowBox.getStyleClass().add("game-flow-background");
 
-        VBox root = new VBox(osBar, gameFlowBox);
-        root.getStyleClass().add("game-flow-background");
-        VBox.setVgrow(gameFlowBox, Priority.ALWAYS);
-        HBox.setHgrow(gameFlowBox, Priority.ALWAYS);
-
-        Scene gameFlowScene = new Scene(root, 1700, 840);
+        Scene gameFlowScene = new Scene(gameFlowBox, 1700, 840);
         setUpScene(gameFlowScene);
 
         gameFlowStage.setScene(gameFlowScene);
         gameFlowStage.show();
+    }
+
+    private void showDrawTilesWindow(String info) {
+        VBox drawTilesBox = gameView.createDrawTilesBox(info);
+        showCustomWindow(drawTilesBox, 700, 400);
+    }
+
+    private void showIlegalWordAlert(String iligalWords) {
+        VBox iligalWordsBox = gameView.createIlegalWordBox(iligalWords);
+        showCustomWindow(iligalWordsBox, 600, 300);
     }
 
     public void showCustomWindow(Node content, double width, double height) {
@@ -142,6 +157,11 @@ public class GameController implements Observer {
         customStage.show();
     }
 
+    public void showMessageWindow(String sender, String message, boolean toAll) {
+        VBox messageBox = gameView.createMessageAlert(sender, message, toAll);
+        showCustomWindow(messageBox, 700, 300);
+    }
+
     public void closeCustomWindow() {
         customStage.close();
     }
@@ -160,12 +180,22 @@ public class GameController implements Observer {
             tb.setDisable(true);
         }
         for (Pane cell : placementList) {
-            // Clear all added style classes
-            cell.getStyleClass().clear();
+            boolean hasLetterStyle = cell.getStyleClass().stream()
+                    .anyMatch(style -> style.startsWith("character-"));
+            // Clear all added style classes except letter styles
+            cell.getStyleClass().removeIf(style -> style.startsWith("character-"));
+
             // Clear inline styles
             cell.setStyle("");
-            // Add the default style
+
+            // Add the default style if it didn't have a letter style
             cell.getStyleClass().add("board-cell");
+        }
+        for (Pane cell : selectedCells) {
+            cell.getStyleClass().remove("selected");
+        }
+        for (Pane cell : placementCelles) {
+            cell.getStyleClass().removeIf(style -> style.startsWith("character-"));
         }
         gameViewModel.clearWord();
         placementCelles.clear();
@@ -201,16 +231,14 @@ public class GameController implements Observer {
         }
     }
 
-
-    protected void handleMouseDragged(MouseEvent event) {
-        Stage stage = (Stage) gameView.getOsBar().getScene().getWindow();
+    public void handleMouseDragged(MouseEvent event) {
+        Stage stage = getCurrentStage();
         stage.setX(event.getScreenX() - xOffset);
         stage.setY(event.getScreenY() - yOffset);
     }
 
-    protected void handleMousePressed(MouseEvent event) {
-        Stage stage = (Stage) gameView.getOsBar().getScene().getWindow();
-
+    public void handleMousePressed(MouseEvent event) {
+        Stage stage = getCurrentStage();
         xOffset = event.getScreenX() - stage.getX();
         yOffset = event.getScreenY() - stage.getY();
     }
@@ -228,15 +256,81 @@ public class GameController implements Observer {
     public void update(Observable o, Object arg) {
         if (o == gameViewModel && arg instanceof String) {
             String message = (String) arg;
+
+            // Update All
             if (message.startsWith(GetMethod.updateAll)) {
                 if (!gameRunning) {
                     gameRunning = true;
                     showGameFlowWindow();
                 }
-            }
-            else {
-                System.out.println("View : "+message);
+                String mod = message.split(",")[1].split(":")[0];
+                String value = message.split(",")[1].split(":")[1];
+                if (mod.equals("drawTiles")) {
+                    // showDrawTilesWindow(value);
+                } else if (mod.equals(gameView.myName)) {
+                    turnWords.clear();
+                    if (value.equals("-1")) {
+                        showIlegalWordAlert(null);
+                    } else if (value.equals("0")) {
+                        // Do nothing... player choose to pass turn
+                    } else {
+                        try {
+                            turnWords = (List<Word>) ObjectSerializer.deserializeObject(value);
+                        } catch (ClassNotFoundException | IOException e) {
+                        }
+                    }
+                }
+
+                // Try Place Word
+            } else if (message.startsWith(GetMethod.tryPlaceWord)) {
+                String params = message.split(",")[1];
+                String[] turnWords = params.split(":");
+                String iligalWords = "";
+                for (int i = 1; i < turnWords.length; i++) {
+                    iligalWords += turnWords[i];
+                    if (i != turnWords.length - 1)
+                        iligalWords += ",";
+                }
+                showIlegalWordAlert(iligalWords);
+
+                // Got message from
+            } else if (message.startsWith(GetMethod.sendTo)) {
+                String values = message.split(",")[1];
+                String msg;
+
+                if (values.split(":").length == 3) {
+                    msg = values.split(":")[1];
+                    String sender = values.split(":")[2];
+                    showMessageWindow(sender, msg, false);
+                } else {
+                    msg = values.split(":")[0];
+                    String sender = values.split(":")[1];
+                    showMessageWindow(sender, msg, true);
+                }
+            } else {
+                System.out.println("View : " + message);
             }
         }
     }
+
+    public List<String> getSelectedBooks() {
+        return selectedBooks;
+    }
+
+    public List<Pane> getSelectedCells() {
+        return selectedCells;
+    }
+
+    public Stack<Pane> getPlacementCelles() {
+        return placementCelles;
+    }
+
+    public List<Pane> getPlacementList() {
+        return placementList;
+    }
+
+    public List<Word> getTurnWords() {
+        return turnWords;
+    }
+
 }

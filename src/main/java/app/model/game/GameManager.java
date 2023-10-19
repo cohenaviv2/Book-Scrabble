@@ -353,13 +353,6 @@ public class GameManager extends Observable {
             Player player = this.playersByID.get(id);
             name = player.getName();
             turnManager.handlePlayerQuit(player);
-            // PRINT DEBUG
-            // System.out.println("GameManager: " + player.getName() + " has quit the
-            // game!");
-
-            // Update the host
-            // setChanged();
-            // notifyObservers();
         }
         return name;
     }
@@ -418,7 +411,7 @@ public class GameManager extends Observable {
             // notifyObservers();
 
             turnManager.resetPasses();
-            turnManager.nextTurn(true);
+            turnManager.nextTurn(1);
 
             String playerScore = String.valueOf(score);
             return playerScore;
@@ -470,7 +463,7 @@ public class GameManager extends Observable {
                 // notifyObservers();
 
                 turnManager.resetPasses();
-                turnManager.nextTurn(true);
+                turnManager.nextTurn(1);
 
                 String playerScore = String.valueOf(score);
                 return playerScore;
@@ -490,7 +483,7 @@ public class GameManager extends Observable {
                 // setChanged();
                 // notifyObservers("updateAll");
 
-                turnManager.nextTurn(false);
+                turnManager.nextTurn(-1);
                 return GetMethod.skipTurn;
             }
         } else {
@@ -577,7 +570,7 @@ public class GameManager extends Observable {
                 p.setIsActiveWord(false);
             }
             turnManager.passesPerRound.replace(p, 1);
-            this.turnManager.nextTurn(false);
+            this.turnManager.nextTurn(0);
             return "true";
         } else
             return "false";
@@ -728,7 +721,7 @@ public class GameManager extends Observable {
             notifyObservers(GetMethod.updateAll + "," + "drawTiles:" + drawTileString);
         }
 
-        public void nextTurn(boolean success) {
+        public void nextTurn(int mode) {
             /* Set turn to the next player (turn index) */
 
             int i = this.currentTurnIndex;
@@ -756,7 +749,7 @@ public class GameManager extends Observable {
 
             try {
                 String turnWords = ObjectSerializer.serializeObject(gameBoard.getTurnWords());
-                String update = success ? turnWords : "0";
+                String update = (mode==1) ? turnWords : String.valueOf(mode);
                 gameBoard.clearTurnWords();
                 setChanged();
                 notifyObservers(GetMethod.updateAll + "," + oldPlayer.getName() + ":" + update);
@@ -783,9 +776,10 @@ public class GameManager extends Observable {
         }
 
         public void handlePlayerQuit(Player quittingPlayer) {
+
+            // Host Is Quitting
             if (quittingPlayer.getID() == hostPlayer.getID()) {
 
-                // The host player is quitting, stop the game or perform necessary actions
                 endGame(true);
 
             } else {
