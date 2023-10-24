@@ -40,7 +40,8 @@ public class CommunicationHandler extends Observable {
             this.myId = Integer.parseInt(ans[2]);
             this.QUIT_GAME_QUERY = myId + "," + GetMethod.quitGame + "," + "true";
             // PRINT DEBUG
-            // System.out.println("CommHandler: got my id " + myId + ", " + name + " is Connected!");
+            // System.out.println("CommHandler: got my id " + myId + ", " + name + " is
+            // Connected!");
             flag = false;
         } else {
             // System.err.println("CommHandler - connectMe: wrong answer from Host server "
@@ -52,7 +53,7 @@ public class CommunicationHandler extends Observable {
     }
 
     public void addMyBookChoice(List<String> myBooks) throws Exception {
-        if(!flag){
+        if (!flag) {
 
             String myBooksSerilized = ObjectSerializer.serializeObject(myBooks);
             out.println(myId + "," + GetMethod.myBooksChoice + "," + myBooksSerilized);
@@ -61,17 +62,19 @@ public class CommunicationHandler extends Observable {
             String modifier = ans[1];
             String value = ans[2];
             if (id == myId && modifier.equals(GetMethod.myBooksChoice) && value.equals("true")) {
-    
+
                 // PRINT DEBUG
-                // System.out.println("CommHandler: your book list is set up! starting chat...");
+                // System.out.println("CommHandler: your book list is set up! starting
+                // chat...");
                 startUpdateListener();
-    
+
             } else {
                 // PRINT DEBUG
-                // System.out.println("CommHandler - addBookHandler: wrong answer from Host erver " + ans);
+                // System.out.println("CommHandler - addBookHandler: wrong answer from Host
+                // erver " + ans);
                 // throw new Exception("CommHandler - addBookHandler: wrong answer from Host
                 // server " + ans);
-    
+
             }
         }
 
@@ -82,16 +85,16 @@ public class CommunicationHandler extends Observable {
             try {
                 String serverMessage;
                 while (!(serverMessage = in.readLine()).equals(QUIT_GAME_QUERY)) {
-
                     // General update message
                     if (!serverMessage.startsWith(String.valueOf(myId))) {
                         MESSAGE = serverMessage;
-                        if (serverMessage.startsWith(GetMethod.endGame)) {
-                            endGameHandler(serverMessage);
-                        } else if (serverMessage.startsWith(GetMethod.updateAll)) {
+                        if (serverMessage.startsWith(GetMethod.updateAll)) {
                             requestProperties();
-                        } else {
-                            checkForMessage(serverMessage);
+                        } else if (serverMessage.startsWith(GetMethod.sendTo)) {
+                            String message = serverMessage.split(",")[1];
+                            checkForMessage(message);
+                        } else if (serverMessage.startsWith(GetMethod.endGame)) {
+                            endGameHandler(serverMessage);
                         }
                     }
 
@@ -107,6 +110,7 @@ public class CommunicationHandler extends Observable {
 
                         // if it's not my id, Drop maessage
                         if (messageId == myId) {
+                            // System.out.println("\n\n"+modifier+","+returnedVal+"\n\n");
                             handleResponse(modifier, returnedVal);
                         }
                     }
@@ -183,11 +187,11 @@ public class CommunicationHandler extends Observable {
     }
 
     private void sentToHandler(String returnedVal) {
-        
+
     }
 
     private void sendToAllHandler(String returnedVal) {
-        
+
     }
 
     private void getGameBooksHandler(String returnedVal) throws ClassNotFoundException, IOException {
@@ -221,56 +225,26 @@ public class CommunicationHandler extends Observable {
     }
 
     private void challengeHandler(String returnedVal) {
-        // System.out.println("\n\nCommHandler - challange ans:" + returnedVal +
-        // "\n\n");
-        if (returnedVal.equals("false")) {
-
-            // PRINT DEBUG
-            // // System.out.println("challenge - some error/turn");
-
-        } else if (returnedVal.equals("skipTurn")) {
-
-            // PRINT DEBUG
-            // // System.out.println("challenge failed - skiping turn!");
-            MessageReader.setMsg("Challenge failed, You lose 10 points");
-
-        } else {
-            // PRINT DEBUG
-            // // System.out.println("challenge success - you got extra points!");
-            MessageReader.setMsg("Challenge was successful!\nYou got more Points!");
-
-        }
+            setChanged();
+            notifyObservers(GetMethod.challenge + "," + returnedVal);
     }
 
     private void tryPlaceWordHandler(String returnedVal) {
         // System.out.println("\n\nCommHandler - tryPlace ans:" + returnedVal + "\n\n");
-        if (returnedVal.equals("false")) {
+
+        if (returnedVal.startsWith("notBoardLegal")) {
 
             // PRINT DEBUG
-            // // System.out.println("CommHandler: its not your turn");
-
-        } else if (returnedVal.equals("notBoardLegal")) {
-
-            // PRINT DEBUG
-            System.out.println("CommHandler: " + returnedVal);
-            MessageReader.setMsg("Word's not Board legal, Try again");
-
-        } else if (returnedVal.startsWith("notDictionaryLegal")) {
-
-            // PRINT DEBUG
-            // // System.out.println("CommHandler: " + returnedVal);
-            // MessageReader
-            // .setMsg("Some word is not Dictionary legal" + returnedVal + "\nYou can try
-            // Challenge or Pass turn");
-
+            // System.out.println("Word's not Board legal, Try again");
             setChanged();
-            notifyObservers(GetMethod.tryPlaceWord + "," + returnedVal);
+            notifyObservers(GetMethod.tryPlaceWord + "," + "notBoardLegal");
 
         } else {
 
             // PRINT DEBUG
-            // // System.out.println("CommHandler: you get points");
-            MessageReader.setMsg("You got more Points!");
+            // System.out.println("tryPlaceWord - some error/turn");
+            setChanged();
+            notifyObservers(GetMethod.tryPlaceWord + "," + returnedVal);
 
         }
     }
@@ -374,22 +348,7 @@ public class CommunicationHandler extends Observable {
     }
 
     private void checkForMessage(String update) {
-        if (update.startsWith(GetMethod.sendTo)) {
-            String values = update.split(",")[1];
-            if(values.split(":").length==3) {
-                String name = values.split(":")[0];
-                if (name.equals(playerProperties.getMyName())) {
-                    setChanged();
-                    notifyObservers(update);
-                }
-            } else {
-                String sender = values.split(":")[1];
-                if(!sender.equals(playerProperties.getMyName())){
-                    setChanged();
-                    notifyObservers(update);
-                }
-            }
-        } else if(update.startsWith(GetMethod.quitGame)){
+        if (update.startsWith(playerProperties.getMyName()) || update.startsWith("All")) {
             setChanged();
             notifyObservers(update);
         }

@@ -6,22 +6,19 @@ import app.model.game.*;
 import app.model.guest.GuestModel;
 import app.model.host.HostModel;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.net.URLConnection;
+import java.io.*;
+import java.net.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import javafx.application.Platform;
 import javafx.beans.property.*;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import javafx.collections.*;
 
 public class ViewModel extends Observable implements Observer {
+    // Game model
     private GameModel gameModel;
-
+    // Properties
     private StringProperty myNameProperty;
     private ObjectProperty<Tile[][]> currentBoardProperty;
     private ListProperty<Tile> myTilesProperty;
@@ -31,19 +28,17 @@ public class ViewModel extends Observable implements Observer {
     private MapProperty<String, String> othersInfoProperty;
     private SetProperty<String> gameBooksProperty;
     private IntegerProperty bagCountProperty;
-
-    private BooleanProperty connectedProperty;
-
+    // Game data
     private int firstRow;
     private int firstCol;
     private int lastRow;
     private int lastCol;
     private StringBuilder wordBuilder;
-
     private boolean isGameEnd;
     private int totalPlayersNum;
 
     public void initialize(boolean isHost) {
+        // Initialize the model
         if (isHost) {
             this.gameModel = HostModel.get();
             HostModel.get().addObserver(this);
@@ -51,8 +46,8 @@ public class ViewModel extends Observable implements Observer {
             this.gameModel = GuestModel.get();
             GuestModel.get().addObserver(this);
         }
+        // Initialize the properties
         myNameProperty = new SimpleStringProperty();
-        connectedProperty = new SimpleBooleanProperty();
         currentBoardProperty = new SimpleObjectProperty<>();
         myTilesProperty = new SimpleListProperty<>(FXCollections.observableArrayList());
         myScoreProperty = new SimpleIntegerProperty();
@@ -61,7 +56,7 @@ public class ViewModel extends Observable implements Observer {
         othersInfoProperty = new SimpleMapProperty<>(FXCollections.observableHashMap());
         gameBooksProperty = new SimpleSetProperty<>(FXCollections.observableSet());
         bagCountProperty = new SimpleIntegerProperty();
-
+        // Game data
         wordBuilder = new StringBuilder();
     }
 
@@ -72,23 +67,31 @@ public class ViewModel extends Observable implements Observer {
             Platform.runLater(() -> {
                 String message = (String) arg;
 
-                System.out.println("View Model : "+message);
+                System.out.println("View Model : " + message);
 
-                myNameProperty.set(gameModel.getPlayerProperties().getMyName());
-                currentBoardProperty.set(gameModel.getCurrentBoard());
-                myTilesProperty.setAll(gameModel.getMyTiles());
-                myScoreProperty.set(gameModel.getMyScore());
-                List<String> myWordsList = gameModel.getMyWords().stream().map(w -> w.toString())
-                        .collect(Collectors.toList());
-                myWordsProperty.setAll(myWordsList);
-                myTurnProperty.set(gameModel.isMyTurn());
-                othersInfoProperty.clear();
-                othersInfoProperty.putAll(gameModel.getOthersInfo());
-                gameBooksProperty.addAll(gameModel.getGameBooks());
-                bagCountProperty.set(gameModel.getBagCount());
+                if (message.startsWith(GetMethod.updateAll)) {
+                    myNameProperty.set(gameModel.getPlayerProperties().getMyName());
+                    currentBoardProperty.set(gameModel.getCurrentBoard());
+                    myTilesProperty.setAll(gameModel.getMyTiles());
+                    myScoreProperty.set(gameModel.getMyScore());
+                    List<String> myWordsList = gameModel.getMyWords().stream().map(w -> w.toString())
+                            .collect(Collectors.toList());
+                    myWordsProperty.setAll(myWordsList);
+                    myTurnProperty.set(gameModel.isMyTurn());
+                    othersInfoProperty.clear();
+                    othersInfoProperty.putAll(gameModel.getOthersInfo());
+                    gameBooksProperty.addAll(gameModel.getGameBooks());
+                    bagCountProperty.set(gameModel.getBagCount());
 
-                setChanged();
-                notifyObservers(message);
+                    String update = message.split(",")[1];
+                    if (!update.startsWith(GetMethod.skipTurn)) {
+                        setChanged();
+                        notifyObservers(update);
+                    }
+                } else {
+                    setChanged();
+                    notifyObservers(message);
+                }
             });
 
         }
@@ -104,10 +107,6 @@ public class ViewModel extends Observable implements Observer {
 
     public StringProperty myNameProperty() {
         return myNameProperty;
-    }
-
-    public BooleanProperty connectedProperty() {
-        return connectedProperty;
     }
 
     public ObjectProperty<Tile[][]> currentBoardProperty() {
@@ -199,9 +198,7 @@ public class ViewModel extends Observable implements Observer {
                 }
             }
         }
-
         Word queryWord = new Word(tiles, f_Row, f_Col, isVer);
-        // System.out.println(queryWord);
         gameModel.tryPlaceWord(queryWord);
     }
 
@@ -258,8 +255,7 @@ public class ViewModel extends Observable implements Observer {
         return FXCollections.observableArrayList(bookList);
     }
 
-    /**************** Try Place Word ****************/
-
+    // Try place word methods
     public String getWord() {
         return wordBuilder.toString();
     }

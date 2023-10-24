@@ -379,42 +379,36 @@ public class GameManager extends Observable {
         Word queryWord = (Word) ObjectSerializer.deserializeObject(moveValue);
         Player player = getPlayerByID(id);
         int score = gameBoard.tryPlaceWord(queryWord);
+        // Word is not board legal
         if (score == -1) {
             return "notBoardLegal";
+            // Word is not dictionary legal
         } else if (score == 0) {
-            // System.out.println("\n\nGame Manager - tryPlace : not dic legal\n\n");
-            // some word that was made is not dictionary legal
-            // players can challenge this word or skip turn
+            // player can challenge or pass turn
             turnManager.setActiveWord(queryWord);
             player.setIsActiveWord(true);
-            String turnWords = "notDictionaryLegal:";
-            for (Word w : gameBoard.getTurnWords()) {
-                turnWords += (gameBoard.wordToString(w) + ":");
-            }
-            // String turnWords =
-            // ObjectSerializer.serializeObject(gameBoard.getTurnWords());
-            return turnWords;
+            // String turnWords = "notDictionaryLegal:";
+            // for (Word w : gameBoard.getTurnWords()) {
+            // turnWords += (gameBoard.wordToString(w) + ":");
+            // }
+            String turnWordSerailized = (String) ObjectSerializer.serializeObject(gameBoard.getTurnWords());
+            return "false" + ":" + turnWordSerailized;
+            // Player get points
         } else {
-            // System.out.println("\n\nGame Manager - tryPlace : got point / is dic
-            // legal\n\n");
-
             player.addPoints(score);
             player.addWords(gameBoard.getTurnWords());
             for (Tile t : queryWord.getTiles()) {
                 player.getMyHandTiles().remove(t);
             }
             turnManager.pullTiles(id);
-            // send some updated to the players, so they could getChanges():
-            // getCurrentBoard, getMyTiles, getMyWords
-
-            // setChanged();
-            // notifyObservers();
 
             turnManager.resetPasses();
             turnManager.nextTurn(1);
 
+            String turnWordSerailized = (String) ObjectSerializer.serializeObject(gameBoard.getTurnWords());
+
             String playerScore = String.valueOf(score);
-            return playerScore;
+            return playerScore + ":" + turnWordSerailized;
         }
     }
 
@@ -438,6 +432,12 @@ public class GameManager extends Observable {
             Word activeWord = turnManager.getActiveWord();
             String answer = challengeToGameServer(turnWords);
             Player player = getPlayerByID(playerId);
+
+            String turnWordSerailized = "";
+            try {
+                turnWordSerailized = (String) ObjectSerializer.serializeObject(turnWords);
+            } catch (IOException e) {
+            }
 
             if (answer.equals("true")) {
                 // System.out.println("\n\nGame Manager - challange : X2 Points\n\n");
@@ -466,7 +466,7 @@ public class GameManager extends Observable {
                 turnManager.nextTurn(1);
 
                 String playerScore = String.valueOf(score);
-                return playerScore;
+                return playerScore + ":" + turnWordSerailized;
 
             } else {
                 // System.out.println("\n\nGame Manager - challange : -10 Points\n\n");
@@ -484,7 +484,9 @@ public class GameManager extends Observable {
                 // notifyObservers("updateAll");
 
                 turnManager.nextTurn(-1);
-                return GetMethod.skipTurn;
+
+                return "false" + ":" + turnWordSerailized;
+
             }
         } else {
             return "false";
@@ -514,6 +516,9 @@ public class GameManager extends Observable {
                 return true;
             } else if (ans.equals("false")) {
                 return false;
+            } else {
+                setChanged();
+                notifyObservers("GAME-SERVER-ERROR: " + ans);
             }
         } catch (IOException e) {
         }
@@ -595,16 +600,16 @@ public class GameManager extends Observable {
         gameEnd = true;
         if (isHostQuitGame) {
             setChanged();
-            notifyObservers(GetMethod.endGame + "," + "HOST");
+            notifyObservers(GetMethod.updateAll + "," + GetMethod.endGame + ":" + "HOST");
         } else {
-            String playersScores = "";
-            for (Player p : playersByID.values()) {
-                playersScores += (p.getName() + "-" + p.getScore() + ":");
-            }
+            // String playersScores = "";
+            // for (Player p : playersByID.values()) {
+            // playersScores += (p.getName() + "-" + p.getScore() + ":");
+            // }
             setChanged();
-            notifyObservers(GetMethod.endGame + "," + playersScores);
+            notifyObservers(GetMethod.updateAll + "," + GetMethod.endGame + ":" + "OK");
 
-            // // reset the game for new game
+            // reset the game for new game
             // resetGame();
             // System.out.println("\n\n\n\n\n\n GAME ENDS \n\n\n\n\n\n\n");
         }
@@ -674,7 +679,7 @@ public class GameManager extends Observable {
              * Sets all players turn index's and the first player isTurn to true.
              */
 
-             System.out.println();
+            System.out.println();
             String drawTileString = "";
             // Pull tile for each player
             for (Player p : playersByID.values()) {
@@ -718,7 +723,7 @@ public class GameManager extends Observable {
 
             setCurrentTurnIndex(0);
             setChanged();
-            notifyObservers(GetMethod.updateAll + "," + "drawTiles:" + drawTileString);
+            notifyObservers(GetMethod.updateAll + "," + GetMethod.drawTiles + ":" + drawTileString);
         }
 
         public void nextTurn(int mode) {
@@ -736,26 +741,15 @@ public class GameManager extends Observable {
 
             // Check rounds
             if (allPlayersPassed()) {
-                this.rounds++;
-                resetPasses();
-                // passesPerRound.forEach((n, p) -> System.out.println(n.getName() + " : " +
-                // p));
-                // System.out.println("rounds: " + rounds);
-                if (rounds >= 3) {
+                rounds++;
+                if (rounds >= 5) {
                     endGame(false);
                     return;
                 }
             }
 
-            try {
-                String turnWords = ObjectSerializer.serializeObject(gameBoard.getTurnWords());
-                String update = (mode==1) ? turnWords : String.valueOf(mode);
-                gameBoard.clearTurnWords();
-                setChanged();
-                notifyObservers(GetMethod.updateAll + "," + oldPlayer.getName() + ":" + update);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            setChanged();
+            notifyObservers(GetMethod.updateAll + "," + GetMethod.skipTurn);
 
             // printTurnInfo();
         }
@@ -780,7 +774,9 @@ public class GameManager extends Observable {
             // Host Is Quitting
             if (quittingPlayer.getID() == hostPlayer.getID()) {
 
-                endGame(true);
+                if (!gameEnd) {
+                    endGame(true);
+                }
 
             } else {
                 // A guest player is quitting, adjust the turn and notify observers
@@ -832,7 +828,7 @@ public class GameManager extends Observable {
                 // Notify observers about the turn change and player removal
                 if (!gameEnd) {
                     setChanged();
-                    notifyObservers(GetMethod.quitGame + "," + quittingPlayer.getName() + "," + totalPlayersNum);
+                    notifyObservers(GetMethod.updateAll + "," + GetMethod.quitGame + ":" + quittingPlayer.getName());
                 }
 
                 // printTurnInfo();

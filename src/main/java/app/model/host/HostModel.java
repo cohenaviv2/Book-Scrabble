@@ -8,6 +8,7 @@ import app.model.GetMethod;
 import app.model.game.*;
 import app.model.server.*;
 import app.view_model.MessageReader;
+import javafx.concurrent.Task;
 
 public class HostModel extends Observable implements GameModel, Observer {
 
@@ -99,37 +100,18 @@ public class HostModel extends Observable implements GameModel, Observer {
                         GetMethod.tryPlaceWord,
                         queryWord);
 
-                if (ans.equals("false")) {
+                if (ans.equals("notBoardLegal")) {
 
                     // PRINT DEBUG
-                    // System.out.println("tryPlaceWord - some error/turn");
-
-                } else if (ans.equals("notBoardLegal")) {
-
-                    // PRINT DEBUG
-                    System.out.println("Word's not Board legal, Try again");
-                    MessageReader.setMsg("notBoardLegal");
-
-                } else if (ans.startsWith("notDictionaryLegal")) {
-
-                    // PRINT DEBUG
-                    // System.out.println("Some word is not Dictionary legal" + ans + "\nYou can try
-                    // Challenge or Pass turn");
-
-                    MessageReader.setMsg("notDictionaryLegal");
-
+                    // System.out.println("Word's not Board legal, Try again");
                     setChanged();
-                    notifyObservers(GetMethod.tryPlaceWord + "," + ans);
-
-                } else if (ans.equals("cantSerialize")) {
-
-                    // PRINT DEBUG
-                    // System.out.println("tryPlaceWord - cant serialize");
+                    notifyObservers(GetMethod.tryPlaceWord + "," + "notBoardLegal");
 
                 } else {
-                    // PRINT DEBUG
-                    // System.out.println("You got more points!");
-                    MessageReader.setMsg("You got more points!");
+                     // PRINT DEBUG
+                    // System.out.println("tryPlaceWord - some error/turn");
+                    setChanged();
+                    notifyObservers(GetMethod.tryPlaceWord + "," + ans);
                 }
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
@@ -146,25 +128,8 @@ public class HostModel extends Observable implements GameModel, Observer {
                         "true");
                 // System.out.println("\n\nHostModel - challange ans:" + ans + "\n\n");
 
-                if (ans.equals("false")) {
-
-                    // PRINT DEBUG
-                    // System.out.println("challenge - some error/turn");
-
-                } else if (ans.equals("skipTurn")) {
-
-                    // PRINT DEBUG
-                    // System.out.println("some word that was made is not dictionary legal - skiping
-                    // turn!");
-                    MessageReader.setMsg("Challenge failed, You lose 10 points");
-
-                } else {
-
-                    // PRINT DEBUG
-                    // System.out.println("Challenge was successful!\nYou got more Points!");
-                    MessageReader.setMsg("Challenge was successful!\nYou got more Points!");
-
-                }
+                    setChanged();
+                    notifyObservers(GetMethod.challenge + "," + ans);
             } catch (ClassNotFoundException | IOException e) {
             }
         }
@@ -198,25 +163,33 @@ public class HostModel extends Observable implements GameModel, Observer {
         if (this.hostServer.getNumOfClients() > 0) {
             String quitGameMod = String.valueOf(gameManager.getHostID()) + "," + GetMethod.quitGame + "," + "true";
             this.gameManager.quitGameHandler(quitGameMod);
-            if (hostServer.getNumOfClients() > 0) {
-                try {
+
+            // Run the waiting logic in a background task
+            Task<Void> waitingTask = new Task<Void>() {
+                @Override
+                protected Void call() throws Exception {
+                    // Sleep for 3 seconds
                     Thread.sleep(3000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    return null;
                 }
-            }
-            if (this.hostServer.getNumOfClients() == 0) {
-                this.hostServer.close();
-                setChanged();
-                notifyObservers(GetMethod.endGame + "," + "OK");
-                System.out.println("\n0 Clients - Host server is closed and the host has quit the game");
-            } else {
-                System.out
-                        .println("\n\n*** There are still clients connected ! ***\n\n" + hostServer.getNumOfClients());
-            }
+            };
+
+            waitingTask.setOnSucceeded(event -> {
+                if (this.hostServer.getNumOfClients() == 0) {
+                    this.hostServer.close();
+                    setChanged();
+                    notifyObservers(GetMethod.exit);
+                    System.out.println("\n0 Clients - Host server is closed, and the host has quit the game");
+                } else {
+                    System.out.println(
+                            "\n\n*** There are still clients connected ! ***\n\n" + hostServer.getNumOfClients());
+                }
+            });
+
+            new Thread(waitingTask).start(); // Start the task in a separate thread
         } else {
             this.hostServer.close();
-            System.out.println("\nNo clients - Host server is closed and the host has quit the game");
+            System.out.println("\nNo clients - Host server is closed, and the host has quit the game");
         }
     }
 
@@ -462,25 +435,44 @@ public class HostModel extends Observable implements GameModel, Observer {
     @Override
     public void update(Observable o, Object arg) {
         if (o == gameManager) {
-            String message = (String) arg;
-            this.hostServer.sendToAll(message);
-            if (message.startsWith(GetMethod.sendTo)) {
-                checkMessage(message);
-            } else {
+            // String message = (String) arg;
+            // if(message.startsWith(GetMethod.updateAll)){
+            // hostServer.sendToAll(message);
+            // }
+            // if (message.startsWith(GetMethod.sendTo)) {
+            // checkMessage(message);
+            // } else {
+            // updateProperties();
+            // setChanged();
+            // notifyObservers(message);
+            // }
+            String update = (String) arg;
+            System.out.println("Model: "+update);
+            if (update.startsWith(GetMethod.updateAll)) {
+                hostServer.sendToAll(update);
                 updateProperties();
                 setChanged();
-                notifyObservers(message);
+                notifyObservers(update);
+
+            } else if (update.startsWith(GetMethod.sendTo)) {
+                hostServer.sendToAll(update);
+                String message = update.split(",")[1];
+                checkForMessage(message);
+            } else if(update.startsWith("GAME-SERVER-ERROR")){
+                System.out.println(update);
+            }
+            else {
+                setChanged();
+                notifyObservers(update);
             }
         }
     }
 
-    private void checkMessage(String message) {
-        if ((message.startsWith(GetMethod.sendTo)
-                && message.split(",")[1].split(":")[0].equals(playerProperties.getMyName())) || message.startsWith(GetMethod.sendToAll)) {
-            updateProperties();
+    private void checkForMessage(String update) {
+        if (update.startsWith(playerProperties.getMyName()) || update.startsWith("All")) {
             setChanged();
-            notifyObservers(message);
-        } 
+            notifyObservers(update);
+        }
     }
 
     @Override
@@ -500,7 +492,7 @@ public class HostModel extends Observable implements GameModel, Observer {
 
     @Override
     public void sendToAll(String message) {
-        hostServer.sendToAll(GetMethod.sendToAll + "," + message + ":" + playerProperties.getMyName());
+        hostServer.sendToAll(GetMethod.sendToAll + "," + "All" + message + ":" + playerProperties.getMyName());
     }
 
 }

@@ -21,7 +21,8 @@ public class GuestModel extends Observable implements GameModel, Observer {
     private PlayerProperties playerProperties;
     private boolean isConnected = false;
 
-    private GuestModel(){}
+    private GuestModel() {
+    }
 
     public static GuestModel get() {
         if (gm == null)
@@ -183,7 +184,7 @@ public class GuestModel extends Observable implements GameModel, Observer {
 
     @Override
     public void sendToAll(String message) {
-        commHandler.sendMessage(GetMethod.sendToAll, message + ":" + playerProperties.getMyName());
+        commHandler.sendMessage(GetMethod.sendToAll, "All" + message + ":" + playerProperties.getMyName());
     }
 
 }

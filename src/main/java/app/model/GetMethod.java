@@ -23,5 +23,6 @@ public class GetMethod {
     public static final String getGameBooks = "getGameBooks";
     public static final String updateAll = "updateAll";
     public static final String endGame = "endGame";
-
+    public static final String drawTiles = "drawTiles";
+    public static final String exit = "exit";
 }

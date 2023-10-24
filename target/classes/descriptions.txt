@@ -46,7 +46,26 @@ game-flow-rules=1. Each player randomly draws a tile from the bag.
         - The above calculation is true for every new word created on the board following the placement in turn.
 7. A player who cannot form a valid word forfeits their turn.
 8. The game will end after N rounds.
-game-flow-how-to-play=Click and mark the first place on the board......
+game-flow-how-to-play=
+            1. Start of Your Turn:
+               - Click any two adjacent cells on the board to select the starting and ending positions for your word.
+                 The selected cells should be in the same row or column.
+               - Click a selected cell again to unselect it.
+               - You can reset your cell and tile selections by clicking the gray 'Reset' button.
+            2. Selecting Letter Tiles:
+               - Click on the letter tiles from your rack to select them in the order you want to use them in your word.
+               - You can sort your letter tiles alphabetically by clicking the blue 'Sort' button.
+            3. Placing Tiles on the Board:
+               - After selecting two cells and the corresponding letter tiles, click the 'Place Tile' button
+                 to put the tiles on the board in the order you've selected them.
+            4. Completing Your Word:
+               - Continue selecting two cells and placing tiles until you've formed the word you want to play.
+                 Tiles should be placed in a continuous line.
+            5. Validation:
+               - When you're ready, click the 'Try Place Word' button to attempt to place your word on the board.
+               - If your word is not found in the game's dictionary, you will receive an alert.
+               - You have the option to challenge the dictionary. If successful, you'll receive double points; otherwise, you lose 10 points.
+               - If you don't want to challenge, you can choose to pass your turn.
 custom-port=The host server usually runs on a default Port.
 Sometimes the host chooses a custom Port.
 Ask your host if the Port has changed, and if set it here:
@@ -60,3 +79,7 @@ If so, ask the host if they changed the port,
 so you can change it in the settings.
 If you are still having trouble connecting,
 please check your internet connection, firewall or permissions
+not-board-legal=The word you placed is not allowed according to the game rules
+
+If you're unsure about the rules,
+click the 'Help' button to view the game instructions

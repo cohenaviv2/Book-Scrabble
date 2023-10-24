@@ -96,7 +96,7 @@
   -fx-font-weight: bold;
   -fx-background-color: linear-gradient(rgb(187, 128, 19), grey),
     rgb(204, 173, 0);
-  -fx-background-radius: 10;
+  -fx-background-radius: 40;
   -fx-text-fill: white;
   -fx-effect: dropshadow(one-pass-box, black, 8, 0, 2, 0);
 }
@@ -200,9 +200,9 @@
   -fx-border-color: black;
 }
 
-.score-label {
+.main-score-label {
   -fx-font-size: 50px;
-  /* -fx-text-fill: rgb(0, 174, 255); */
+  -fx-text-fill: rgb(0, 174, 255);
   -fx-font-weight: bold;
   -fx-font-family: "Comic Sans MS";
   -fx-padding: 10px;
@@ -211,11 +211,20 @@
 
 .other-score-label {
   -fx-font-size: 25px;
-  /* -fx-text-fill: rgb(0, 174, 255); */
+  -fx-text-fill: rgb(0, 140, 255);
   -fx-font-weight: bold;
   -fx-font-family: "Comic Sans MS";
   -fx-padding: 10px;
-  -fx-effect: dropshadow(gaussian, rgb(0, 0, 0), 20, 0, 2, 6);
+  -fx-effect: dropshadow(gaussian, rgb(0, 0, 0), 30, 0, 2, 6);
+}
+
+.winner-score-label {
+  -fx-font-size: 50px;
+  -fx-text-fill: rgb(6, 193, 0);
+  -fx-font-weight: bold;
+  -fx-font-family: "Comic Sans MS";
+  -fx-padding: 10px;
+  -fx-effect: dropshadow(gaussian, rgb(0, 0, 0), 30, 0, 2, 6);
 }
 
 .bag-label {
@@ -297,16 +306,34 @@
 .board-cell.selected {
   -fx-alignment: center;
   -fx-border-color: black;
+  -fx-effect: dropshadow(gaussian, rgb(220, 243, 8), 40, 0.1, 0, 10);
   -fx-border-width: 4px;
+  -fx-border-radius: 5px;
+}
+
+.board-cell.star {
+  -fx-alignment: center;
+  -fx-border-color: gold;
+  -fx-effect: dropshadow(gaussian, gold, 60, 0.5, 0, 1);
+  -fx-border-width: 1px;
   -fx-border-radius: 5px;
 }
 
 .board-cell.highlight {
   -fx-alignment: center;
-  -fx-border-color: rgb(91, 247, 91);
-  -fx-border-width: 4px;
+  -fx-border-color: rgb(120, 253, 120);
+  -fx-border-width: 3px;
   -fx-border-radius: 5px;
   -fx-effect: dropshadow(gaussian, rgb(157, 255, 45), 25, 0, 0, 7);
+
+}
+
+.board-cell.failed {
+  -fx-alignment: center;
+  -fx-border-color: rgb(206, 0, 0);
+  -fx-border-width: 3px;
+  -fx-border-radius: 5px;
+  -fx-effect: dropshadow(gaussian, rgb(233, 58, 58), 25, 0, 0, 7);
 
 }
 
@@ -336,6 +363,16 @@
   -fx-effect: dropshadow(gaussian, rgb(255, 241, 45), 15, 0, 0, 0);
 }
 
+.score-highlight {
+  /* Define the hover effect styles here */
+  -fx-effect: dropshadow(gaussian, rgb(106, 252, 252), 45, 0, 0, 3);
+}
+
+.score-failed {
+  /* Define the hover effect styles here */
+  -fx-effect: dropshadow(gaussian, rgb(253, 115, 115), 45, 0, 0, 3);
+}
+
 .book-scrabble-header {
   -fx-font-size: 55px;
   -fx-fill: antiquewhite;
@@ -345,7 +382,7 @@
   -fx-effect: dropshadow(gaussian, black, 20, 0, 2, 6);
 }
 
-.my-name-label {
+.main-name-label {
   -fx-font-size: 35px;
   -fx-font-weight: bold;
   -fx-font-family: "Comic Sans MS";
@@ -358,13 +395,13 @@
   -fx-font-weight: bold;
   -fx-font-family: "Comic Sans MS";
   -fx-text-fill: rgb(245, 245, 245);
-  -fx-effect: dropshadow(gaussian, #1f1f1f, 5, 0, 0, 1);
+  -fx-effect: dropshadow(gaussian, #1f1f1f, 30, 0, 0, 2);
 }
 
 .mode-label {
   -fx-font-size: 16px;
   -fx-padding: 5px;
-  -fx-text-fill: gainsboro;
+  -fx-text-fill: rgb(196, 196, 196);
   -fx-effect: dropshadow(gaussian, #000000, 20, 0, 2, 6);
 }
 
@@ -374,7 +411,7 @@
 }
 
 .selected-book-image {
-  -fx-effect: dropshadow(gaussian, gold, 7, 1, 0, 1);
+  -fx-effect: dropshadow(gaussian, gold, 40, 0.7, 0, 0);
 }
 
 .error-field {
@@ -418,7 +455,7 @@
 }
 
 .message-content-background {
-  -fx-background-color: rgb(8, 61, 13);
+  -fx-background-color: rgb(255, 235, 123);
   -fx-border-color: black;
   -fx-border-width: 3px;
 }
