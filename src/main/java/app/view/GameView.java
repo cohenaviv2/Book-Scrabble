@@ -1,20 +1,15 @@
 package app.view;
 
 import java.io.*;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.net.*;
 import java.util.*;
 
 import app.model.game.Tile;
 import app.model.game.Word;
 import app.model.host.HostModel;
-import app.view_model.MessageReader;
 import app.view_model.ViewModel;
 import javafx.animation.*;
 import javafx.application.Platform;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.StringProperty;
 import javafx.collections.*;
 import javafx.event.*;
 import javafx.geometry.*;
@@ -66,6 +61,7 @@ public class GameView {
         icons.put("star", new Image("icons/star-icon.png"));
         icons.put("bag", new Image("icons/bag-icon.png"));
         icons.put("trophy", new Image("icons/trophy-icon.png"));
+        icons.put("arrow", new Image("icons/arrow-icon.png"));
         this.symbols = new HashMap<>();
         symbols.put("exit", "\uD83D\uDDD9");
         symbols.put("minimize", "\uD83D\uDDD5");
@@ -73,8 +69,10 @@ public class GameView {
         symbols.put("help", "❓");
         symbols.put("messages", "\uD83D\uDCE8");
         symbols.put("back", "\u2B05");
-        symbols.put("prev", "⮜");
-        symbols.put("next", "⮞");
+        symbols.put("left", "⮜");
+        symbols.put("right", "⮞");
+        symbols.put("up", "🡅");
+        symbols.put("down", "🡇");
         symbols.put("copy", "📋");
         symbols.put("sort", "⭰");
         symbols.put("reset", "\u2B6F"); // \u2B6F ⟲ ⭯
@@ -168,7 +166,7 @@ public class GameView {
         hostButton.setOnAction(event -> {
             this.isHost = true;
             this.gameViewModel.initialize(isHost);
-            gameController.gameSetupStage.close();
+            gameController.gameLoginStage.close();
             gameController.showLoginWindow(isHost);
         });
 
@@ -182,7 +180,7 @@ public class GameView {
         guestButton.setOnAction(event -> {
             this.isHost = false;
             this.gameViewModel.initialize(isHost);
-            gameController.gameSetupStage.close();
+            gameController.gameLoginStage.close();
             gameController.showLoginWindow(isHost);
         });
 
@@ -273,10 +271,9 @@ public class GameView {
         Text modeText = new Text(descriptions.get("game-mode-" + descMode));
         modeText.getStyleClass().add("content-label");
         modeText.setTextAlignment(TextAlignment.CENTER);
-        modeText.setFill(Color.WHITE);
-        VBox guestModeExp = new VBox(10, modeTitle, modeText);
-        guestModeExp.setAlignment(Pos.CENTER);
-        Node[] helpNodes = createCustomBox(guestModeExp, "red", symbols.get("exit"), "help");
+        VBox modeExp = new VBox(10, modeTitle, modeText);
+        modeExp.setAlignment(Pos.CENTER);
+        Node[] helpNodes = createCustomBox(modeExp, "red", symbols.get("exit"), "help");
         VBox helpBox = (VBox) helpNodes[0];
         helpButton.setOnAction(e -> gameController.showCustomWindow(helpBox, 700, 400));
         Button settingsButton = (Button) roundButtonsPane.getChildren().get(1);
@@ -513,7 +510,7 @@ public class GameView {
     }
 
     private HBox createRoundButtons(boolean isGameFlow) {
-        HBox roundButtonsPane = new HBox(15);
+        HBox roundButtonsPane = new HBox(12);
         roundButtonsPane.setAlignment(Pos.CENTER);
         roundButtonsPane.setPadding(new Insets(30, 0, 0, 0));
         roundButtonsPane.setMinHeight(70);
@@ -545,10 +542,11 @@ public class GameView {
         Button goBackButton = new Button(symbols.get("back"));
         goBackButton.getStyleClass().add("green-button");
         goBackButton.setOnAction(e -> {
+            gameController.close();
             if (isHost) {
                 HostModel.get().stopHostServer();
             }
-            gameController.gameSetupStage.close();
+            gameController.gameLoginStage.close();
             gameController.showInitialWindow();
         });
 
@@ -596,10 +594,6 @@ public class GameView {
         Node[] quitGameBox = createCustomBox(quitAlertBox, null, null, "alert");
 
         return (VBox) quitGameBox[0];
-    }
-
-    public HBox getOsBar() {
-        return osBar;
     }
 
     private Node[] createCustomBox(Node content, String btnColor, String btnText, String theme) {
@@ -792,6 +786,7 @@ public class GameView {
 
             HBox myIpBox = new HBox(10, myIpField, copyButton);
             myIpBox.setAlignment(Pos.CENTER);
+            myIpBox.setPadding(new Insets(0, 0, 10, 0));
 
             CheckBox localIpCheckBox = new CheckBox("We're playing on the same network");
             localIpCheckBox.setTextFill(Color.DARKSLATEGREY);
@@ -828,7 +823,7 @@ public class GameView {
 
             // settings = new VBox(5, gameServerSettings, customPortSettings, myIpSettings);
             VBox[] switchList = { myIpSettings, customPortSettings, gameServerSettings };
-            settings = createSwitchableHBox(switchList);
+            settings = createSwitchableHBox(switchList, false);
 
         } else {
             // Custom port
@@ -887,7 +882,7 @@ public class GameView {
                 error = descriptions.get("game-server-error");
                 connected = false;
             } else if (!gameViewModel.isConnected()) {
-                error = descriptions.get("game-server-error");
+                error = descriptions.get("host-server-error");
                 connected = false;
             }
 
@@ -1145,10 +1140,14 @@ public class GameView {
     }
 
     public VBox createDrawTilesBox(String drawTilesString) {
-        Text drawTilesTitle = new Text("Draw Tiles");
-        drawTilesTitle.getStyleClass().add("title");
+        Label drawTilesLabel = new Label("Draw Tiles");
+        drawTilesLabel.getStyleClass().add("title");
+        drawTilesLabel.setStyle("-fx-font-size: 60; -fx-text-fill: mediumorchid; ");
+        drawTilesLabel.setPadding(new Insets(10, 0, 20, 0));
+
         String firstName = drawTilesString.split(":")[0].split("-")[0];
         HBox players = new HBox();
+        players.setPadding(new Insets(30, 0, 30, 0));
         players.setAlignment(Pos.CENTER);
         for (String s : drawTilesString.split("_")) {
             // this.totalPlayersNum++;
@@ -1156,25 +1155,38 @@ public class GameView {
             String letter = s.split("-")[1];
             Text nameText = new Text(name);
             nameText.getStyleClass().add("little-title");
-            nameText.setFill(Color.BROWN);
+            nameText.setFill(Color.WHITE);
             nameText.setTextAlignment(TextAlignment.CENTER);
             Button tileButton = new Button();
-            tileButton.setPrefSize(45, 45);
+            tileButton.setPrefSize(55, 55);
             tileButton.getStyleClass().add("tile-button");
             tileButton.setStyle("-fx-background-image: url('tiles/" + letter + ".png');");
             VBox playerBox = new VBox(15, nameText, tileButton);
             playerBox.setAlignment(Pos.CENTER);
-            playerBox.setPrefSize(100, 100);
-            players.getChildren().add(playerBox);
+            playerBox.setPrefSize(100, 120);
+            if (name.equals(firstName)) {
+                playerBox.getStyleClass().add("glow-button");
+                ImageView arrowIcon = new ImageView(icons.get("turn"));
+                arrowIcon.setFitHeight(70);
+                arrowIcon.setFitWidth(70);
+                arrowIcon.getStyleClass().add("glow-button");
+                HBox startingPlayerBox = new HBox(5, arrowIcon, playerBox);
+                startingPlayerBox.setAlignment(Pos.BOTTOM_CENTER);
+                players.getChildren().add(startingPlayerBox);
+            } else {
+                players.getChildren().add(playerBox);
+            }
         }
         String firstString = firstName.equals(myName) ? "You play first!" : (firstName + " is playing first!");
         Text firstPlayerText = new Text(firstString);
         firstPlayerText.setTextAlignment(TextAlignment.CENTER);
         firstPlayerText.setFont(Font.font("Arial", FontWeight.BOLD, 20));
-        VBox box = new VBox(40, drawTilesTitle, players, firstPlayerText);
+        firstPlayerText.setFill(Color.LIGHTBLUE);
+        VBox box = new VBox(40, drawTilesLabel, players, firstPlayerText);
+        box.setPadding(new Insets(0, 0, 20, 0));
         box.setAlignment(Pos.CENTER);
 
-        Node[] drawTilesNodes = createCustomBox(box, "darkgreen", "Let's Go", "drawtiles");
+        Node[] drawTilesNodes = createCustomBox(box, "green", "Let's Go", "drawtiles");
         VBox drawTilesBox = (VBox) drawTilesNodes[0];
 
         return drawTilesBox;
@@ -1194,6 +1206,16 @@ public class GameView {
             tileButton.setPrefSize(45, 45);
             tileButton.getStyleClass().add("tile-button");
             tileButton.setStyle("-fx-background-image: url('tiles/" + letter + ".png')");
+            tileButton.getStyleClass().add("glow-button");
+            Timer timer = new Timer();
+            timer.schedule(new TimerTask() {
+
+                @Override
+                public void run() {
+                    tileButton.getStyleClass().remove("glow-button");
+                }
+
+            }, 300);
 
             tileButton.setOnAction(event -> {
                 // Handle button click, similar to your existing code
@@ -1277,7 +1299,10 @@ public class GameView {
         Button passTurnButton = new Button("Pass Turn");
         passTurnButton.getStyleClass().add("yellow-button");
         passTurnButton.setStyle("-fx-font-size: 23px;");
-        passTurnButton.setOnAction(e -> gameViewModel.skipTurn());
+        passTurnButton.setOnAction(e -> {
+            gameViewModel.skipTurn();
+            // gameBoard.setDisable(false);
+        });
 
         // Challange Button
         Button challengeButton = new Button("Challenge");
@@ -1286,6 +1311,7 @@ public class GameView {
         challengeButton.setDisable(true);
         challengeButton.setOnAction(event -> {
             isTilePlaced = false;
+            // gameBoard.setDisable(false);
             gameViewModel.challenge();
         });
 
@@ -1313,6 +1339,9 @@ public class GameView {
         tryPlaceWordButton.setStyle("-fx-font-size: 26px;");
         tryPlaceWordButton.setOnAction(event -> {
             isTilePlaced = false;
+            // gameBoard.setDisable(true);
+            resetTilesButton.setDisable(true);
+            sortTilesButton.setDisable(true);
             tryPlaceWordButton.setDisable(true);
             challengeButton.setDisable(false);
 
@@ -1341,8 +1370,8 @@ public class GameView {
 
         // Round buttons pane
         Button helpButton = (Button) roundButtonsBox.getChildren().get(0);
-        VBox helpBox = createGameHelpBox();
-        helpButton.setOnAction(e -> gameController.showCustomWindow(helpBox, 1100, 900));
+        VBox helpBox = createGameInstuctionsBox();
+        helpButton.setOnAction(e -> gameController.showCustomWindow(helpBox, 900, 600));
 
         Button messageButton = (Button) roundButtonsBox.getChildren().get(1);
         Node[] messagesNodes = createCustomBox(createMessagesBox(), "red", symbols.get("exit"), "message");
@@ -1356,12 +1385,89 @@ public class GameView {
         return customRoot;
     }
 
-    private VBox createGameHelpBox() {
+    public VBox createGameInstuctionsBox() {
         VBox instructions1 = createTextAlertBox("Rules And Gameplay", descriptions.get("game-flow-rules"), false);
         VBox instructions2 = createTextAlertBox("How To Play", descriptions.get("game-flow-how-to-play"), false);
-        VBox[] switchList = { instructions1, instructions2 };
-        HBox instructionsBox = createSwitchableHBox(switchList);
-        Node[] helpBoxNodes = createCustomBox(instructionsBox, "red", symbols.get("exit"), "help");
+        /**************************** */
+        VBox howToPlayBox = new VBox(15);
+        howToPlayBox.setAlignment(Pos.CENTER);
+        Label howToLabel = new Label("How To Play");
+        howToLabel.getStyleClass().add("title");
+        howToLabel.setStyle("-fx-font-size: 40; -fx-text-fill: black; ");
+        // howToLabel.setPadding(new Insets(0, 0, 30, 0));
+
+        Label selectCellLabel = new Label("Select Cells");
+        selectCellLabel.getStyleClass().add("title");
+        selectCellLabel.setStyle("-fx-font-size: 22;  -fx-text-fill: black;");
+        ImageView selectCellsGif = new ImageView(new Image("instructions/select-cells.gif"));
+        VBox firstBox = new VBox(20, selectCellLabel, selectCellsGif);
+        firstBox.setAlignment(Pos.CENTER);
+        firstBox.setPadding(new Insets(15, 15, 15, 15));
+
+        Label selectTilesLabel = new Label("Select Tiles");
+        selectTilesLabel.getStyleClass().add("title");
+        selectTilesLabel.setStyle("-fx-font-size: 22;  -fx-text-fill: black;");
+        ImageView selectTilesGif = new ImageView(new Image("instructions/select-tiles.gif"));
+        VBox secondBox = new VBox(20, selectTilesLabel, selectTilesGif);
+        secondBox.setAlignment(Pos.CENTER);
+        secondBox.setPadding(new Insets(15, 15, 15, 15));
+
+        Label tryButtonLabel = new Label("Click the Try Place Button");
+        tryButtonLabel.getStyleClass().add("title");
+        tryButtonLabel.setStyle("-fx-font-size: 22;  -fx-text-fill: black;");
+        ImageView tryPlaceGif = new ImageView(new Image("instructions/try-place.gif"));
+        VBox thirdBox = new VBox(20, tryButtonLabel, tryPlaceGif);
+        thirdBox.setAlignment(Pos.CENTER);
+        thirdBox.setPadding(new Insets(15, 15, 15, 15));
+
+        Label placeWordLabel = new Label("Place Word");
+        placeWordLabel.getStyleClass().add("title");
+        placeWordLabel.setStyle("-fx-font-size: 22; -fx-text-fill: black;");
+        ImageView placeWordGif = new ImageView(new Image("instructions/place-word.gif"));
+        VBox fourthBox = new VBox(20, placeWordLabel, placeWordGif);
+        fourthBox.setAlignment(Pos.CENTER);
+        fourthBox.setPadding(new Insets(15, 15, 15, 15));
+
+        VBox main = new VBox(10, firstBox, secondBox, thirdBox, fourthBox);
+        main.setStyle("-fx-background-color: rgb(168, 79, 212);");
+        main.setAlignment(Pos.CENTER);
+        main.setPrefSize(600, 270);
+
+        ScrollPane scrollPane = new ScrollPane(main);
+        scrollPane.setMinViewportWidth(600); // Set the preferred width
+        scrollPane.setMinViewportHeight(300); // Set the preferred height
+        scrollPane.setStyle("-fx-background-color: rgb(168, 79, 212);");
+
+        VBox[] list = { firstBox, secondBox, thirdBox, fourthBox };
+        howToPlayBox.getChildren().addAll(howToLabel, scrollPane);
+
+        VBox instructionsBox = new VBox(15);
+        instructionsBox.setAlignment(Pos.CENTER);
+        instructionsBox.setPrefSize(600, 300);
+        Label instructionsLabel = new Label("Rules And Gameplay");
+        instructionsLabel.getStyleClass().add("title");
+        instructionsLabel.setStyle("-fx-font-size: 40; -fx-text-fill: black; ");
+
+        Text instructionsText = new Text(descriptions.get("game-flow-rules"));
+        instructionsText.setFill(Color.WHITE);
+        instructionsText.setFont(new Font(25));
+
+        VBox main2 = new VBox(10, instructionsText);
+        main2.setStyle("-fx-background-color: rgb(168, 79, 212);");
+        main2.setAlignment(Pos.CENTER);
+        main2.setPrefSize(600, 300);
+
+        ScrollPane scrollPane2 = new ScrollPane(main2);
+        scrollPane.setMinViewportWidth(600); // Set the preferred width
+        scrollPane.setMinViewportHeight(300); // Set the preferred height
+        scrollPane.setStyle("-fx-background-color: rgb(168, 79, 212);");
+
+        instructionsBox.getChildren().addAll(instructionsLabel, scrollPane2);
+
+        /**************************** */
+        VBox[] switchList = { howToPlayBox, instructionsBox };
+        HBox gameInstructionsBox = createSwitchableHBox(switchList, false);
+        Node[] helpBoxNodes = createCustomBox(gameInstructionsBox, "red", symbols.get("exit"), "help");
         VBox helpBox = (VBox) helpBoxNodes[0];
 
         return helpBox;
@@ -1524,18 +1630,21 @@ public class GameView {
         return null;
     }
 
-    private HBox createSwitchableHBox(VBox[] vBoxes) {
+    private HBox createSwitchableHBox(VBox[] vBoxes, boolean isVertical) {
         HBox switchableHBox = new HBox();
         switchableHBox.setAlignment(Pos.CENTER);
+        String buttonColor = isVertical ? "lightblue-button" : "brown-button";
+        String firstButtonSymbol = isVertical ? symbols.get("up") : symbols.get("left");
+        String secondButtonSymbol = isVertical ? symbols.get("down") : symbols.get("right");
 
         // Create buttons for switching
-        Button prevButton = new Button(symbols.get("prev"));
-        prevButton.getStyleClass().add("brown-button");
-        VBox prevBox = new VBox(prevButton);
+        Button firstButton = new Button(firstButtonSymbol);
+        firstButton.getStyleClass().add(buttonColor);
+        VBox prevBox = new VBox(firstButton);
         prevBox.setAlignment(Pos.CENTER);
-        Button nextButton = new Button(symbols.get("next"));
-        nextButton.getStyleClass().add("brown-button");
-        VBox nextBox = new VBox(nextButton);
+        Button secondButton = new Button(secondButtonSymbol);
+        secondButton.getStyleClass().add(buttonColor);
+        VBox nextBox = new VBox(secondButton);
         nextBox.setAlignment(Pos.CENTER);
 
         // Initialize the index to 0
@@ -1544,17 +1653,18 @@ public class GameView {
         // Create a StackPane to hold the VBox in the middle with a fixed size
         StackPane middleContainer = new StackPane();
         middleContainer.setPrefSize(450, 250); // Set your desired fixed size here
+        middleContainer.setPadding(new Insets(0, 10, 0, 10));
         middleContainer.getChildren().add(vBoxes[currentIndex[0]]);
 
         // Handle switching to the previous VBox
-        prevButton.setOnAction(event -> {
+        firstButton.setOnAction(event -> {
             middleContainer.getChildren().remove(vBoxes[currentIndex[0]]);
             currentIndex[0] = (currentIndex[0] - 1 + vBoxes.length) % vBoxes.length;
             middleContainer.getChildren().add(vBoxes[currentIndex[0]]);
         });
 
         // Handle switching to the next VBox
-        nextButton.setOnAction(event -> {
+        secondButton.setOnAction(event -> {
             middleContainer.getChildren().remove(vBoxes[currentIndex[0]]);
             currentIndex[0] = (currentIndex[0] + 1) % vBoxes.length;
             middleContainer.getChildren().add(vBoxes[currentIndex[0]]);
@@ -1636,7 +1746,7 @@ public class GameView {
             gameController.closeCustomWindow();
             String to = players.getValue();
             String message = messageField.getText();
-            if(message.length()>0){
+            if (message.length() > 0) {
                 if (to.equals("All")) {
                     gameViewModel.sendToAll(message);
                 } else {
@@ -1704,7 +1814,7 @@ public class GameView {
         helpButton.getStyleClass().add("purple-button");
         helpButton.setOnAction(e -> {
             gameController.resetWordPlacement();
-            gameController.showCustomWindow(createGameHelpBox(), 1100, 900);
+            gameController.showCustomWindow(createGameInstuctionsBox(), 600, 600);
         });
         illegalMoveBox.getChildren().add(helpButton);
 

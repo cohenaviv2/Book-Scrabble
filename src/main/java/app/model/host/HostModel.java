@@ -14,7 +14,7 @@ public class HostModel extends Observable implements GameModel, Observer {
 
     private static HostModel hm = null; // Singleton
     public static final int HOST_SERVER_PORT = 8040;
-    public MyServer hostServer; // Host server - support connection of up to 3 guests parallel
+    private MyServer hostServer; // Host server - support connection of up to 3 guests parallel
     private GameManager gameManager; // game manager contains all the game data and logic
     private PlayerProperties playerProperties; // All player properties for the game view
 
@@ -27,13 +27,20 @@ public class HostModel extends Observable implements GameModel, Observer {
     }
 
     public static HostModel get() {
-        if (hm == null)
+        if (hm == null) {
             hm = new HostModel();
+        }
         return hm;
     }
 
     public void stopHostServer() {
         hostServer.close();
+    }
+
+    public void startHostServer() {
+        if (!hostServer.isRunning()) {
+            hostServer.start();
+        }
     }
 
     public void setNumOfPlayers(int numOftotalPlayers) {
@@ -108,7 +115,7 @@ public class HostModel extends Observable implements GameModel, Observer {
                     notifyObservers(GetMethod.tryPlaceWord + "," + "notBoardLegal");
 
                 } else {
-                     // PRINT DEBUG
+                    // PRINT DEBUG
                     // System.out.println("tryPlaceWord - some error/turn");
                     setChanged();
                     notifyObservers(GetMethod.tryPlaceWord + "," + ans);
@@ -128,8 +135,8 @@ public class HostModel extends Observable implements GameModel, Observer {
                         "true");
                 // System.out.println("\n\nHostModel - challange ans:" + ans + "\n\n");
 
-                    setChanged();
-                    notifyObservers(GetMethod.challenge + "," + ans);
+                setChanged();
+                notifyObservers(GetMethod.challenge + "," + ans);
             } catch (ClassNotFoundException | IOException e) {
             }
         }
@@ -447,7 +454,7 @@ public class HostModel extends Observable implements GameModel, Observer {
             // notifyObservers(message);
             // }
             String update = (String) arg;
-            System.out.println("Model: "+update);
+            System.out.println("Model: " + update);
             if (update.startsWith(GetMethod.updateAll)) {
                 hostServer.sendToAll(update);
                 updateProperties();
@@ -458,10 +465,9 @@ public class HostModel extends Observable implements GameModel, Observer {
                 hostServer.sendToAll(update);
                 String message = update.split(",")[1];
                 checkForMessage(message);
-            } else if(update.startsWith("GAME-SERVER-ERROR")){
+            } else if (update.startsWith("GAME-SERVER-ERROR")) {
                 System.out.println(update);
-            }
-            else {
+            } else {
                 setChanged();
                 notifyObservers(update);
             }
@@ -477,9 +483,11 @@ public class HostModel extends Observable implements GameModel, Observer {
 
     @Override
     public boolean isConnected() {
-        if (!this.hostServer.isRunning()) {
+        if (!hostServer.isRunning()) {
+            System.out.println("!hostServer.isConnected");
             return false;
         } else if (!isGameServerConnect()) {
+            System.out.println("!gameServer.isConnected");
             return false;
         } else
             return true;

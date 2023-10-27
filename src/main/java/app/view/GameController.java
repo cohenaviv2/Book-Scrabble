@@ -10,9 +10,11 @@ import javafx.stage.*;
 import java.io.IOException;
 import java.util.*;
 
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.scene.*;
 import javafx.scene.control.Button;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 
@@ -20,7 +22,7 @@ public class GameController implements Observer {
     private ViewModel gameViewModel; // Game view model
     private GameView gameView; // Creates the game components
     // Stages
-    protected Stage gameSetupStage;
+    protected Stage gameLoginStage;
     protected Stage gameFlowStage;
     protected Stage customStage;
     private double xOffset = 0;
@@ -67,11 +69,11 @@ public class GameController implements Observer {
     }
 
     public void showInitialWindow() {
-        gameSetupStage = new Stage();
-        setUpStage(gameSetupStage);
+        gameLoginStage = new Stage();
+        setUpStage(gameLoginStage);
 
         VBox gameModeBox = gameView.createInitialBox();
-        HBox osBar = gameView.createOsBar(gameSetupStage, false);
+        HBox osBar = gameView.createOsBar(gameLoginStage, false);
 
         VBox root = new VBox(osBar, gameModeBox);
         root.getStyleClass().add("wood-background");
@@ -79,13 +81,13 @@ public class GameController implements Observer {
         Scene gameModScene = new Scene(root, 600, 480);
         setUpScene(gameModScene);
 
-        gameSetupStage.setScene(gameModScene);
-        gameSetupStage.show();
+        gameLoginStage.setScene(gameModScene);
+        gameLoginStage.show();
     }
 
     public void showLoginWindow(boolean isHost) {
         VBox formBox = gameView.createLoginBox();
-        HBox osBar = gameView.createOsBar(gameSetupStage, isHost);
+        HBox osBar = gameView.createOsBar(gameLoginStage, isHost);
 
         VBox root = new VBox(osBar, formBox);
         root.getStyleClass().add("wood-background");
@@ -93,8 +95,8 @@ public class GameController implements Observer {
         Scene gameSetupScene = new Scene(root, 400, 600);
         setUpScene(gameSetupScene);
 
-        gameSetupStage.setScene(gameSetupScene);
-        gameSetupStage.show();
+        gameLoginStage.setScene(gameSetupScene);
+        gameLoginStage.show();
     }
 
     public void showBookSelectionWindow(boolean fullBookList) {
@@ -112,7 +114,7 @@ public class GameController implements Observer {
 
     public void showGameFlowWindow() {
         customStage.close();
-        gameSetupStage.close();
+        gameLoginStage.close();
         gameFlowStage = new Stage();
         setUpStage(gameFlowStage);
 
@@ -128,9 +130,14 @@ public class GameController implements Observer {
         gameFlowStage.show();
     }
 
+    public void showGameInstructionsWindow() {
+        VBox gameInstructionsBox = gameView.createGameInstuctionsBox();
+        showCustomWindow(gameInstructionsBox, 1100, 800);
+    }
+
     private void showDrawTilesWindow(String resaults) {
         VBox drawTilesBox = gameView.createDrawTilesBox(resaults);
-        showCustomWindow(drawTilesBox, 700, 400);
+        showCustomWindow(drawTilesBox, 800, 600);
     }
 
     private void showIllegalWordsAlert(List<Word> illegalWords, boolean isChallange) {
@@ -174,7 +181,7 @@ public class GameController implements Observer {
     }
 
     public Stage getCurrentStage() {
-        return gameRunning ? gameFlowStage : gameSetupStage;
+        return gameRunning ? gameFlowStage : gameLoginStage;
     }
 
     public void resetWordPlacement() {
@@ -254,8 +261,11 @@ public class GameController implements Observer {
         if (gameRunning) {
             gameFlowStage.close();
         } else {
-            gameSetupStage.close();
+            gameLoginStage.close();
         }
+        selectedBooks.clear();
+        gameRunning = false;
+        hostQuit = false;
     }
 
     @Override
@@ -269,10 +279,10 @@ public class GameController implements Observer {
                 gameRunning = true;
                 showGameFlowWindow();
                 String drawResault = message.split(":")[1];
-                // showDrawTilesWindow(drawResault);
+                //showDrawTilesWindow(drawResault);
             } else if (message.startsWith(GetMethod.tryPlaceWord)) {
                 String update = message.split(",")[1];
-                if (update.equals("notBoardLegal")) {
+                if (update.equals("notBoardLegal") || update.equals("illegal")) {
                     VBox illegalAlertBox = gameView.createIllegalMoveBox();
                     showCustomWindow(illegalAlertBox, 650, 420);
                 } else {
@@ -285,7 +295,7 @@ public class GameController implements Observer {
                     if (res.equals("false")) {
                         showIllegalWordsAlert(turnWords, false);
                     } else {
-                        gameView.highlightCellsForWords(turnWords,true);
+                        gameView.highlightCellsForWords(turnWords, true);
                         turnWords.clear();
                     }
                 }
@@ -301,7 +311,7 @@ public class GameController implements Observer {
                     showIllegalWordsAlert(turnWords, true);
                     gameView.highlightCellsForWords(turnWords, false);
                 } else {
-                    gameView.highlightCellsForWords(turnWords,true);
+                    gameView.highlightCellsForWords(turnWords, true);
                     turnWords.clear();
                 }
 
@@ -363,5 +373,5 @@ public class GameController implements Observer {
     public boolean isGameRunning() {
         return gameRunning;
     }
-
+    
 }

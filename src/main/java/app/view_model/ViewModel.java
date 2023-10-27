@@ -41,6 +41,7 @@ public class ViewModel extends Observable implements Observer {
         // Initialize the model
         if (isHost) {
             this.gameModel = HostModel.get();
+            HostModel.get().startHostServer();
             HostModel.get().addObserver(this);
         } else {
             this.gameModel = GuestModel.get();
@@ -168,6 +169,7 @@ public class ViewModel extends Observable implements Observer {
         int wordLen = getWordLength();
         int f_Row = getFirstSelectedCellRow();
         int f_Col = getFirstSelectedCellCol();
+        boolean isValid = true;
 
         Tile[] tiles = new Tile[wordLen];
         int j = 0;
@@ -177,6 +179,10 @@ public class ViewModel extends Observable implements Observer {
                     tiles[i] = null;
                 } else {
                     for (Tile t : gameModel.getMyTiles()) {
+                        if (j >= word.toCharArray().length) {
+                            isValid = false;
+                            break;
+                        }
                         if (t.getLetter() == word.toCharArray()[j]) {
                             tiles[i] = t;
                             j++;
@@ -189,6 +195,10 @@ public class ViewModel extends Observable implements Observer {
                     tiles[i] = null;
                 } else {
                     for (Tile t : gameModel.getMyTiles()) {
+                        if (j >= word.toCharArray().length) {
+                            isValid = false;
+                            break;
+                        }
                         if (t.getLetter() == word.toCharArray()[j]) {
                             tiles[i] = t;
                             j++;
@@ -198,8 +208,13 @@ public class ViewModel extends Observable implements Observer {
                 }
             }
         }
-        Word queryWord = new Word(tiles, f_Row, f_Col, isVer);
-        gameModel.tryPlaceWord(queryWord);
+        if (!isValid) {
+            setChanged();
+            notifyObservers(GetMethod.tryPlaceWord + "," + "illegal");
+        } else {
+            Word queryWord = new Word(tiles, f_Row, f_Col, isVer);
+            gameModel.tryPlaceWord(queryWord);
+        }
     }
 
     public void challenge() {

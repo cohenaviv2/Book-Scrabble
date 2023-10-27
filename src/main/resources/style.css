@@ -67,7 +67,7 @@
 }
 
 .lightblue-button {
-  -fx-font-size: 20px;
+  -fx-font-size: 18px;
   -fx-font-weight: bold;
   -fx-background-color: linear-gradient(rgb(0, 88, 139), grey), rgb(0, 195, 255);
   -fx-background-radius: 40;
@@ -324,7 +324,7 @@
   -fx-border-color: rgb(120, 253, 120);
   -fx-border-width: 3px;
   -fx-border-radius: 5px;
-  -fx-effect: dropshadow(gaussian, rgb(157, 255, 45), 25, 0, 0, 7);
+  -fx-effect: dropshadow(gaussian, rgb(157, 255, 45), 25, 0.5, 0, 7);
 
 }
 
@@ -365,12 +365,12 @@
 
 .score-highlight {
   /* Define the hover effect styles here */
-  -fx-effect: dropshadow(gaussian, rgb(106, 252, 252), 45, 0, 0, 3);
+  -fx-effect: dropshadow(gaussian, rgb(106, 252, 252), 85, 0.1, 0, 3);
 }
 
 .score-failed {
   /* Define the hover effect styles here */
-  -fx-effect: dropshadow(gaussian, rgb(253, 115, 115), 45, 0, 0, 3);
+  -fx-effect: dropshadow(gaussian, rgb(253, 115, 115), 85, 0.1, 0, 3);
 }
 
 .book-scrabble-header {
@@ -411,7 +411,7 @@
 }
 
 .selected-book-image {
-  -fx-effect: dropshadow(gaussian, gold, 40, 0.7, 0, 0);
+  -fx-effect: dropshadow(gaussian, gold, 25, 0.8, 0, 0);
 }
 
 .error-field {
@@ -449,7 +449,9 @@
 }
 
 .drawtiles-content-background {
-  -fx-background-color: rgb(48, 219, 224);
+  -fx-background-image: url("backgrounds/nightSky.jpg");
+  -fx-background-repeat: no-repeat;
+  -fx-background-size: cover;
   -fx-border-color: black;
   -fx-border-width: 3px;
 }
