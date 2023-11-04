@@ -59,7 +59,6 @@ public class GameView {
         icons.put("star", new Image("icons/star-icon.png"));
         icons.put("bag", new Image("icons/bag-icon.png"));
         icons.put("trophy", new Image("icons/trophy-icon.png"));
-        icons.put("arrow", new Image("icons/arrow-icon.png"));
         icons.put("draw", new Image("icons/draw-icon2.png"));
         this.symbols = new HashMap<>();
         symbols.put("exit", "\uD83D\uDDD9");
