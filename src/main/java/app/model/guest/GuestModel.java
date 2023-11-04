@@ -184,7 +184,7 @@ public class GuestModel extends Observable implements GameModel, Observer {
 
     @Override
     public void sendToAll(String message) {
-        commHandler.sendMessage(GetMethod.sendToAll, "All" + message + ":" + playerProperties.getMyName());
+        commHandler.sendMessage(GetMethod.sendToAll, "All" + ":" + message + ":" + playerProperties.getMyName());
     }
 
 }

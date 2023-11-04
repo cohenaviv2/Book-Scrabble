@@ -55,6 +55,9 @@ public class GameManager extends Observable {
         this.GAME_SERVER_PORT = Integer.parseInt(RunGameServer.loadProperties().getProperty("GAME_SERVER_PORT"));
 
         this.gameBoard = Board.getBoard();
+        /***************** */
+        
+        /***************** */
         this.gameBag = Tile.Bag.getBag();
         this.turnManager = new TurnManager();
         this.fullBookList = GameModel.getFullBookList();
@@ -266,7 +269,7 @@ public class GameManager extends Observable {
     }
 
     private String sentToHandler(String value) {
-        System.out.println("Game manager - sendTo");
+        System.err.println(value);
         String name = value.split(":")[0];
         if (playersByName.containsKey(name)) {
             setChanged();
@@ -277,7 +280,6 @@ public class GameManager extends Observable {
     }
 
     private String sentToAllHandler(String value) {
-        System.out.println("Game manager - sendToAll");
         setChanged();
         notifyObservers(GetMethod.sendToAll + "," + value);
         return "true";
@@ -403,7 +405,7 @@ public class GameManager extends Observable {
             turnManager.pullTiles(id);
 
             turnManager.resetPasses();
-            turnManager.nextTurn(1);
+            turnManager.nextTurn();
 
             String turnWordSerailized = (String) ObjectSerializer.serializeObject(gameBoard.getTurnWords());
 
@@ -463,7 +465,7 @@ public class GameManager extends Observable {
                 // notifyObservers();
 
                 turnManager.resetPasses();
-                turnManager.nextTurn(1);
+                turnManager.nextTurn();
 
                 String playerScore = String.valueOf(score);
                 return playerScore + ":" + turnWordSerailized;
@@ -483,7 +485,7 @@ public class GameManager extends Observable {
                 // setChanged();
                 // notifyObservers("updateAll");
 
-                turnManager.nextTurn(-1);
+                turnManager.nextTurn();
 
                 return "false" + ":" + turnWordSerailized;
 
@@ -575,7 +577,7 @@ public class GameManager extends Observable {
                 p.setIsActiveWord(false);
             }
             turnManager.passesPerRound.replace(p, 1);
-            this.turnManager.nextTurn(0);
+            this.turnManager.nextTurn();
             return "true";
         } else
             return "false";
@@ -644,12 +646,14 @@ public class GameManager extends Observable {
         private Word activeWord;
         private Map<Player, Integer> passesPerRound;
         private int rounds;
+        private boolean bagEmpty;
 
         private TurnManager() {
             this.activeWord = null;
             this.currentTurnIndex = -1;
             this.rounds = 0;
             this.passesPerRound = new HashMap<>();
+            this.bagEmpty = false;
         }
 
         public void pullTiles(int playerId) {
@@ -658,7 +662,8 @@ public class GameManager extends Observable {
 
             while (p.getMyHandTiles().size() < 7) {
                 if (gameBag.size() == 0) {
-                    endGame(false);
+                    setBagEmpty(true);
+                    break;
                 }
                 Tile t = gameBag.getRand();
                 while (t == null) {
@@ -726,7 +731,7 @@ public class GameManager extends Observable {
             notifyObservers(GetMethod.updateAll + "," + GetMethod.drawTiles + ":" + drawTileString);
         }
 
-        public void nextTurn(int mode) {
+        public void nextTurn() {
             /* Set turn to the next player (turn index) */
 
             int i = this.currentTurnIndex;
@@ -750,6 +755,10 @@ public class GameManager extends Observable {
 
             setChanged();
             notifyObservers(GetMethod.updateAll + "," + GetMethod.skipTurn);
+
+            if(isBagEmpty()){
+                endGame(false);
+            }
 
             // printTurnInfo();
         }
@@ -863,6 +872,14 @@ public class GameManager extends Observable {
 
         public int getCurrentTurnIndex() {
             return currentTurnIndex;
+        }
+
+        public boolean isBagEmpty() {
+            return bagEmpty;
+        }
+
+        public void setBagEmpty(boolean bagEmpty) {
+            this.bagEmpty = bagEmpty;
         }
     }
 

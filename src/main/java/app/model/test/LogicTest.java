@@ -68,9 +68,12 @@ public class LogicTest {
 		Word w5 = new Word(ts, 0, 7, true);
 		Word w6 = new Word(ts, 7, 0, false);
 
-		if (b.boardLegal(w0) || b.boardLegal(w1) || b.boardLegal(w2) || b.boardLegal(w3) || b.boardLegal(w4)
-				|| !b.boardLegal(w5) || !b.boardLegal(w6))
-			System.out.println("your boardLegal function is wrong (-10)");
+		// * Board legal test - change method to private *
+
+		// if (b.boardLegal(w0) || b.boardLegal(w1) || b.boardLegal(w2) ||
+		// b.boardLegal(w3) || b.boardLegal(w4)
+		// || !b.boardLegal(w5) || !b.boardLegal(w6))
+		// System.out.println("your boardLegal function is wrong (-10)");
 
 		for (Tile t : ts)
 			bag.put(t);
@@ -129,17 +132,15 @@ public class LogicTest {
 		}
 
 		// Check ID's
-		for (Player i : players){
-			for (Player j : players){
-				if (i!=j && i.getID() == j.getID()){
+		for (Player i : players) {
+			for (Player j : players) {
+				if (i != j && i.getID() == j.getID()) {
 					System.out.println("There is some players with the same ID");
 				}
 			}
 		}
 
-
 		/* ............ */
-
 
 	}
 

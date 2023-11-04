@@ -2,6 +2,8 @@ package app.model.game;
 
 import java.util.ArrayList;
 
+import app.model.game.Tile.Bag;
+
 /*
  * Represents the Game Board
  * Contains 15x15 matrix of Squares
@@ -120,7 +122,7 @@ public class Board {
         return boardTiles;
     }
 
-    public boolean boardLegal(Word word) {
+    private boolean boardLegal(Word word) {
         /*
          * returns true if the word is in the board(in place),
          * leans on one of the existing tiles,
@@ -130,7 +132,7 @@ public class Board {
 
         if (!isOnBoard(word))
             return false;
-        else if (!(board[SIZE / 2][SIZE / 2].isValue())) // first word
+        else if (!(board[SIZE / 2][SIZE / 2].isTile())) // first word
             return checkFirstWord(word);
         else
             return (isLeanOnExistTile(word) && !isReplaceExistTile(word));
@@ -165,22 +167,22 @@ public class Board {
 
         if (word.isVertical()) {
             for (int i = word.getRow(); i < word.getTiles().length + word.getRow(); i++) {
-                if ((i > 0 && this.board[i - 1][word.getCol()].isValue()) || (i + word.getTiles().length < SIZE
-                        && this.board[i + word.getTiles().length][word.getCol()].isValue()))
+                if ((i > 0 && this.board[i - 1][word.getCol()].isTile()) || (i + word.getTiles().length < SIZE
+                        && this.board[i + word.getTiles().length][word.getCol()].isTile()))
                     return true;
-                else if ((word.getCol() > 0 && this.board[i][word.getCol() - 1].isValue())
-                        || (word.getCol() < SIZE - 1 && this.board[i][word.getCol() + 1].isValue()))
+                else if ((word.getCol() > 0 && this.board[i][word.getCol() - 1].isTile())
+                        || (word.getCol() < SIZE - 1 && this.board[i][word.getCol() + 1].isTile()))
                     return true;
             }
             return false;
 
         } else {
             for (int i = word.getCol(); i < word.getTiles().length + word.getCol(); i++) {
-                if ((i > 0 && this.board[word.getRow()][i - 1].isValue()) || (i + word.getTiles().length < SIZE
-                        && this.board[word.getRow()][i + word.getTiles().length].isValue()))
+                if ((i > 0 && this.board[word.getRow()][i - 1].isTile()) || (i + word.getTiles().length < SIZE
+                        && this.board[word.getRow()][i + word.getTiles().length].isTile()))
                     return true;
-                else if ((word.getRow() > 0 && this.board[word.getRow() - 1][i].isValue())
-                        || (word.getRow() < SIZE - 1 && this.board[word.getRow() + 1][i].isValue()))
+                else if ((word.getRow() > 0 && this.board[word.getRow() - 1][i].isTile())
+                        || (word.getRow() < SIZE - 1 && this.board[word.getRow() + 1][i].isTile()))
                     return true;
             }
             return false;
@@ -194,12 +196,12 @@ public class Board {
 
         if (word.isVertical()) {
             for (int i = word.getRow(), index = 0; i < word.getTiles().length + word.getRow(); i++, index++)
-                if (this.board[i][word.getCol()].isValue()
+                if (this.board[i][word.getCol()].isTile()
                         && this.board[i][word.getCol()].tile != word.getTiles()[index])
                     return true;
         } else {
             for (int i = word.getCol(), index = 0; i < word.getTiles().length + word.getCol(); i++, index++)
-                if (this.board[word.getRow()][i].isValue()
+                if (this.board[word.getRow()][i].isTile()
                         && this.board[word.getRow()][i].tile != word.getTiles()[index])
                     return true;
         }
@@ -232,7 +234,7 @@ public class Board {
         }
     }
 
-    public boolean dictionaryLegal(Word word) {
+    private boolean dictionaryLegal(Word word) {
         return GameManager.get().dictionaryLegal(word);
     }
 
@@ -246,66 +248,77 @@ public class Board {
 
         /*
          * word completes ANOTHER GREATER WORD check:
-         * (for example - on the board "SET", the given word is "SUB" output: "SUBSET"
-         * as a full word)
+         * (for example - on the board "SET", the given word is "SUB" output: "SUBSET")
          */
-        if (word.isVertical() && ((word.getRow() > 0 && this.board[word.getRow() - 1][word.getCol()].isValue())
+        if (word.isVertical() && ((word.getRow() > 0 && this.board[word.getRow() - 1][word.getCol()].isTile())
                 || (word.getRow() + word.getTiles().length < SIZE
-                        && this.board[word.getRow() + word.getTiles().length][word.getCol()].isValue()))) {
-            int start = word.getRow() - 1;
-            int end = word.getRow() + word.getTiles().length;
+                        && this.board[word.getRow() + word.getTiles().length][word.getCol()].isTile()))) {
 
-            // find new starting/ending index:
-            while (start >= 0) {
-                if (start < 0)
-                    break;
-                if (!this.board[start][word.getCol()].isValue())
-                    break;
-                --start;
+            int start = word.getRow();
+            int end = word.getRow() + word.getTiles().length - 1;
+
+            // Find new starting index:
+            while (start >= 1 && board[start - 1][word.getCol()].isTile()) {
+                start--;
             }
-            while (end < SIZE) {
-                if (end >= SIZE)
-                    break;
-                if (!this.board[end][word.getCol()].isValue())
-                    break;
+
+            // Find new ending index:
+            while (end <= SIZE - 2 && board[end + 1][word.getCol()].isTile()) {
                 end++;
             }
-            start++;
-            end--;
 
             // Build the new word and add it into the array:
             int wordLength = end - start + 1;
             int startIndex = start;
-            Tile[] tryTiles = new Tile[wordLength];
-            for (int k = 0; k < wordLength; k++, start++)
-                if (!this.board[start][word.getCol()].isValue())
-                    tryTiles[k] = word.getTiles()[(start - word.getRow())];
-                else
-                    tryTiles[k] = this.board[start][word.getCol()].getTile();
-            Word tryWord = new Word(tryTiles, word.getCol(), startIndex, false);
-            words.add(tryWord);
+            Tile[] newTiles = new Tile[wordLength];
+            for (int i = 0, current = start; i < wordLength; i++, current++) {
+                if (!board[current][word.getCol()].isTile()) {
+                    newTiles[i] = word.getTiles()[current - start];
+                } else {
+                    newTiles[i] = board[current][word.getCol()].getTile();
+                }
+            }
 
-        } else if (!word.isVertical() && ((word.getCol() > 0 && this.board[word.getRow()][word.getCol() - 1].isValue())
+            Word newWord = new Word(newTiles, startIndex, word.getCol(), true);
+            words.add(newWord);
+
+        } else if (!word.isVertical() && ((word.getCol() > 0 && this.board[word.getRow()][word.getCol() - 1].isTile())
                 || (word.getCol() + word.getTiles().length < SIZE
-                        && this.board[word.getRow()][word.getCol() + word.getTiles().length].isValue()))) {
-            int start, end;
-            for (start = word.getCol() - 1; this.board[word.getRow()][start].isValue(); --start)
-                ;
-            for (end = word.getCol() + word.getTiles().length; this.board[word.getRow()][end]
-                    .isValue(); ++end)
-                ;
-            start++;
-            end--;
+                        && this.board[word.getRow()][word.getCol() + word.getTiles().length].isTile()))) {
+            // int start, end;
+            // for (start = word.getCol() - 1; this.board[word.getRow()][start].isValue() &&
+            // start >= 0; --start)
+            // ;
+            // for (end = word.getCol() + word.getTiles().length;
+            // this.board[word.getRow()][end]
+            // .isValue() && end < SIZE; ++end)
+            // ;
+            int start = word.getCol();
+            int end = word.getCol() + word.getTiles().length - 1;
+
+            // Find new starting index:
+            while (start >= 1 && board[word.getRow()][start - 1].isTile()) {
+                start--;
+            }
+
+            // Find new ending index:
+            while (end <= SIZE - 2 && board[word.getRow()][end + 1].isTile()) {
+                end++;
+            }
+
             int wordLength = end - start + 1;
             int startIndex = start;
-            Tile[] tryTiles = new Tile[wordLength];
-            for (int k = 0; k < wordLength; k++, start++)
-                if (!this.board[word.getRow()][start].isValue())
-                    tryTiles[k] = word.getTiles()[(start - word.getCol())]; /****** */
-                else
-                    tryTiles[k] = this.board[word.getRow()][start].getTile();
-            Word tryWord = new Word(tryTiles, startIndex, word.getRow(), false);
-            words.add(tryWord);
+            Tile[] newTiles = new Tile[wordLength];
+            for (int i = 0, current = start; i < wordLength; i++, current++) {
+                if (!board[word.getRow()][current].isTile()) {
+                    newTiles[i] = word.getTiles()[current - start];
+                } else {
+                    newTiles[i] = board[word.getRow()][current].getTile();
+                }
+            }
+
+            Word newWord = new Word(newTiles, word.getRow(), startIndex, false);
+            words.add(newWord);
         } else {
             words.add(getFullWord(word));
         }
@@ -315,56 +328,77 @@ public class Board {
          */
         if (word.isVertical()) {
             for (int j = 0, i = word.getRow(); i < word.getTiles().length + word.getRow(); i++, j++) {
-                if (word.getTiles()[j] == null && this.board[i][word.getCol()].isValue()) // Tile already exist on the
-                                                                                          // bboard
+                if (word.getTiles()[j] == null && this.board[i][word.getCol()].isTile()) // Tile already exist on the
+                                                                                         // board
                     continue;
-                if ((word.getCol() + 1 < SIZE && this.board[i][word.getCol() + 1].isValue())
-                        || (word.getCol() - 1 >= 0 && this.board[i][word.getCol() - 1].isValue())) {
-                    int start, end;
-                    for (start = word.getCol() - 1; this.board[i][start].isValue(); --start) /***** */
-                        ;
-                    for (end = word.getCol() + 1; this.board[i][end].isValue(); ++end) // **** */
-                        ;
-                    start++;
-                    end--;
+                if ((word.getCol() + 1 < SIZE && this.board[i][word.getCol() + 1].isTile())
+                        || (word.getCol() - 1 >= 0 && this.board[i][word.getCol() - 1].isTile())) {
+
+                    int start = word.getCol();
+                    int end = word.getCol();
+
+                    // Find new starting index:
+                    while (start >= 1 && board[i][start - 1].isTile()) {
+                        start--;
+                    }
+
+                    // Find new ending index:
+                    while (end <= SIZE - 2 && board[i][end + 1].isTile()) {
+                        end++;
+                    }
+
+                    System.out.println("start: "+start+"\n"+"end: "+end);
+
                     int wordLength = end - start + 1;
                     int startIndex = start;
-                    Tile[] tryTiles = new Tile[wordLength];
-                    for (int k = 0; k < wordLength; k++, start++)
-                        if (!this.board[i][start].isValue())
-                            tryTiles[k] = word.getTiles()[j];
-                        else
-                            tryTiles[k] = this.board[i][start].getTile();
-                    Word tryWord = new Word(tryTiles, i, startIndex, false);
-                    words.add(tryWord);
+                    Tile[] newTiles = new Tile[wordLength];
+                    for (int k = 0, current = start; k < wordLength; k++, current++) {
+                        if (!board[i][current].isTile()) {
+                            newTiles[k] = word.getTiles()[j];
+                        } else {
+                            newTiles[k] = board[i][current].getTile();
+                        }
+                    }
+
+                    Word newWord = new Word(newTiles, i, startIndex, false);
+                    words.add(newWord);
                 }
             }
         } else {
             for (int j = 0, i = word.getCol(); i < word.getTiles().length + word.getCol(); i++, j++) {
-                if (word.getTiles()[j] == null && this.board[word.getRow()][i].isValue()) // Tile already exist on the
-                                                                                          // board
+                if (word.getTiles()[j] == null && this.board[word.getRow()][i].isTile()) // Tile already exist on the
+                                                                                         // board
                     continue;
-                if ((word.getRow() + 1 < SIZE && this.board[word.getRow() + 1][i].isValue())
+                if ((word.getRow() + 1 < SIZE && this.board[word.getRow() + 1][i].isTile())
                         || (word.getRow() - 1 >= 0 && this.board[word.getRow() - 1][i]
-                                .isValue())) { /************************************************ */
-                    int start, end;
-                    for (start = word.getRow() - 1; this.board[start][i].isValue(); --start) /***** */
-                        ;
-                    for (end = word.getRow() + 1; this.board[end][i].isValue(); ++end) // **** */
-                        ;
-                    start++;
-                    end--;
+                                .isTile())) { /************************************************ */
+
+                    int start = word.getRow();
+                    int end = word.getRow();
+
+                    // Find new starting index:
+                    while (start >= 1 && board[start - 1][i].isTile()) {
+                        start--;
+                    }
+
+                    // Find new ending index:
+                    while (end <= SIZE - 2 && board[end + 1][i].isTile()) {
+                        end++;
+                    }
+
                     int wordLength = end - start + 1;
                     int startIndex = start;
-                    Tile[] tryTiles = new Tile[wordLength];
-                    for (int k = 0; k < wordLength; k++, start++) {
-                        if (!this.board[start][i].isValue())
-                            tryTiles[k] = word.getTiles()[j];
-                        else
-                            tryTiles[k] = this.board[start][i].getTile();
+                    Tile[] newTiles = new Tile[wordLength];
+                    for (int k = 0, current = start; k < wordLength; k++, current++) {
+                        if (!board[current][i].isTile()) {
+                            newTiles[k] = word.getTiles()[j];
+                        } else {
+                            newTiles[k] = board[current][i].getTile();
+                        }
                     }
-                    Word tryWord = new Word(tryTiles, startIndex, i, true);
-                    words.add(tryWord);
+
+                    Word newWord = new Word(newTiles, startIndex, i, true);
+                    words.add(newWord);
                 }
             }
         }
@@ -627,7 +661,7 @@ public class Board {
     public boolean isBoardFull() {
         for (int i = 0; i < SIZE; i++) {
             for (int j = 0; j < SIZE; j++) {
-                if (!this.board[i][j].isValue())
+                if (!this.board[i][j].isTile())
                     return false;
             }
         }
@@ -702,7 +736,7 @@ public class Board {
             return scoreModifier;
         }
 
-        public boolean isValue() {
+        public boolean isTile() {
             if (this.tile != null)
                 return true;
             else

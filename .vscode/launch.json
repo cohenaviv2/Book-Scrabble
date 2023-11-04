@@ -6,6 +6,13 @@
   "configurations": [
     {
       "type": "java",
+      "name": "MessageReader",
+      "request": "launch",
+      "mainClass": "app.view_model.MessageReader",
+      "projectName": "BookScrableApp"
+    },
+    {
+      "type": "java",
       "name": "GameView",
       "request": "launch",
       "mainClass": "app.view.GameView",

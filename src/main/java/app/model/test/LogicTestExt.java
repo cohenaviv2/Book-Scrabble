@@ -69,12 +69,15 @@ public class LogicTestExt {
         Word w8 = new Word(ts, -2, -1, true);
         Word w9 = new Word(ts, 1, 18, true);
 
-        if (b.boardLegal(w0) || b.boardLegal(w1) || b.boardLegal(w2) || b.boardLegal(w3) || b.boardLegal(w4)
-                || !b.boardLegal(w5) || !b.boardLegal(w6))
-            System.out.println("your boardLegal function is wrong (-10)");
 
-        if (b.boardLegal(w7) || b.boardLegal(w8) || b.boardLegal(w9))
-            System.out.println("your boardLegal function is wrong2 (-10)");
+        //  * Board legal test - change method to private *
+
+        // if (b.boardLegal(w0) || b.boardLegal(w1) || b.boardLegal(w2) || b.boardLegal(w3) || b.boardLegal(w4)
+        //         || !b.boardLegal(w5) || !b.boardLegal(w6))
+        //     System.out.println("your boardLegal function is wrong (-10)");
+
+        // if (b.boardLegal(w7) || b.boardLegal(w8) || b.boardLegal(w9))
+        //     System.out.println("your boardLegal function is wrong2 (-10)");
 
         for (Tile t : ts)
             bag.put(t);

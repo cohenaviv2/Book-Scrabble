@@ -1,0 +1,119 @@
+game-mode-host=In Host Mode, you can host a game for up to 4 players, including yourself.
+As the host, you'll be running a host server to send and receive data to the guests.
+You will also connect and send word queries to the game server - which is responsible
+for checking wheather a word is dictionary legal in the game books terms.
+
+game-mode-guest=In Guest Mode, you'll be joining an existing game hosted by another player.
+As a guest, you connect to the host's server and participate as one of the players.
+Guest mode allows you to enjoy the multiplayer experience without hosting the game.
+host-mode=In Host Mode,  you're in charge.
+As the host, you manage a game server right on your machine.
+This means that you'll be running a host server to connects you with up to 3 guests,
+forming a group of 4 players including you.
+
+Imagine it as your personal hub in your own space.
+You're not just a player; you're the server admin.
+Your role is to ensure everyone connects and communicates smoothly on your local setup.
+
+But that's not all. You also connect to a game server responsible for checking word legality.
+This separate server ensures fair play and maintains dictionary standards.
+
+Choose Host Mode, take control locally, and link up to 3 players to your game hub for multiplayer excitement.
+guest-mode=In Guest Mode, you're a player on the move.
+As a guest, you connect to the host server to jump into the game.
+To get started, you'll need the host's IP address.
+
+Simply input the host's IP, and you're in.
+No hosting, no setup. Just plug in and play.
+Guest Mode lets you join the action and experience multiplayer excitement.
+game-flow-rules=1. Each player randomly draws a tile from the bag.
+2. The order of the players is determined by the order of the letters drawn(from smallest to largest).
+    - If an empty tile is drawn, it is returned to the bag, and another one is drawn.
+3. All the tiles are returned to the bag.
+4. Each player randomly draws 7 tiles.
+5. The first player (the one who drew the smallest letter in the lottery) has to form a legal word
+   that passes through the central slot (the star) on the board.
+    - Only he gets a double score for it.
+    - He replenishes his tiles from the bag to have 7 tiles again.
+6. Gradually, each player, in turn, assembles a legal word from the tiles in their possession.
+    - Like in a crossword puzzle, each word must rest on one of the tiles on the board.
+    - After writing the word, the player adds 7 tiles from the bag.
+    - Their score is accumulated based on all the words created on the board following
+      the placement of the tiles.
+        - Tiles placed on double or triple letter squares will be doubled or tripled in value accordingly.
+        - The word then receives the sum of the tile value.
+        - This amount will be doubled or tripled for each doubling or tripling word slot
+           that the tiles are superimposed on
+          (e.g., it is possible to multiply by 4 or 9 if the word took
+           two double word or triple word slots, respectively).
+        - The above calculation is true for every new word created on the board
+          following the placement in turn.
+7. A player who cannot form a valid word forfeits their turn.
+8. The game will end after N rounds.
+game-flow-how-to-play=
+            1. Start of Your Turn:
+               - Click any two adjacent cells on the board to select the starting and ending positions for your word.
+                 The selected cells should be in the same row or column.
+               - Click a selected cell again to unselect it.
+               - You can reset your cell and tile selections by clicking the gray 'Reset' button.
+            2. Selecting Letter Tiles:
+               - Click on the letter tiles from your rack to select them in the order you want to use them in your word.
+               - You can sort your letter tiles alphabetically by clicking the blue 'Sort' button.
+            3. Placing Tiles on the Board:
+               - After selecting two cells and the corresponding letter tiles, click the 'Place Tile' button
+                 to put the tiles on the board in the order you've selected them.
+            4. Completing Your Word:
+               - Continue selecting two cells and placing tiles until you've formed the word you want to play.
+                 Tiles should be placed in a continuous line.
+            5. Validation:
+               - When you're ready, click the 'Try Place Word' button to attempt to place your word on the board.
+               - If your word is not found in the game's dictionary, you will receive an alert.
+               - You have the option to challenge the dictionary. If successful, you'll receive double points; otherwise, you lose 10 points.
+               - If you don't want to challenge, you can choose to pass your turn.
+custom-port=The host server usually runs on a default Port.
+Sometimes the host chooses a custom Port.
+Ask your host if the Port has changed, and set it here:
+game-server-error=Can not connect to the game server.
+Please check your internet connection, or try again later.
+host-server-error=Some error occurred while running the host server.
+Please check your internet connection, firewall or user permissions.
+guest-socket-error=Some error occurred while connecting to the host.
+Please check if the IP address of the host is correct.
+If so, ask the host if they changed the port,
+so you can change it in the settings.
+If you are still having trouble connecting,
+please check your internet connection, firewall or permissions
+not-board-legal=The word you placed is not allowed according to the game rules
+
+If you're unsure about the rules,
+click the 'Help' button to view the game instructions
+mode-host=1. My Name:
+Enter your name in the text field.
+This is how other players will know you during the game.
+
+2. Select Books:
+Choose the books that will be used in the game.
+Pick your favorites!
+
+3. Select Number of Players:
+Use the 'Number of Players' dropdown to specify how many players
+will be in the game.
+
+Settings:
+Allows you to get your IP address, customize the host server port,
+or check the server connection status.
+mode-guest=1. my Name:
+Enter your name in the text field.
+This is how other players will know you during the game.
+
+2. Select Books:
+Choose the books that will be used in the game.
+Pick your favorites!
+
+3. Host IP:
+Enter the host's IP address in the text field
+Ensure it's correct to join the game.
+
+Settings:
+Allows you set a custom port if the host has chosen to change it.
+Ask the host if he changed the port, then adjust as needed.

@@ -500,7 +500,7 @@ public class HostModel extends Observable implements GameModel, Observer {
 
     @Override
     public void sendToAll(String message) {
-        hostServer.sendToAll(GetMethod.sendToAll + "," + "All" + message + ":" + playerProperties.getMyName());
+        hostServer.sendToAll(GetMethod.sendToAll + "," + "All" + ":" + message + ":" + playerProperties.getMyName());
     }
 
 }

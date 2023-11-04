@@ -9,12 +9,12 @@ import javafx.stage.*;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.scene.*;
 import javafx.scene.control.Button;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 
@@ -78,7 +78,7 @@ public class GameController implements Observer {
         VBox root = new VBox(osBar, gameModeBox);
         root.getStyleClass().add("wood-background");
 
-        Scene gameModScene = new Scene(root, 600, 480);
+        Scene gameModScene = new Scene(root, 630, 505); // H: 480
         setUpScene(gameModScene);
 
         gameLoginStage.setScene(gameModScene);
@@ -132,12 +132,17 @@ public class GameController implements Observer {
 
     public void showGameInstructionsWindow() {
         VBox gameInstructionsBox = gameView.createGameInstuctionsBox();
-        showCustomWindow(gameInstructionsBox, 1100, 800);
+        showCustomWindow(gameInstructionsBox, 900, 600);
     }
 
     private void showDrawTilesWindow(String resaults) {
         VBox drawTilesBox = gameView.createDrawTilesBox(resaults);
-        showCustomWindow(drawTilesBox, 800, 600);
+        showCustomWindow(drawTilesBox, 800, 750);
+    }
+
+    public void showTurnAlert() {
+        VBox turnAlertBox = gameView.createTurnAlertBox();
+        showCustomWindow(turnAlertBox, 530, 290);
     }
 
     private void showIllegalWordsAlert(List<Word> illegalWords, boolean isChallange) {
@@ -168,7 +173,7 @@ public class GameController implements Observer {
 
     public void showMessageWindow(String sender, String message, boolean toAll) {
         VBox messageBox = gameView.createMessageAlertBox(sender, message, toAll);
-        showCustomWindow(messageBox, 700, 300);
+        showCustomWindow(messageBox, 700, 350);
     }
 
     public void closeCustomWindow() {
@@ -186,11 +191,9 @@ public class GameController implements Observer {
 
     public void resetWordPlacement() {
         for (Button tb : gameView.getTileButtons()) {
-            tb.setDisable(true);
+            tb.setDisable(false);
         }
         for (Pane cell : placementList) {
-            boolean hasLetterStyle = cell.getStyleClass().stream()
-                    .anyMatch(style -> style.startsWith("character-"));
             // Clear all added style classes except letter styles
             cell.getStyleClass().removeIf(style -> style.startsWith("character-"));
 
@@ -271,82 +274,96 @@ public class GameController implements Observer {
     @Override
     public void update(Observable o, Object arg) {
         if (o == gameViewModel && arg instanceof String) {
-            String message = (String) arg;
-            System.out.println("View : " + message);
+            Platform.runLater(() -> {
+                String message = (String) arg;
+                System.out.println("View : " + message);
 
-            // Update All
-            if (message.startsWith(GetMethod.drawTiles)) {
-                gameRunning = true;
-                showGameFlowWindow();
-                String drawResault = message.split(":")[1];
-                //showDrawTilesWindow(drawResault);
-            } else if (message.startsWith(GetMethod.tryPlaceWord)) {
-                String update = message.split(",")[1];
-                if (update.equals("notBoardLegal") || update.equals("illegal")) {
-                    VBox illegalAlertBox = gameView.createIllegalMoveBox();
-                    showCustomWindow(illegalAlertBox, 650, 420);
-                } else {
+                // Update All
+                if (message.startsWith(GetMethod.drawTiles)) {
+                    gameRunning = true;
+                    showGameFlowWindow();
+                    String drawResault = message.split(":")[1];
+                    showDrawTilesWindow(drawResault);
+                } else if (message.startsWith(GetMethod.tryPlaceWord)) {
+                    String update = message.split(",")[1];
+                    if (update.equals("notBoardLegal") || update.equals("illegal")) {
+                        VBox illegalAlertBox = gameView.createIllegalMoveBox();
+                        showCustomWindow(illegalAlertBox, 650, 420);
+                    } else {
+                        String res = update.split(":")[0];
+                        String turnWordsSerialized = update.split(":")[1];
+                        try {
+                            turnWords = (List<Word>) ObjectSerializer.deserializeObject(turnWordsSerialized);
+                            System.out.println();
+                            for (Word w : turnWords) {
+                                System.out.println("(" + w.getRow() + "," + w.getCol() + ")" + " " + w);
+                            }
+                            System.out.println();
+                        } catch (ClassNotFoundException | IOException e) {
+                        }
+                        if (res.equals("false")) {
+                            showIllegalWordsAlert(turnWords, false);
+                        } else {
+                            gameView.highlightCellsForWords(turnWords, true);
+                            turnWords.clear();
+                        }
+                    }
+                } else if (message.startsWith(GetMethod.challenge)) {
+                    String update = message.split(",")[1];
                     String res = update.split(":")[0];
                     String turnWordsSerialized = update.split(":")[1];
                     try {
                         turnWords = (List<Word>) ObjectSerializer.deserializeObject(turnWordsSerialized);
+                        System.out.println();
+                        for (Word w : turnWords) {
+                            System.out.println("(" + w.getRow() + "," + w.getCol() + ")" + " " + w);
+                        }
+                        System.out.println();
                     } catch (ClassNotFoundException | IOException e) {
                     }
                     if (res.equals("false")) {
-                        showIllegalWordsAlert(turnWords, false);
+                        showIllegalWordsAlert(turnWords, true);
+                        gameView.highlightCellsForWords(turnWords, false);
                     } else {
                         gameView.highlightCellsForWords(turnWords, true);
                         turnWords.clear();
                     }
-                }
-            } else if (message.startsWith(GetMethod.challenge)) {
-                String update = message.split(",")[1];
-                String res = update.split(":")[0];
-                String turnWordsSerialized = update.split(":")[1];
-                try {
-                    turnWords = (List<Word>) ObjectSerializer.deserializeObject(turnWordsSerialized);
-                } catch (ClassNotFoundException | IOException e) {
-                }
-                if (res.equals("false")) {
-                    showIllegalWordsAlert(turnWords, true);
-                    gameView.highlightCellsForWords(turnWords, false);
-                } else {
-                    gameView.highlightCellsForWords(turnWords, true);
-                    turnWords.clear();
-                }
 
-            } else if (message.startsWith(GetMethod.quitGame)) {
-                if (gameView.isHost() && gameViewModel.othersInfoProperty().size() == 0) {
-                    VBox allQuitBox = gameView.createQuitAlertBox("Game Over", "You left alone in the game", true);
-                    showCustomWindow(allQuitBox, 550, 300);
-                } else {
-                    String player = message.split(":")[1];
-                    VBox quitAlertBox = gameView.createClosableAlertBox("", player + " has quit the game!", true);
-                    showCustomWindow(quitAlertBox, 500, 260);
-                }
+                } else if (message.startsWith(GetMethod.quitGame)) {
+                    if (gameView.isHost() && gameViewModel.othersInfoProperty().size() == 0) {
+                        VBox allQuitBox = gameView.createQuitAlertBox("Game Over", "You left alone in the game", true);
+                        showCustomWindow(allQuitBox, 550, 300);
+                    } else {
+                        String player = message.split(":")[1];
+                        VBox quitAlertBox = gameView.createClosableAlertBox("", player + " has quit the game!", true);
+                        showCustomWindow(quitAlertBox, 500, 260);
+                    }
 
-            } else if (message.startsWith(GetMethod.endGame)) {
-                String update = message.split(":")[1];
-                hostQuit = update.equals("HOST");
-                VBox endGameBox = gameView.createEndGameBox(hostQuit);
-                if (!gameView.isHost() || !hostQuit) {
-                    showCustomWindow(endGameBox, 700, hostQuit ? 800 : 700);
+                } else if (message.startsWith(GetMethod.endGame)) {
+                    String update = message.split(":")[1];
+                    hostQuit = update.equals("HOST");
+                    VBox endGameBox = gameView.createEndGameBox(hostQuit);
+                    if (!gameView.isHost() || !hostQuit) {
+                        showCustomWindow(endGameBox, 850, hostQuit ? 800 : 700);
+                    }
+                    gameViewModel.quitGame();
+                } else if (message.equals(GetMethod.exit)) {
+                    if (hostQuit) {
+                        close();
+                        System.exit(0);
+                    }
+                } else if (message.startsWith(gameViewModel.myNameProperty().get())) {
+                    String sender = message.split(":")[2];
+                    String msg = message.split(":")[1];
+                    showMessageWindow(sender, msg, false);
+                } else if (message.startsWith("All")) {
+                    String sender = message.split(":")[2];
+                    String msg = message.split(":")[1];
+                    if (!sender.equals(gameViewModel.myNameProperty().get())) {
+                        showMessageWindow(sender, msg, true);
+                    }
                 }
-                gameViewModel.quitGame();
-            } else if (message.startsWith(gameViewModel.myNameProperty().get())) {
-                String sender = message.split(":")[2];
-                String msg = message.split(":")[1];
-                showMessageWindow(sender, msg, false);
-            } else if (message.startsWith("All")) {
-                String sender = message.split(":")[2];
-                String msg = message.split(":")[1];
-                showMessageWindow(sender, msg, true);
-            } else if (message.equals(GetMethod.exit)) {
-                if (hostQuit) {
-                    close();
-                    System.exit(0);
-                }
-            }
+            });
         }
     }
 
@@ -373,5 +390,14 @@ public class GameController implements Observer {
     public boolean isGameRunning() {
         return gameRunning;
     }
-    
+
+    public boolean isName(String input) {
+        String firstNameRegex = "^[A-Za-z]+$"; // Only letters are allowed
+
+        Pattern pattern = Pattern.compile(firstNameRegex);
+        Matcher matcher = pattern.matcher(input);
+
+        return matcher.matches();
+    }
+
 }

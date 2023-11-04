@@ -14,23 +14,24 @@
 }
 
 .night-sky-background {
-  -fx-background-image: url("backgrounds/nightSky.jpg");
+  -fx-background-image: url("backgrounds/night-sky.jpg");
   -fx-background-repeat: no-repeat;
   -fx-background-size: cover;
 }
 
 .game-flow-background {
-  -fx-background-image: url("backgrounds/game-flow-2.jpg");
+  -fx-background-image: url("backgrounds/game-flow.JPG");
   -fx-background-repeat: no-repeat;
   -fx-background-size: cover;
 }
+
 
 /************* BUTTONS *************/
 
 .blue-button {
   -fx-font-size: 20px;
   -fx-font-weight: bold;
-  -fx-background-color: linear-gradient(darkblue, grey), blue;
+  -fx-background-color: linear-gradient(darkblue, grey), rgb(22, 22, 253);
   -fx-background-radius: 10;
   -fx-text-fill: white;
   -fx-effect: dropshadow(one-pass-box, black, 8, 0, 2, 0);
@@ -69,8 +70,8 @@
 .lightblue-button {
   -fx-font-size: 18px;
   -fx-font-weight: bold;
-  -fx-background-color: linear-gradient(rgb(0, 88, 139), grey), rgb(0, 195, 255);
-  -fx-background-radius: 40;
+  -fx-background-color: linear-gradient(rgb(0, 88, 139), grey), rgb(1, 143, 209);
+  -fx-background-radius: 10;
   -fx-text-fill: white;
   -fx-effect: dropshadow(one-pass-box, black, 8, 0, 2, 0);
 }
@@ -127,6 +128,18 @@
 }
 .darkgreen-button:hover {
   -fx-background-color: linear-gradient(rgb(0, 90, 0), grey), rgb(0, 56, 0);
+}
+
+.lightgreen-button {
+  -fx-font-size: 20px;
+  -fx-font-weight: bold;
+  -fx-background-color: linear-gradient(rgb(0, 94, 0), grey), rgb(28, 148, 28);
+  -fx-background-radius: 10;
+  -fx-text-fill: white;
+  -fx-effect: dropshadow(one-pass-box, black, 8, 0, 2, 0);
+}
+.lightgreen-button:hover {
+  -fx-background-color: linear-gradient(rgb(0, 90, 0), grey), rgb(0, 114, 0);
 }
 
 .red-button {
@@ -245,7 +258,7 @@
 }
 
 .wood-score-board {
-  -fx-background-image: url("player-board3.png");
+  -fx-background-image: url("backgrounds/player-board.png");
   -fx-background-size: contain;
   -fx-background-repeat: no-repeat;
 }
@@ -263,7 +276,7 @@
 }
 
 .my-words-box {
-  -fx-background-image: url("class-board.jpg");
+  -fx-background-image: url("backgrounds/class-board.jpg");
   -fx-background-size: cover;
   -fx-background-repeat: no-repeat;
 }
@@ -331,7 +344,7 @@
 .board-cell.failed {
   -fx-alignment: center;
   -fx-border-color: rgb(206, 0, 0);
-  -fx-border-width: 3px;
+  -fx-border-width: 4px;
   -fx-border-radius: 5px;
   -fx-effect: dropshadow(gaussian, rgb(233, 58, 58), 25, 0, 0, 7);
 
@@ -365,12 +378,12 @@
 
 .score-highlight {
   /* Define the hover effect styles here */
-  -fx-effect: dropshadow(gaussian, rgb(106, 252, 252), 85, 0.1, 0, 3);
+  -fx-effect: dropshadow(gaussian, rgb(106, 252, 252), 185, 0.7, 0, 3);
 }
 
 .score-failed {
   /* Define the hover effect styles here */
-  -fx-effect: dropshadow(gaussian, rgb(253, 115, 115), 85, 0.1, 0, 3);
+  -fx-effect: dropshadow(gaussian, rgb(253, 115, 115), 185, 0.7, 0, 3);
 }
 
 .book-scrabble-header {
@@ -421,6 +434,13 @@
   -fx-effect: dropshadow(gaussian, #090909, 15, 0, 0,9);
 }
 
+.name-error-field {
+  -fx-border-color: rgb(215, 22, 22);
+  -fx-border-width: 5px;
+  -fx-border-radius: 6px;
+  -fx-effect: dropshadow(gaussian, #090909, 15, 0, 0,9);
+}
+
 .os-bar {
   -fx-background-color: transparent;
 }
@@ -449,7 +469,7 @@
 }
 
 .drawtiles-content-background {
-  -fx-background-image: url("backgrounds/nightSky.jpg");
+  -fx-background-image: url("backgrounds/night-sky.jpg");
   -fx-background-repeat: no-repeat;
   -fx-background-size: cover;
   -fx-border-color: black;
@@ -457,7 +477,7 @@
 }
 
 .message-content-background {
-  -fx-background-color: rgb(255, 235, 123);
+  -fx-background-color: rgb(255, 227, 69);
   -fx-border-color: black;
   -fx-border-width: 3px;
 }
@@ -472,7 +492,7 @@
 }
 
 .login-label {
-  -fx-font-size: 16px;
+  -fx-font-size: 18px;
   -fx-font-weight: bold;
   -fx-text-fill: gainsboro;
 }
