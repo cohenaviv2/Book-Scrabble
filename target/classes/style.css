@@ -207,6 +207,11 @@
   -fx-effect: dropshadow(gaussian, rgb(144, 157, 158), 80, 0, 0, 6);
 }
 
+.glow-button-sorted {
+  /* Define the hover effect styles here */
+  -fx-effect: dropshadow(gaussian, rgb(37, 138, 210), 80, 0, 0, 6);
+}
+
 /************* BOARD *************/
 
 .score-icon-pane {
@@ -224,11 +229,20 @@
 
 .other-score-label {
   -fx-font-size: 25px;
-  -fx-text-fill: rgb(0, 140, 255);
+  -fx-text-fill: rgb(0, 174, 255);
   -fx-font-weight: bold;
   -fx-font-family: "Comic Sans MS";
   -fx-padding: 10px;
   -fx-effect: dropshadow(gaussian, rgb(0, 0, 0), 30, 0, 2, 6);
+}
+
+.double-score-label {
+  -fx-font-size: 20px;
+  -fx-text-fill: rgb(225, 19, 19);
+  -fx-font-weight: bold;
+  -fx-font-family: "Comic Sans MS";
+  -fx-padding: 10px;
+  -fx-effect: dropshadow(gaussian, rgb(144, 157, 158), 80, 0.3, 0, 6);
 }
 
 .winner-score-label {
@@ -319,7 +333,7 @@
 .board-cell.selected {
   -fx-alignment: center;
   -fx-border-color: black;
-  -fx-effect: dropshadow(gaussian, rgb(220, 243, 8), 40, 0.1, 0, 10);
+  -fx-effect: dropshadow(gaussian, rgb(220, 243, 8), 10, 0.5, 0, 0);
   -fx-border-width: 4px;
   -fx-border-radius: 5px;
 }
@@ -425,6 +439,10 @@
 
 .selected-book-image {
   -fx-effect: dropshadow(gaussian, gold, 25, 0.8, 0, 0);
+}
+
+.challange-button-glow {
+  -fx-effect: dropshadow(gaussian, rgb(201, 152, 112), 10, 0.5, 0, 0);
 }
 
 .error-field {

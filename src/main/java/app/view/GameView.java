@@ -7,9 +7,13 @@ import java.util.*;
 import app.model.game.Tile;
 import app.model.game.Word;
 import app.model.host.HostModel;
-import app.view_model.ViewModel;
+import app.view_model.GameViewModel;
+import javafx.animation.FadeTransition;
+import javafx.animation.PauseTransition;
+import javafx.animation.ScaleTransition;
 import javafx.application.Platform;
 import javafx.collections.*;
+import javafx.concurrent.Task;
 import javafx.geometry.*;
 import javafx.scene.Node;
 import javafx.scene.control.*;
@@ -21,32 +25,35 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.*;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 public class GameView {
     //
-    private ViewModel gameViewModel;
+    private GameViewModel gameViewModel;
     private GameController gameController;
-    // Styles
+    // Utils
     private Map<String, String> descriptions;
     private Map<String, String> symbols;
     private Map<String, Image> icons;
     public final String styleSheet;
-    //
+    // JavaFX
     private HBox osBar;
     private GridPane gameBoard;
     private List<Button> tileButtons;
-
     private Button tryPlaceWordButton;
+    private Button challengeButton;
+    private Button passTurnButton;
     private Button resetTilesButton;
     private Button sortTilesButton;
-    //
-    //
+    private HBox scoreBox;
+    // Properties
     public String myName;
     private boolean isHost;
     private int customPort = 0;
+    private boolean isTilesSorted;
     private boolean isTilePlaced;
 
-    public GameView(ViewModel viewModel, GameController gameController) {
+    public GameView(GameViewModel viewModel, GameController gameController) {
         this.osBar = null;
         this.gameViewModel = viewModel;
         this.gameController = gameController;
@@ -198,10 +205,12 @@ public class GameView {
         hostModeTitle.setFont(Font.font("Arial", FontWeight.BOLD, 20));
         Text hostModeText = new Text(descriptions.get("game-mode-host"));
         hostModeText.getStyleClass().add("content-label");
+        hostModeText.setTextAlignment(TextAlignment.CENTER);
         Text guestModeTitle = new Text("Join as a Guest");
         guestModeTitle.setFont(Font.font("Arial", FontWeight.BOLD, 20));
         Text guestModeText = new Text(descriptions.get("game-mode-guest"));
         guestModeText.getStyleClass().add("content-label");
+        guestModeText.setTextAlignment(TextAlignment.CENTER);
 
         VBox centerContent = new VBox(10, hostModeTitle, hostModeText, guestModeTitle, guestModeText);
         centerContent.setAlignment(Pos.CENTER);
@@ -223,9 +232,9 @@ public class GameView {
         loginFormBox.setAlignment(Pos.CENTER);
         loginFormBox.setSpacing(15);
 
-        if (isHost) {
-            checkHostConnection();
-        }
+        // if (isHost) {
+        // checkHostConnection();
+        // }
 
         List<TextField> textFields = new ArrayList<>();
         // Waiting Box
@@ -244,9 +253,9 @@ public class GameView {
         // My name
         Label nameLabel = new Label("My name");
         nameLabel.getStyleClass().add("login-label");
-        String tempName = isHost ? "Aviv" : "Moshe";
+        String tempName = isHost ? "Daniel" : "Anthony";
         // myName != null ? myName : ""
-        TextField nameTextField = new TextField(myName != null ? myName : "");
+        TextField nameTextField = new TextField(tempName);
         int maxCharacters = 11; // Maximum characters in the name field
         TextFormatter<String> textFormatter = new TextFormatter<>(change -> {
             if (change.getControlNewText().length() <= maxCharacters) {
@@ -260,7 +269,13 @@ public class GameView {
         nameTextField.setAlignment(Pos.CENTER);
         nameTextField.setMaxWidth(200);
         nameTextField
-                .setOnMouseClicked(e -> nameTextField.getStyleClass().removeAll("error-field", "name-error-field"));
+                .setOnMouseClicked(e -> {
+                    if (nameTextField.getStyleClass().contains("name-error-field")) {
+                        nameTextField.setText("");
+                    }
+                    nameTextField.getStyleClass()
+                            .removeIf(s -> s.equals("error-field") || s.equals("name-error-field"));
+                });
         textFields.add(nameTextField);
         VBox nameTextFieldBox = new VBox(nameTextField);
         nameTextFieldBox.setMinHeight(50);
@@ -310,7 +325,7 @@ public class GameView {
             Label numOfPlayersLabel = new Label("Number of Players");
             numOfPlayersLabel.getStyleClass().add("login-label");
             ComboBox<Integer> numOfPlayersComboBox = new ComboBox<>();
-            // numOfPlayersComboBox.setValue(2);
+            numOfPlayersComboBox.setValue(2);
             numOfPlayersComboBox.getItems().addAll(2, 3, 4);
             numOfPlayersComboBox.getStyleClass().add("text-field");
             numOfPlayersComboBox.setMinWidth(105);
@@ -349,6 +364,7 @@ public class GameView {
                     if (gameController.getSelectedBooks().size() == 0) {
                         booksButton.getStyleClass().add("error-field");
                     } else {
+                        checkHostConnection();
                         startGameButton.setDisable(true);
                         gameViewModel.setTotalPlayersCount(numOfPlayersComboBox.getValue());
                         gameViewModel.connectMe(myName, "0", customPort);
@@ -370,7 +386,7 @@ public class GameView {
             ipLabel.getStyleClass().add("login-label");
             TextField ipTextField = new TextField();
             ipTextField.setMaxWidth(250);
-            // ipTextField.setText("localhost");
+            ipTextField.setText("localhost");
             ipTextField.setAlignment(Pos.CENTER);
             ipTextField.getStyleClass().add("text-field");
             ipTextField.setOnMouseClicked(e -> ipTextField.getStyleClass().remove("error-field"));
@@ -386,6 +402,11 @@ public class GameView {
             HBox submitButtons = createSubmitButtons();
             Button joinGameButton = (Button) submitButtons.getChildren().get(1);
             joinGameButton.setStyle("-fx-font-size: 22px;");
+            ProgressIndicator progressIndicator = new ProgressIndicator();
+            progressIndicator.setPrefSize(20, 20);
+            progressIndicator.getStyleClass().add("progress-indicator");
+            submitButtons.getChildren().add(progressIndicator);
+            progressIndicator.setVisible(false);
             loginFormBox.getChildren().add(submitButtons);
 
             joinGameButton.setOnAction(event -> {
@@ -408,40 +429,60 @@ public class GameView {
                         booksButton.getStyleClass().add("error-field");
                     } else {
                         joinGameButton.setDisable(true);
-                        if (customPort == 0) {
-                            customPort = HostModel.HOST_SERVER_PORT;
-                        }
-                        gameViewModel.connectMe(myName, ip, customPort);
+                        progressIndicator.setVisible(true);
 
-                        loginFormBox.setDisable(true);
-                        osBar.setDisable(true);
+                        // Move network operations to a background thread
+                        Task<Boolean> networkTask = new Task<Boolean>() {
+                            @Override
+                            protected Boolean call() throws Exception {
+                                if (customPort == 0) {
+                                    customPort = HostModel.HOST_SERVER_PORT;
+                                }
+                                gameViewModel.connectMe(myName, ip, customPort);
+                                boolean isConnected = gameViewModel.isConnected();
 
-                        if (!gameViewModel.isConnected()) {
-                            VBox networkAlert = createTextAlertBox("Network Error",
-                                    descriptions.get("guest-socket-error"),
-                                    true);
-                            Node[] p = createCustomBox(networkAlert, "red", "Exit Game", "alert");
-                            VBox networkAlertBox = (VBox) p[0];
-                            Button alertButton = (Button) p[1];
-                            alertButton.setOnAction(e -> {
-                                gameViewModel.quitGame();
-                                gameController.close();
-                                System.exit(0);
-                            });
-                            Platform.runLater(() -> gameController.showCustomWindow(networkAlertBox, 550, 350));
-                        } else {
-                            gameViewModel.myBooksChoice(gameController.getSelectedBooks());
-                            gameViewModel.ready();
+                                return isConnected;
+                            }
+                        };
 
-                            // loginFormBox.setDisable(true);
-                            // osBar.setDisable(true);
+                        networkTask.setOnSucceeded(e -> {
+                            boolean isConnected = networkTask.getValue();
 
-                            // Waiting Window
-                            gameController.showCustomWindow(fullWaitingBox, 500, 350);
+                            if (!isConnected) {
+                                loginFormBox.setDisable(true);
+                                progressIndicator.setVisible(false);
+                                // Show a network error alert
+                                VBox networkAlert = createTextAlertBox("Network Error",
+                                        descriptions.get("guest-socket-error"),
+                                        true);
 
-                        }
+                                Node[] p = createCustomBox(networkAlert, "red", "Exit Game", "alert");
+                                VBox networkAlertBox = (VBox) p[0];
+                                Button alertButton = (Button) p[1];
+                                alertButton.setOnAction(ev -> {
+                                    gameViewModel.quitGame();
+                                    gameController.close();
+                                    System.exit(0);
+                                });
 
+                                gameController.showCustomWindow(networkAlertBox, 550, 350);
+                            } else {
+                                gameViewModel.myBooksChoice(gameController.getSelectedBooks());
+                                gameViewModel.ready();
+
+                                // loginFormBox.setDisable(true);
+                                // osBar.setDisable(true);
+
+                                // Waiting Window
+                                progressIndicator.setVisible(false);
+                                gameController.showCustomWindow(fullWaitingBox, 500, 350);
+                            }
+                        });
+
+                        // Start the background task
+                        new Thread(networkTask).start();
                     }
+
                 }
 
             });
@@ -468,7 +509,7 @@ public class GameView {
         bookContainer.setPrefWidth(800);
         bookContainer.setPrefHeight(650);
 
-        ObservableList<String> bookList = fullBookList ? ViewModel.getBookList()
+        ObservableList<String> bookList = fullBookList ? GameViewModel.getBookList()
                 : FXCollections.observableArrayList(gameViewModel.gameBooksProperty());
 
         for (String book : bookList) {
@@ -584,9 +625,9 @@ public class GameView {
         goBackButton.getStyleClass().add("green-button");
         goBackButton.setOnAction(e -> {
             gameController.close();
-            if (isHost) {
-                HostModel.get().stopHostServer();
-            }
+            // if (isHost) {
+            // HostModel.get().stopHostServer();
+            // }
             gameController.gameLoginStage.close();
             gameController.showInitialWindow();
             isHost = false;
@@ -977,7 +1018,7 @@ public class GameView {
         // Other Player's Info Board
         VBox otherBox = new VBox(15);
         otherBox.setAlignment(Pos.CENTER);
-        otherBox.setPadding(new Insets(10, 0, 20, 0));
+        otherBox.setPadding(new Insets(20, 0, 20, 0));
 
         List<Map.Entry<String, String>> sortedEntries = new ArrayList<>(gameViewModel.othersInfoProperty().entrySet());
         sortedEntries.sort((entry1, entry2) -> {
@@ -1015,7 +1056,6 @@ public class GameView {
                     Pane otherInfoBoard = createPlayerInfoBoard(playerName, playerInfo, true);
                     otherBox.getChildren().add(otherInfoBoard);
                 }
-                System.out.println("1. others info listener");
             });
         });
 
@@ -1104,8 +1144,8 @@ public class GameView {
 
         // Turn indicator
         ImageView turnIndicator = new ImageView(icons.get("turn"));
-        turnIndicator.setFitWidth(isOtherPlayer ? 40 : 60);
-        turnIndicator.setFitHeight(isOtherPlayer ? 40 : 60);
+        turnIndicator.setFitWidth(isOtherPlayer ? 50 : 60);
+        turnIndicator.setFitHeight(isOtherPlayer ? 50 : 60);
 
         HBox nameBox = new HBox(10);
         nameBox.setMinWidth(isOtherPlayer ? 190 : 160);
@@ -1119,45 +1159,29 @@ public class GameView {
             if (playerScore < 0) {
                 scoreLabel.setStyle("-fx-text-fill: red");
             } else {
-                scoreLabel.setStyle("-fx-text-fill: rgb(0, 174, 255);");
+                scoreLabel.setStyle("");
             }
         } else {
             scoreLabel.textProperty().bind(gameViewModel.myScoreProperty().asString());
             // Negative score
             gameViewModel.myScoreProperty().addListener((observable, oldScore, newScore) -> {
                 Platform.runLater(() -> {
-                    System.out.println("\n\n" + oldScore.intValue() + " & " + newScore.intValue() + "\n\n");
                     if (newScore.intValue() < 0) {
                         scoreLabel.setStyle("-fx-text-fill: red");
                     } else {
-                        scoreLabel.setStyle("-fx-text-fill: rgb(0, 174, 255);");
+                        scoreLabel.setStyle("");
                     }
 
+                    // Score effect
                     String effect = newScore.intValue() > oldScore.intValue() ? "highlight" : "failed";
-                    scoreLabel.getStyleClass()
-                            .add("score-" + effect);
-                    Timer timer = new Timer();
-                    timer.schedule(new TimerTask() {
+                    scoreLabel.getStyleClass().add("score-" + effect);
+                    PauseTransition pauseTransition = new PauseTransition(Duration.seconds(1)); // 1 second
+                    pauseTransition.setOnFinished(event -> {
+                        scoreLabel.getStyleClass().remove("score-" + effect);
+                    });
 
-                        @Override
-                        public void run() {
-                            Platform.runLater(() -> {
-                                scoreLabel.getStyleClass().remove("score-" + effect);
-                            });
-                        }
+                    pauseTransition.play();
 
-                    }, 1000);
-
-                    // if (newValue.intValue() < 0) {
-                    // // Animate the score change
-                    // updatePlayerScoreWithAnimation(oldValue.intValue(), newValue.intValue());
-                    // scoreLabel.setStyle("-fx-text-fill: red");
-                    // } else {
-                    // // Animate the score change
-                    // updatePlayerScoreWithAnimation(oldValue.intValue(), newValue.intValue());
-                    // scoreLabel.setStyle("-fx-text-fill: rgb(0, 174, 255);");
-                    // }
-                    System.out.println("2. score listener");
                 });
             });
         }
@@ -1169,6 +1193,7 @@ public class GameView {
         HBox scoreBox = new HBox(scoreIndicator, scoreLabel);
         scoreBox.setMinWidth(170);
         scoreBox.setAlignment(Pos.CENTER);
+        // scoreBox.setStyle("-fx-border-color: yellow;");
 
         if (isOtherPlayer) {
             if (playerTurn) {
@@ -1188,20 +1213,18 @@ public class GameView {
             return playerInfoBoard;
         } else {
             VBox turnBox = new VBox();
-            turnBox.setAlignment(Pos.CENTER);
+            turnBox.setAlignment(Pos.CENTER_LEFT);
             turnBox.getChildren().add(turnIndicator);
             turnBox.setVisible(false);
 
-            // turnBox.setStyle("-fx-border-color: yellow; ");
-            VBox playerInfoBox = new VBox(-10, nameBox, scoreBox);
-            // playerInfoBox.setStyle("-fx-border-color: yellow; ");
-
-            playerInfoBox.getStyleClass().add("wood-score-board");
-            playerInfoBox.setMinSize(230, 130);
-            playerInfoBox.setMaxSize(230, 130);
+            this.scoreBox = scoreBox;
+            VBox myInfoBox = new VBox(-10, nameBox, scoreBox);
+            myInfoBox.getStyleClass().add("wood-score-board");
+            myInfoBox.setMinSize(230, 130);
+            myInfoBox.setMaxSize(230, 130);
             if (playerTurn) {
                 turnBox.getStyleClass().add("glow-button");
-                playerInfoBox.getStyleClass().add("glow-button");
+                myInfoBox.getStyleClass().add("glow-button");
                 turnBox.setVisible(true);
             }
             gameViewModel.myTurnProperty().addListener((observable, oldValue, newValue) -> {
@@ -1210,19 +1233,18 @@ public class GameView {
                         // nameBox.getChildren().add(0, turnIndicator);
                         turnBox.setVisible(true);
                         turnBox.getStyleClass().add("glow-button");
-                        playerInfoBox.getStyleClass().add("glow-button");
+                        myInfoBox.getStyleClass().add("glow-button");
                     } else {
                         // nameBox.getChildren().remove(0);
                         turnBox.setVisible(false);
                         turnBox.getStyleClass().remove("glow-button");
-                        playerInfoBox.getStyleClass().remove("glow-button");
+                        myInfoBox.getStyleClass().remove("glow-button");
                     }
-                    System.out.println("3. turn listener");
                 });
             });
 
-            HBox playerInfoBoard = new HBox(turnBox, playerInfoBox);
-            playerInfoBox.setAlignment(Pos.CENTER);
+            HBox playerInfoBoard = new HBox(turnBox, myInfoBox);
+            myInfoBox.setAlignment(Pos.CENTER);
             playerInfoBoard.setPadding(new Insets(0, 0, 0, 20));
             return playerInfoBoard;
         }
@@ -1275,13 +1297,21 @@ public class GameView {
                 players.getChildren().add(playerBox);
             }
         }
+        // First Player Text
         String firstString = firstName.equals(myName) ? "You play first!" : (firstName + " is playing first!");
         Text firstPlayerText = new Text(firstString);
         firstPlayerText.setTextAlignment(TextAlignment.CENTER);
-        firstPlayerText.setFont(Font.font("Arial", FontWeight.BOLD, 20));
+        firstPlayerText.setFont(Font.font("Arial", FontWeight.BOLD, 24));
         firstPlayerText.setFill(Color.LIGHTBLUE);
-        VBox box = new VBox(40, drawTitleBox, players, firstPlayerText);
-        box.setPadding(new Insets(0, 0, 20, 0));
+        // Help Button
+        Button helpButton = new Button(symbols.get("help"));
+        helpButton.getStyleClass().add("purple-button");
+        helpButton.setOnAction(e -> {
+            gameController.showGameInstructionsWindow();
+        });
+
+        VBox box = new VBox(40, drawTitleBox, players, firstPlayerText, helpButton);
+        box.setPadding(new Insets(0, 0, 0, 0));
         box.setAlignment(Pos.CENTER);
 
         Node[] drawTilesNodes = createCustomBox(box, "green", "Let's Go", "drawtiles");
@@ -1292,32 +1322,26 @@ public class GameView {
         return drawTilesBox;
     }
 
-    private List<Button> createTileButtons(List<Tile> tiles, boolean isSorted) {
-
-        // Tile buttons
-        List<Button> tileButtons = new ArrayList<>();
-
-        if (isSorted) {
-            Collections.sort(tiles, Comparator.comparing(Tile::getLetter));
-        }
-        for (Tile tile : tiles) {
+    private void createTileButtons(List<Tile> myTiles) {
+        for (Tile tile : myTiles) {
             String letter = String.valueOf(tile.getLetter());
             Button tileButton = new Button();
+            tileButton.setId(letter);
             tileButton.setPrefSize(45, 45);
             tileButton.getStyleClass().add("tile-button");
             tileButton.setStyle("-fx-background-image: url('tiles/" + letter + ".png')");
 
             // Tiles update effect
             tileButton.getStyleClass().add("glow-button");
-            Timer timer = new Timer();
-            timer.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    Platform.runLater(() -> {
+            PauseTransition pauseTransition = new PauseTransition(Duration.millis(300)); // 1 second
+                    pauseTransition.setOnFinished(event -> {
                         tileButton.getStyleClass().remove("glow-button");
                     });
-                }
-            }, 300);
+
+                    pauseTransition.play();
+
+            tileButton.setOnMouseEntered(ev -> tileButton.getStyleClass().add("tile-button-hover"));
+            tileButton.setOnMouseExited(ev -> tileButton.getStyleClass().remove("tile-button-hover"));
 
             // On Tile Click
             tileButton.setOnAction(event -> {
@@ -1328,7 +1352,6 @@ public class GameView {
                 }
                 if (!gameController.getPlacementCelles().isEmpty()) {
                     isTilePlaced = true;
-                    sortTilesButton.setDisable(true);
                     Pane cellPane = gameController.getPlacementCelles().pop();
                     cellPane.getStyleClass().add("character");
                     cellPane.getStyleClass().add("character-" + letter);
@@ -1337,18 +1360,21 @@ public class GameView {
                     // Disable the tile button upon selection
                     tileButton.setDisable(true);
                     resetTilesButton.setDisable(false);
+                    sortTilesButton.setDisable(true);
 
                     // tilePane.getChildren().remove(tileButton);
 
                     // Add the tile value to the word
                     gameViewModel.addToWord(letter);
+
+                    if (gameController.getPlacementCelles().isEmpty()) {
+                        tryPlaceWordButton.setDisable(false);
+                    }
                 }
             });
 
             tileButtons.add(tileButton);
         }
-
-        return tileButtons;
     }
 
     private VBox createButtons() {
@@ -1356,31 +1382,41 @@ public class GameView {
         customRoot.setPadding(new Insets(20));
         customRoot.setAlignment(Pos.CENTER);
 
+        boolean myTurn = gameViewModel.myTurnProperty().get();
+
         // Tile buttons
         FlowPane tileButtonsPane = new FlowPane(10, 10);
         tileButtonsPane.setAlignment(Pos.CENTER);
 
         List<Tile> myTiles = gameViewModel.myTilesProperty();
-        tileButtons = createTileButtons(myTiles, false);
+        tileButtons = new ArrayList<>();
+        createTileButtons(myTiles);
         tileButtonsPane.getChildren().setAll(tileButtons);
         gameViewModel.myTilesProperty().addListener((obs, oldTiles, newTiles) -> {
             Platform.runLater(() -> {
-                tileButtons = createTileButtons(gameViewModel.myTilesProperty(), false);
+                tileButtons.clear();
+                createTileButtons(newTiles);
                 tileButtonsPane.getChildren().setAll(tileButtons);
-                System.err.println("4. tiles hanlder");
             });
         });
-
-        boolean myTurn = gameViewModel.myTurnProperty().get();
 
         // Sort Tiles Button
         sortTilesButton = new Button(symbols.get("sort"));
         sortTilesButton.getStyleClass().add("lightblue-button");
         sortTilesButton.setDisable(!myTurn);
         sortTilesButton.setOnAction(e -> {
+            isTilesSorted = true;
             sortTilesButton.setDisable(true);
-            tileButtons = createTileButtons(gameViewModel.myTilesProperty(), true);
+            Collections.sort(tileButtons, (b1, b2) -> b1.getId().compareTo(b2.getId()));
             tileButtonsPane.getChildren().setAll(tileButtons);
+
+            // Tiles sort effect
+            tileButtons.forEach(tileButton -> tileButton.getStyleClass().add("glow-button-sorted"));
+            PauseTransition pauseTransition = new PauseTransition(Duration.millis(300));
+            pauseTransition.setOnFinished(event -> {
+                tileButtons.forEach(tileButton -> tileButton.getStyleClass().remove("glow-button-sorted"));
+            });
+            pauseTransition.play();
         });
 
         // Reset Tiles button
@@ -1389,46 +1425,48 @@ public class GameView {
         resetTilesButton.setDisable(true);
         resetTilesButton.setOnAction(event -> {
             this.isTilePlaced = false;
-            sortTilesButton.setDisable(false);
-            gameController.resetWordPlacement();
+            gameController.resetWordPlacement(false);
+            gameController.setPlacementCells();
+            tryPlaceWordButton.setDisable(true);
             resetTilesButton.setDisable(true);
+            sortTilesButton.setDisable(isTilesSorted);
         });
 
+        // Tile buttons BOX
         HBox buttonBox = new HBox(10, sortTilesButton, resetTilesButton);
         buttonBox.setAlignment(Pos.CENTER);
-
-        // Tile buttons BOX
         VBox tileBox = new VBox(15, tileButtonsPane, buttonBox);
         tileBox.setAlignment(Pos.CENTER);
 
         // Pass turn Button
-        Button passTurnButton = new Button("Pass Turn");
+        passTurnButton = new Button("Pass Turn");
         passTurnButton.getStyleClass().add("yellow-button");
         passTurnButton.setStyle("-fx-font-size: 23px;");
+        passTurnButton.setDisable(!myTurn);
         passTurnButton.setOnAction(e -> {
+            isTilePlaced = false;
             gameViewModel.skipTurn();
-            // gameBoard.setDisable(false);
         });
 
         // Challange Button
-        Button challengeButton = new Button("Challenge");
+        challengeButton = new Button("Challenge");
         challengeButton.getStyleClass().add("green-button");
-        challengeButton.setStyle("-fx-font-size: 23px;");
+        challengeButton.setStyle("-fx-font-size: 25px;");
         challengeButton.setDisable(true);
         challengeButton.setOnAction(event -> {
             isTilePlaced = false;
-            // gameBoard.setDisable(false);
             gameViewModel.challenge();
         });
 
-        passTurnButton.setDisable(!myTurn);
-
+        // My Turn Listener
         gameViewModel.myTurnProperty().addListener((observable, oldTurn, newTurn) -> {
             Platform.runLater(() -> {
-                challengeButton.setDisable(true);
+                isTilePlaced = false;
+                isTilesSorted = false;
                 passTurnButton.setDisable(!newTurn);
                 sortTilesButton.setDisable(!newTurn);
-                System.out.println("5. turn button listener");
+                tryPlaceWordButton.setDisable(true);
+                challengeButton.setDisable(true);
             });
         });
 
@@ -1442,27 +1480,17 @@ public class GameView {
         tryPlaceWordButton = new Button("Try Place Word");
         tryPlaceWordButton.getStyleClass().add("blue-button");
         tryPlaceWordButton.setStyle("-fx-font-size: 26px;");
+        tryPlaceWordButton.setDisable(true);
         tryPlaceWordButton.setOnAction(event -> {
             isTilePlaced = false;
             gameBoard.setDisable(true);
             resetTilesButton.setDisable(true);
-            sortTilesButton.setDisable(true);
             tryPlaceWordButton.setDisable(true);
-            challengeButton.setDisable(false);
 
+            // try place word
             String word = gameViewModel.getWord();
-
             gameViewModel.tryPlaceWord(word);
-
-            // challengeButton.getStyleClass().add("glow-button");
-            // passTurnButton.getStyleClass().add("glow-button");
-
-            // gameViewModel.clearPlayerTiles();
-
-            // Clear existing tile buttons
-            // tilePane.getChildren().clear();
         });
-        tryPlaceWordButton.setDisable(gameController.getPlacementCelles().isEmpty());
 
         VBox playButtonsBox = new VBox(15, tryPlaceWordButton, challengeButton, passTurnButton, quitGameButton);
         playButtonsBox.setAlignment(Pos.CENTER);
@@ -1472,17 +1500,14 @@ public class GameView {
         HBox roundButtonsBox = createRoundButtons(true);
         roundButtonsBox.setPrefHeight(70);
         roundButtonsBox.setAlignment(Pos.BOTTOM_CENTER);
-
-        // Round buttons pane
+        // Help Button
         Button helpButton = (Button) roundButtonsBox.getChildren().get(0);
         helpButton.setOnAction(e -> gameController.showGameInstructionsWindow());
-
+        // Messages Button
         Button messageButton = (Button) roundButtonsBox.getChildren().get(1);
         Node[] messagesNodes = createCustomBox(createMessagesBox(), "red", symbols.get("exit"), "message");
         VBox messagesBox = (VBox) messagesNodes[0];
         messageButton.setOnAction(e -> gameController.showCustomWindow(messagesBox, 700, 370));
-
-        // messageButton.setOnAction(e -> showMessageWindow("All"));
 
         customRoot.getChildren().addAll(tileBox, playButtonsBox, roundButtonsBox);
 
@@ -1501,8 +1526,11 @@ public class GameView {
         Label selectCellLabel = new Label("1. Select Cells:");
         selectCellLabel.getStyleClass().add("title");
         selectCellLabel.setStyle("-fx-font-size: 18;  -fx-text-fill: black;");
+        Text selectCellsText = new Text(descriptions.get("select-cells"));
+        selectCellsText.setFont(new Font(16));
+        selectCellsText.setTextAlignment(TextAlignment.CENTER);
         ImageView selectCellsGif = new ImageView(new Image("instructions/select-cells.gif"));
-        VBox firstBox = new VBox(20, selectCellLabel, selectCellsGif);
+        VBox firstBox = new VBox(20, selectCellLabel, selectCellsGif, selectCellsText);
         firstBox.setAlignment(Pos.CENTER);
         firstBox.setPadding(new Insets(15, 15, 15, 15));
         VBox.setMargin(selectCellLabel, new Insets(0, 0, 0, 15));
@@ -1510,8 +1538,11 @@ public class GameView {
         Label selectTilesLabel = new Label("2. Select Tiles:");
         selectTilesLabel.getStyleClass().add("title");
         selectTilesLabel.setStyle("-fx-font-size: 18;  -fx-text-fill: black;");
+        Text selectTilesText = new Text(descriptions.get("select-tiles"));
+        selectTilesText.setFont(new Font(16));
+        selectTilesText.setTextAlignment(TextAlignment.CENTER);
         ImageView selectTilesGif = new ImageView(new Image("instructions/select-tiles.gif"));
-        VBox secondBox = new VBox(20, selectTilesLabel, selectTilesGif);
+        VBox secondBox = new VBox(20, selectTilesLabel, selectTilesGif, selectTilesText);
         secondBox.setAlignment(Pos.CENTER);
         secondBox.setPadding(new Insets(15, 15, 15, 15));
         VBox.setMargin(selectTilesLabel, new Insets(0, 0, 0, 15));
@@ -1519,8 +1550,11 @@ public class GameView {
         Label tryButtonLabel = new Label("3. Click the Try Place Button:");
         tryButtonLabel.getStyleClass().add("title");
         tryButtonLabel.setStyle("-fx-font-size: 18;  -fx-text-fill: black;");
+        Text tryButtonText = new Text(descriptions.get("try-button"));
+        tryButtonText.setFont(new Font(16));
+        tryButtonText.setTextAlignment(TextAlignment.CENTER);
         ImageView tryPlaceGif = new ImageView(new Image("instructions/try-place.gif"));
-        VBox thirdBox = new VBox(20, tryButtonLabel, tryPlaceGif);
+        VBox thirdBox = new VBox(20, tryButtonLabel, tryPlaceGif, tryButtonText);
         thirdBox.setAlignment(Pos.CENTER);
         thirdBox.setPadding(new Insets(15, 15, 15, 15));
         VBox.setMargin(tryButtonLabel, new Insets(0, 0, 0, 15));
@@ -1528,8 +1562,11 @@ public class GameView {
         Label placeWordLabel = new Label("4. Place Word:");
         placeWordLabel.getStyleClass().add("title");
         placeWordLabel.setStyle("-fx-font-size: 18; -fx-text-fill: black;");
+        Text placeWordText = new Text(descriptions.get("place-word"));
+        placeWordText.setFont(new Font(16));
+        placeWordText.setTextAlignment(TextAlignment.CENTER);
         ImageView placeWordGif = new ImageView(new Image("instructions/place-word.gif"));
-        VBox fourthBox = new VBox(20, placeWordLabel, placeWordGif);
+        VBox fourthBox = new VBox(20, placeWordLabel, placeWordGif, placeWordText);
         fourthBox.setAlignment(Pos.CENTER);
         fourthBox.setPadding(new Insets(15, 15, 15, 15));
         VBox.setMargin(placeWordLabel, new Insets(0, 0, 0, 15));
@@ -1537,12 +1574,12 @@ public class GameView {
         VBox main = new VBox(10, firstBox, secondBox, thirdBox, fourthBox);
         main.setStyle("-fx-background-color: rgb(168, 79, 212);");
         main.setAlignment(Pos.CENTER);
-        main.setPrefSize(700, 280);
+        main.setPrefSize(700, 350);
 
         ScrollPane scrollPane = new ScrollPane(main);
         scrollPane.setMinViewportWidth(700); // Set the preferred width
         scrollPane.setMinViewportHeight(200); // Set the preferred height
-        scrollPane.setMinHeight(280);
+        scrollPane.setMinHeight(350);
         scrollPane.setStyle("-fx-background-color: rgb(168, 79, 212);");
 
         howToPlayBox.getChildren().addAll(howToLabel, scrollPane);
@@ -1562,12 +1599,12 @@ public class GameView {
         VBox main2 = new VBox(10, instructionsText);
         main2.setStyle("-fx-background-color: rgb(168, 79, 212);");
         main2.setAlignment(Pos.CENTER);
-        main2.setPrefSize(700, 280);
+        main2.setPrefSize(700, 350);
 
         ScrollPane scrollPane2 = new ScrollPane(main2);
         scrollPane2.setMinViewportWidth(700); // Set the preferred width
         scrollPane2.setMinViewportHeight(200); // Set the preferred height
-        scrollPane2.setMinHeight(280);
+        scrollPane2.setMinHeight(350);
         scrollPane2.setStyle("-fx-background-color: rgb(168, 79, 212);");
 
         instructionsBox.getChildren().addAll(instructionsLabel, scrollPane2);
@@ -1590,14 +1627,11 @@ public class GameView {
         gameBoard.setMaxSize(734, 734);
         gameBoard.getStyleClass().add("board-background");
 
-        gameViewModel.currentBoardProperty().addListener((observable, oldValue, newValue) -> {
+        gameViewModel.currentBoardProperty().addListener((observable, oldBoard, newBoard) -> {
             Platform.runLater(() -> {
-                gameController.resetWordPlacement();
                 gameBoard.setDisable(false);
-                updateBoard(newValue);
-                System.out.println("6. board listener");
+                updateBoard(newBoard);
             });
-
         });
 
         // Initial setup
@@ -1626,22 +1660,25 @@ public class GameView {
     }
 
     private void updateBoard(Tile[][] board) {
-        sortTilesButton.setDisable(false);
+        challengeButton.getStyleClass().removeIf(s -> s.equals("challange-button-glow"));
+        passTurnButton.getStyleClass().removeIf(s -> s.equals("challange-button-glow"));
 
-        gameController.resetWordPlacement();
-        int boardSize = board.length;
+        if (!isTilePlaced) {
+            gameController.resetWordPlacement(true);
+            int boardSize = board.length;
 
-        for (int row = 0; row < boardSize; row++) {
-            for (int col = 0; col < boardSize; col++) {
-                Pane cellPane = (Pane) gameBoard.getChildren().get(row * boardSize + col);
+            for (int row = 0; row < boardSize; row++) {
+                for (int col = 0; col < boardSize; col++) {
+                    Pane cellPane = (Pane) gameBoard.getChildren().get(row * boardSize + col);
 
-                if (board[row][col] != null) {
-                    String letter = String.valueOf(board[row][col].getLetter());
-                    // Update styling based on the letter
-                    cellPane.getStyleClass().add("character");
-                    cellPane.getStyleClass().add("character-" + letter);
-                } else {
-                    cellPane.getStyleClass().removeIf(style -> style.startsWith("character-"));
+                    if (board[row][col] != null) {
+                        String letter = String.valueOf(board[row][col].getLetter());
+                        // Update styling based on the letter
+                        cellPane.getStyleClass().add("character");
+                        cellPane.getStyleClass().add("character-" + letter);
+                    } else {
+                        cellPane.getStyleClass().removeIf(style -> style.startsWith("character-"));
+                    }
                 }
             }
         }
@@ -1653,14 +1690,11 @@ public class GameView {
             gameController.showTurnAlert();
         } else {
 
-            // Player's hasnt placed tiles yet
+            // Player hasn't placed tiles yet
             if (!isTilePlaced) {
-                gameController.getPlacementCelles().clear();
-                gameController.getPlacementList().clear();
-                //
 
                 if (gameController.getSelectedCells().size() == 0) {
-                    // gameController.resetWordPlacement();
+                    // Add The Cell
                     gameController.getSelectedCells().add(cell);
                     cell.getStyleClass().add("selected");
                 } else if (gameController.getSelectedCells().size() == 1) {
@@ -1681,32 +1715,26 @@ public class GameView {
                     }
                 } else if (gameController.getSelectedCells().size() == 2) {
                     if (gameController.getSelectedCells().contains(cell)) {
+                        // Deselect the clicked cell
                         gameController.getSelectedCells().remove(cell);
                         cell.getStyleClass().remove("selected");
                     } else {
-                        // clear all panes
-                        gameController.resetWordPlacement();
-                        // for (Pane cell : gameController.getSelectedCells()) {
-                        // cell.getStyleClass().remove("selected");
-                        // }
-                        // gameController.getSelectedCells().clear();
-
+                        gameController.getSelectedCells().forEach(c -> c.getStyleClass().remove("selected"));
+                        gameController.getSelectedCells().clear();
                         // add the new one
                         gameController.getSelectedCells().add(cell);
                         cell.getStyleClass().add("selected");
                     }
+                    // Clear The Word's Location Lists
+                    gameController.getPlacementCelles().clear();
+                    gameController.getPlacementTileList().clear();
                 }
 
                 // Enable/disable buttons based on the number of selected cells
                 boolean enableButtons = gameController.getSelectedCells().size() == 2;
-                tryPlaceWordButton.setDisable(!enableButtons);
+                // tryPlaceWordButton.setDisable(!enableButtons);
 
                 if (enableButtons) {
-                    for (Button b : tileButtons) {
-                        // b.setDisable(false);
-                        b.setOnMouseEntered(e -> b.getStyleClass().add("tile-button-hover"));
-                        b.setOnMouseExited(e -> b.getStyleClass().remove("tile-button-hover"));
-                    }
                     int firstRow = GridPane.getRowIndex(gameController.getSelectedCells().get(0));
                     int firstCol = GridPane.getColumnIndex(gameController.getSelectedCells().get(0));
                     int lastRow = GridPane.getRowIndex(gameController.getSelectedCells().get(1));
@@ -1720,9 +1748,6 @@ public class GameView {
                     gameController.setPlacementCells();
 
                 }
-                // else {
-                // gameViewModel.clearSelectedCells();
-                // }
             }
         }
     }
@@ -1800,15 +1825,47 @@ public class GameView {
                 }
             }
         }
-        Timer timer = new Timer();
-        timer.schedule(new TimerTask() {
 
-            @Override
-            public void run() {
-                panes.forEach(p -> p.getStyleClass().remove(success ? "highlight" : "failed"));
-            }
+        PauseTransition pauseTransition = new PauseTransition(Duration.seconds(1)); // 1 second
+        pauseTransition.setOnFinished(event -> {
+            panes.forEach(p -> p.getStyleClass().remove(success ? "highlight" : "failed"));
+        });
 
-        }, success ? 1000 : 3500);
+        pauseTransition.play();
+    }
+
+    public void showDoubleScoreEffect() {
+        // Double Score Label
+        Label doubleScoreLabel = new Label("x2");
+        doubleScoreLabel.getStyleClass().add("double-score-label");
+        VBox doubleScoreBox = new VBox(doubleScoreLabel);
+        doubleScoreBox.setAlignment(Pos.CENTER);
+
+        // Add the doubleScoreBox to the center of myInfoBox
+        scoreBox.getChildren().add(0, doubleScoreBox);
+
+        // Create a scale animation to make the box larger
+        ScaleTransition scaleAnimation = new ScaleTransition(Duration.seconds(0.5), doubleScoreBox);
+        scaleAnimation.setToX(2); // Scale horizontally to 150%
+        scaleAnimation.setToY(2); // Scale vertically to 150%
+
+        // Create a fade animation to make the box fade out
+        FadeTransition fadeOutAnimation = new FadeTransition(Duration.seconds(1), doubleScoreBox);
+        fadeOutAnimation.setFromValue(1.0);
+        fadeOutAnimation.setToValue(0.0);
+
+        // Sequentially play the scale and fade animations
+        scaleAnimation.setOnFinished(event -> {
+            fadeOutAnimation.play();
+        });
+
+        // Remove the box after it's fully faded out
+        fadeOutAnimation.setOnFinished(event -> {
+            scoreBox.getChildren().remove(doubleScoreBox);
+        });
+
+        // Play the scale animation to start the effect
+        scaleAnimation.play();
     }
 
     public VBox createMessagesBox() {
@@ -1925,7 +1982,7 @@ public class GameView {
         return messageWindowBox;
     }
 
-    public VBox createChallangeBox(List<Word> illegalWords, boolean isChallange) {
+    public VBox createChallangeBox(List<Word> illegalWords, boolean afterChallange) {
         VBox box = null;
         String words = "";
         for (int i = 0; i < illegalWords.size(); i++) {
@@ -1934,15 +1991,27 @@ public class GameView {
                 words += ",";
             }
         }
-        if (isChallange) {
+        if (afterChallange) {
             box = createTextAlertBox("Challange Failed",
                     "One of these words: " + words + "\nis not found in the game books\n\nYou lost 10 points.",
                     true);
         } else {
             box = createTextAlertBox(words,
                     "One of these words is not dictionary legal\nYou can try Challange or Pass turn.", true);
+            challengeButton.getStyleClass().add("challange-button-glow");
+            challengeButton.setDisable(false);
+            passTurnButton.getStyleClass().add("challange-button-glow");
         }
         Node[] nodes = createCustomBox(box, "blue", "OK", "alert");
+        Button okButton = (Button) nodes[1];
+
+        if (afterChallange) {
+            okButton.setOnAction(e -> {
+                gameController.closeCustomWindow();
+                highlightCellsForWords(illegalWords, false);
+            });
+        }
+
         VBox iligalWordsBox = (VBox) nodes[0];
 
         return iligalWordsBox;
@@ -1954,7 +2023,7 @@ public class GameView {
         helpButton.getStyleClass().add("purple-button");
         gameBoard.setDisable(false);
         helpButton.setOnAction(e -> {
-            gameController.resetWordPlacement();
+            gameController.resetWordPlacement(true);
             gameController.showGameInstructionsWindow();
         });
         illegalMoveBox.getChildren().add(helpButton);
@@ -1962,7 +2031,7 @@ public class GameView {
         Node[] nodes = createCustomBox(illegalMoveBox, "green", "Try Again", "alert");
         Button tryAgainButton = (Button) nodes[1];
         tryAgainButton.setOnAction(e -> {
-            gameController.resetWordPlacement();
+            gameController.resetWordPlacement(true);
             gameController.closeCustomWindow();
         });
 

@@ -5,7 +5,6 @@ import java.io.*;
 import app.model.GetMethod;
 import app.model.game.GameManager;
 import app.model.server.ClientHandler;
-import app.view_model.MessageReader;
 
 /*
  * The Guest handler used to communicate between the host and the guests
@@ -77,12 +76,8 @@ public class GuestHandler implements ClientHandler {
             // this.yourTurnString = myId + ",isMyTurn,true"; // my turn modifier
             String connectionMessage = myId + "," + GetMethod.connectMe + "," + myId; // ack & id
             out.println(connectionMessage); // send id
-            // PRINT DEBUG
-            // System.out.println("GUEST HANDLER: guest " + myId + " connected!\n");
             flag = false;
         } else {
-            // PRINT DEBUG
-            // System.out.println("GUEST HANDLER: failed to connect guest\n");
         }
     }
 
@@ -101,12 +96,8 @@ public class GuestHandler implements ClientHandler {
                     if (ans.equals("true")) {
                         isBooksSet = true;
                         out.println(myId + "," + GetMethod.myBooksChoice + "," + ans);
-                        // PRINT DEBUG
-                        // System.out.println("GUEST HANDLER: guest " + myId + " set book choice! \n");
                     } else {
                         out.println(myId + ",myBookChoice," + ans);
-                        // PRINT DEBUG
-                        // System.out.println("GuestHandler: cant set guest's book");
                     }
                 }
                 if (!ready) {
@@ -116,11 +107,7 @@ public class GuestHandler implements ClientHandler {
                     if (id == myId && params[1].equals(GetMethod.ready)) {
                         if (params[2].equals("true")) {
                             gameManager.setReady();
-                            // PRINT DEBUG
-                            // System.out.println("GUEST HANDLER: guest " + myId + " is ready to play!\n");
                         } else {
-                            // PRINT DEBUG
-                            // System.out.println("GuestHandler: cant set guest's ready val");
                         }
                     }
                 }
@@ -154,9 +141,6 @@ public class GuestHandler implements ClientHandler {
         out.println(quitGameString);
         // Handle quit in game manager
         gameManager.quitGameHandler(quitGameString);
-        MessageReader.setMsg(playerName + " has quit the game!");
-        // PRINT DEBUG
-        System.out.println("\nGUEST HANDLER: chat ended, " + myId + " has quit the game\n");
     }
 
     @Override

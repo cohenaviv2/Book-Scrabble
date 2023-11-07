@@ -7,7 +7,6 @@ import java.util.concurrent.*;
 
 import app.model.GetMethod;
 import app.model.game.*;
-import app.view_model.MessageReader;
 
 public class CommunicationHandler extends Observable {
     private Socket hostSocket;
@@ -39,14 +38,11 @@ public class CommunicationHandler extends Observable {
         if (!ans[2].equals("0")) {
             this.myId = Integer.parseInt(ans[2]);
             this.QUIT_GAME_QUERY = myId + "," + GetMethod.quitGame + "," + "true";
-            // PRINT DEBUG
-            // System.out.println("CommHandler: got my id " + myId + ", " + name + " is
             // Connected!");
             flag = false;
         } else {
             // System.err.println("CommHandler - connectMe: wrong answer from Host server "
             // + ans);
-            System.out.println("\nCannot connect to the game\n");
             flag = true;
             close();
         }
@@ -63,14 +59,10 @@ public class CommunicationHandler extends Observable {
             String value = ans[2];
             if (id == myId && modifier.equals(GetMethod.myBooksChoice) && value.equals("true")) {
 
-                // PRINT DEBUG
-                // System.out.println("CommHandler: your book list is set up! starting
                 // chat...");
                 startUpdateListener();
 
             } else {
-                // PRINT DEBUG
-                // System.out.println("CommHandler - addBookHandler: wrong answer from Host
                 // erver " + ans);
                 // throw new Exception("CommHandler - addBookHandler: wrong answer from Host
                 // server " + ans);
@@ -110,13 +102,10 @@ public class CommunicationHandler extends Observable {
 
                         // if it's not my id, Drop maessage
                         if (messageId == myId) {
-                            // System.out.println("\n\n"+modifier+","+returnedVal+"\n\n");
                             handleResponse(modifier, returnedVal);
                         }
                     }
                 }
-                // PRINT DEBUG
-                System.out.println("\nCommHandler: chat with host ended");
 
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
@@ -181,8 +170,6 @@ public class CommunicationHandler extends Observable {
                 quitGameHandler(returnedVal);
                 break;
             default:
-                // PRINT DEBUG
-                // System.out.println("CommHandler: wrong instructions operator - " + modifier);
         }
     }
 
@@ -197,8 +184,6 @@ public class CommunicationHandler extends Observable {
     private void getGameBooksHandler(String returnedVal) throws ClassNotFoundException, IOException {
         if (playerProperties.getGameBookList() == null) {
             if (returnedVal.equals("false")) {
-                // PRINT DEBUG
-                // // System.out.println("CommHandler: cant get my game books");
             } else {
                 @SuppressWarnings(value = "unchecked")
                 Set<String> gameBooks = (Set<String>) ObjectSerializer.deserializeObject(returnedVal);
@@ -213,12 +198,8 @@ public class CommunicationHandler extends Observable {
     private void skipTurnHandler(String returnedVal) {
         if (returnedVal.equals("true")) {
             playerProperties.setMyTurn(false);
-            // PRINT DEBUG
-            // // System.out.println("CommHandler: you skipped your turn");
 
         } else if (returnedVal.equals("false")) {
-            // PRINT DEBUG
-            // // System.out.println("CommHandler: cant skip your turn/it is not your
             // turn");
 
         }
@@ -230,19 +211,14 @@ public class CommunicationHandler extends Observable {
     }
 
     private void tryPlaceWordHandler(String returnedVal) {
-        // System.out.println("\n\nCommHandler - tryPlace ans:" + returnedVal + "\n\n");
 
         if (returnedVal.startsWith("notBoardLegal")) {
 
-            // PRINT DEBUG
-            // System.out.println("Word's not Board legal, Try again");
             setChanged();
             notifyObservers(GetMethod.tryPlaceWord + "," + "notBoardLegal");
 
         } else {
 
-            // PRINT DEBUG
-            // System.out.println("tryPlaceWord - some error/turn");
             setChanged();
             notifyObservers(GetMethod.tryPlaceWord + "," + returnedVal);
 
@@ -252,19 +228,11 @@ public class CommunicationHandler extends Observable {
     private void isMyTurnHandler(String returnedVal) {
         if (returnedVal.equals("true")) {
             playerProperties.setMyTurn(true);
-            // PRINT DEBUG
-            // System.out.println("CommHandler: your turn - TRUE");
-
-            MessageReader.setMsg("It's your turn!");
 
         } else if (returnedVal.equals("false")) {
             playerProperties.setMyTurn(false);
-            // PRINT DEBUG
-            // System.out.println("CommHandler: your turn - FALSE");
 
         } else {
-            // PRINT DEBUG
-            // System.out.println("CommHandler: wrong answer from Host server " +
             // returnedVal);
 
         }
@@ -272,8 +240,6 @@ public class CommunicationHandler extends Observable {
 
     private void getMyWordsHandler(String returnedVal) throws ClassNotFoundException, IOException {
         if (returnedVal.equals("false")) {
-            // PRINT DEBUG
-            // System.out.println("CommHandler: cant get my words");
         } else {
             @SuppressWarnings(value = "unchecked")
             ArrayList<Word> word = (ArrayList<Word>) ObjectSerializer.deserializeObject(returnedVal);
@@ -284,8 +250,6 @@ public class CommunicationHandler extends Observable {
 
     private void getMyTilesHandler(String returnedVal) throws ClassNotFoundException, IOException {
         if (returnedVal.equals("false")) {
-            // PRINT DEBUG
-            // System.out.println("CommHandler: cant get my tiles");
         } else {
             @SuppressWarnings(value = "unchecked")
             ArrayList<Tile> tile = (ArrayList<Tile>) ObjectSerializer.deserializeObject(returnedVal);
@@ -295,8 +259,6 @@ public class CommunicationHandler extends Observable {
 
     private void getMyScoreHandler(String returnedVal) {
         if (returnedVal.equals("false")) {
-            // PRINT DEBUG
-            // System.out.println("CommHandler: cant get score");
         } else {
             int score = Integer.parseInt(returnedVal);
             playerProperties.setMyScore(score);
@@ -305,8 +267,6 @@ public class CommunicationHandler extends Observable {
 
     private void getCurrentBoardHandler(String returnedVal) throws ClassNotFoundException, IOException {
         if (returnedVal.equals("false")) {
-            // PRINT DEBUG
-            // System.out.println("CommHandler: cant get board");
         } else {
             Tile[][] board = (Tile[][]) ObjectSerializer.deserializeObject(returnedVal);
             playerProperties.setMyBoard(board);
@@ -315,8 +275,6 @@ public class CommunicationHandler extends Observable {
 
     private void getOtherInfoHandler(String returnedVal) throws ClassNotFoundException, IOException {
         if (returnedVal.equals("false")) {
-            // PRINT DEBUG
-            // System.out.println("CommHandler: cant get others Scores");
         } else {
             @SuppressWarnings(value = "unchecked")
             Map<String, String> othersScores = (Map<String, String>) ObjectSerializer
@@ -327,14 +285,11 @@ public class CommunicationHandler extends Observable {
 
     private void getBagCountHandler(String returnedVal) {
         if (returnedVal.equals("false")) {
-            // PRINT DEBUG
-            // System.out.println("CommHandler: cant get bag count");
         } else {
             int bagCount = Integer.parseInt(returnedVal);
             playerProperties.setBagCount(bagCount);
         }
         // All props are set
-        // System.out.println(this.playerProperties);
         setChanged();
         notifyObservers((MESSAGE != null) ? MESSAGE : GetMethod.updateAll);
         this.MESSAGE = null;

@@ -49,7 +49,6 @@ public class GuestModel extends Observable implements GameModel, Observer {
             this.commHandler.addObserver(this);
             commHandler.connectMe(name);
             setIsConnected(true);
-            // System.out.println("guest is connected");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -86,27 +85,21 @@ public class GuestModel extends Observable implements GameModel, Observer {
                 e.printStackTrace();
 
             }
-        } else
-            System.out.println("its not your turn");
-
+        }
     }
 
     @Override
     public void challenge() {
         if (playerProperties.isMyTurn()) {
             commHandler.sendMessage(GetMethod.challenge, "true");
-        } else
-            System.out.println("its not your turn");
-
+        } 
     }
 
     @Override
     public void skipTurn() {
         if (playerProperties.isMyTurn()) {
             commHandler.sendMessage(GetMethod.skipTurn, "true");
-        } else
-            System.out.println("its not your turn");
-
+        } 
     }
 
     @Override

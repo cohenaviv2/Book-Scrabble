@@ -4,14 +4,14 @@ import app.model.GetMethod;
 import app.model.game.ObjectSerializer;
 import app.model.game.Tile;
 import app.model.game.Word;
-import app.view_model.ViewModel;
-import javafx.stage.*;
+import app.view_model.GameViewModel;
 
 import java.io.IOException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javafx.stage.*;
 import javafx.application.Platform;
 import javafx.scene.*;
 import javafx.scene.control.Button;
@@ -19,7 +19,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 
 public class GameController implements Observer {
-    private ViewModel gameViewModel; // Game view model
+    private GameViewModel gameViewModel; // Game view model
     private GameView gameView; // Creates the game components
     // Stages
     protected Stage gameLoginStage;
@@ -31,12 +31,12 @@ public class GameController implements Observer {
     private List<String> selectedBooks;
     private List<Pane> selectedCells;
     private Stack<Pane> placementCelles;
-    private List<Pane> placementList;
+    private List<Pane> placementTileList;
     private List<Word> turnWords;
     private boolean gameRunning;
     private boolean hostQuit;
 
-    public GameController(ViewModel viewModel) {
+    public GameController(GameViewModel viewModel) {
         this.gameViewModel = viewModel;
         viewModel.addObserver(this);
         this.gameView = new GameView(viewModel, this);
@@ -44,10 +44,10 @@ public class GameController implements Observer {
         setUpStage(customStage);
         this.gameRunning = false;
         this.selectedBooks = new ArrayList<>();
-        // selectedBooks.add("harry potter");
+        selectedBooks.add("harry potter");
         this.selectedCells = new ArrayList<>();
         this.placementCelles = new Stack<>();
-        this.placementList = new ArrayList<>();
+        this.placementTileList = new ArrayList<>();
         this.turnWords = new ArrayList<>();
     }
 
@@ -131,13 +131,14 @@ public class GameController implements Observer {
     }
 
     public void showGameInstructionsWindow() {
+        customStage.close();
         VBox gameInstructionsBox = gameView.createGameInstuctionsBox();
-        showCustomWindow(gameInstructionsBox, 900, 600);
+        showCustomWindow(gameInstructionsBox, 900, 630);
     }
 
     private void showDrawTilesWindow(String resaults) {
         VBox drawTilesBox = gameView.createDrawTilesBox(resaults);
-        showCustomWindow(drawTilesBox, 800, 750);
+        showCustomWindow(drawTilesBox, 800, 700);
     }
 
     public void showTurnAlert() {
@@ -145,8 +146,8 @@ public class GameController implements Observer {
         showCustomWindow(turnAlertBox, 530, 290);
     }
 
-    private void showIllegalWordsAlert(List<Word> illegalWords, boolean isChallange) {
-        VBox iligalWordsBox = gameView.createChallangeBox(illegalWords, isChallange);
+    private void showIllegalWordsAlert(List<Word> illegalWords, boolean afterChallange) {
+        VBox iligalWordsBox = gameView.createChallangeBox(illegalWords, afterChallange);
         showCustomWindow(iligalWordsBox, 600, 300);
     }
 
@@ -189,30 +190,34 @@ public class GameController implements Observer {
         return gameRunning ? gameFlowStage : gameLoginStage;
     }
 
-    public void resetWordPlacement() {
+    public void resetWordPlacement(boolean isResetCells) {
+        // Able Tile Buttons
         for (Button tb : gameView.getTileButtons()) {
             tb.setDisable(false);
         }
-        for (Pane cell : placementList) {
-            // Clear all added style classes except letter styles
+        // Reset Placement Tile List Style
+        for (Pane cell : placementTileList) {
             cell.getStyleClass().removeIf(style -> style.startsWith("character-"));
-
-            // Clear inline styles
             cell.setStyle("");
-
-            // Add the default style if it didn't have a letter style
             cell.getStyleClass().add("board-cell");
         }
-        for (Pane cell : selectedCells) {
-            cell.getStyleClass().remove("selected");
-        }
-        for (Pane cell : placementCelles) {
-            cell.getStyleClass().removeIf(style -> style.startsWith("character-"));
-        }
+        // Clear All
         gameViewModel.clearWord();
-        placementCelles.clear();
-        placementList.clear();
-        selectedCells.clear();
+
+        if (isResetCells) {
+            placementTileList.clear();
+
+            // Reset Placement Cells Style
+            for (Pane cell : placementCelles) {
+                cell.getStyleClass().removeIf(style -> style.startsWith("character-"));
+            }
+            placementCelles.clear();
+            // Reset Selected Cells
+            for (Pane cell : selectedCells) {
+                cell.getStyleClass().remove("selected");
+            }
+            selectedCells.clear();
+        }
     }
 
     public void setPlacementCells() {
@@ -227,7 +232,7 @@ public class GameController implements Observer {
                 if (board[lastRow][lastCol] == null) {
                     Pane cell = (Pane) gameView.getCellFromBoard(lastRow, lastCol);
                     placementCelles.push(cell);
-                    placementList.add(cell);
+                    placementTileList.add(cell);
                 }
                 lastRow--;
             }
@@ -236,7 +241,7 @@ public class GameController implements Observer {
                 if (board[lastRow][lastCol] == null) {
                     Pane cell = (Pane) gameView.getCellFromBoard(lastRow, lastCol);
                     placementCelles.push(cell);
-                    placementList.add(cell);
+                    placementTileList.add(cell);
                 }
                 lastCol--;
             }
@@ -276,14 +281,13 @@ public class GameController implements Observer {
         if (o == gameViewModel && arg instanceof String) {
             Platform.runLater(() -> {
                 String message = (String) arg;
-                System.out.println("View : " + message);
 
                 // Update All
                 if (message.startsWith(GetMethod.drawTiles)) {
                     gameRunning = true;
                     showGameFlowWindow();
                     String drawResault = message.split(":")[1];
-                    showDrawTilesWindow(drawResault);
+                    // showDrawTilesWindow(drawResault);
                 } else if (message.startsWith(GetMethod.tryPlaceWord)) {
                     String update = message.split(",")[1];
                     if (update.equals("notBoardLegal") || update.equals("illegal")) {
@@ -294,11 +298,6 @@ public class GameController implements Observer {
                         String turnWordsSerialized = update.split(":")[1];
                         try {
                             turnWords = (List<Word>) ObjectSerializer.deserializeObject(turnWordsSerialized);
-                            System.out.println();
-                            for (Word w : turnWords) {
-                                System.out.println("(" + w.getRow() + "," + w.getCol() + ")" + " " + w);
-                            }
-                            System.out.println();
                         } catch (ClassNotFoundException | IOException e) {
                         }
                         if (res.equals("false")) {
@@ -314,18 +313,13 @@ public class GameController implements Observer {
                     String turnWordsSerialized = update.split(":")[1];
                     try {
                         turnWords = (List<Word>) ObjectSerializer.deserializeObject(turnWordsSerialized);
-                        System.out.println();
-                        for (Word w : turnWords) {
-                            System.out.println("(" + w.getRow() + "," + w.getCol() + ")" + " " + w);
-                        }
-                        System.out.println();
                     } catch (ClassNotFoundException | IOException e) {
                     }
                     if (res.equals("false")) {
                         showIllegalWordsAlert(turnWords, true);
-                        gameView.highlightCellsForWords(turnWords, false);
                     } else {
                         gameView.highlightCellsForWords(turnWords, true);
+                        gameView.showDoubleScoreEffect();
                         turnWords.clear();
                     }
 
@@ -379,8 +373,8 @@ public class GameController implements Observer {
         return placementCelles;
     }
 
-    public List<Pane> getPlacementList() {
-        return placementList;
+    public List<Pane> getPlacementTileList() {
+        return placementTileList;
     }
 
     public List<Word> getTurnWords() {
