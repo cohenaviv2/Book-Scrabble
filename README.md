@@ -12,7 +12,7 @@ Book Scrabble puts a new twist on the traditional word game by replacing the sta
 Plus, it's an online multiplayer game, so you can host or join games with friends over the internet for a sociable gaming experience.
 Use your imagination to challange the dictionary with unique words!
 
-<img src="https://i.ibb.co/7rSqx9m/screen-shot-1.jpg" alt="Game" width="700px" height="400px">
+<img src="https://i.ibb.co/7rSqx9m/screen-shot-1.jpg" alt="Game" width="850px" height="400px">
 
 ## Definitions
 ### Tile
