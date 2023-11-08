@@ -28,7 +28,7 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 
 public class GameView {
-    //
+    // View Model & Controller
     private GameViewModel gameViewModel;
     private GameController gameController;
     // Utils
@@ -46,6 +46,7 @@ public class GameView {
     private Button resetTilesButton;
     private Button sortTilesButton;
     private HBox scoreBox;
+    private ProgressIndicator progressIndicator;
     // Properties
     public String myName;
     private boolean isHost;
@@ -81,6 +82,10 @@ public class GameView {
         symbols.put("copy", "📋");
         symbols.put("sort", "⭰");
         symbols.put("reset", "\u2B6F"); // \u2B6F ⟲ ⭯
+        progressIndicator = new ProgressIndicator();
+        progressIndicator.setPrefSize(25, 25);
+        progressIndicator.getStyleClass().add("progress-indicator");
+        progressIndicator.setVisible(false);
         this.descriptions = new HashMap<>();
         try (BufferedReader reader = new BufferedReader(
                 new FileReader("src\\main\\resources\\instructions\\descriptions.txt"))) {
@@ -232,9 +237,9 @@ public class GameView {
         loginFormBox.setAlignment(Pos.CENTER);
         loginFormBox.setSpacing(15);
 
-        // if (isHost) {
-        // checkHostConnection();
-        // }
+        if (isHost) {
+            gameController.checkHostConnection(true);
+        }
 
         List<TextField> textFields = new ArrayList<>();
         // Waiting Box
@@ -364,7 +369,9 @@ public class GameView {
                     if (gameController.getSelectedBooks().size() == 0) {
                         booksButton.getStyleClass().add("error-field");
                     } else {
-                        checkHostConnection();
+                        // Check Host Server Connection In The Background
+                        gameController.checkHostConnection(false);
+
                         startGameButton.setDisable(true);
                         gameViewModel.setTotalPlayersCount(numOfPlayersComboBox.getValue());
                         gameViewModel.connectMe(myName, "0", customPort);
@@ -792,19 +799,34 @@ public class GameView {
             contentLabel.setTextAlignment(TextAlignment.CENTER);
             Button connectionButton = new Button("Check Connection");
             connectionButton.getStyleClass().add("green-button");
-            Text connectionField = new Text("");
-            connectionField.setFont(Font.font("Arial", FontWeight.BOLD, 20));
-            connectionField.setTextAlignment(TextAlignment.CENTER);
-            connectionButton.setOnAction(e -> {
-                // HostModel hm = (HostModel) gameViewModel.gameModel;
-                if (HostModel.get().isGameServerConnect()) {
-                    connectionField.setFill(Color.GREEN);
-                    connectionField.setText("Connected");
-                    connectionButton.setDisable(true);
+            VBox connectionField = new VBox();
+            connectionField.setAlignment(Pos.CENTER);
+
+            Task<Boolean> gameServerConnectionTask = new Task<Boolean>() {
+                @Override
+                protected Boolean call() throws Exception {
+                    return gameViewModel.isGameServerConnect();
+                } 
+            };
+            gameServerConnectionTask.setOnSucceeded(e->{
+                Text connectionText = new Text("");
+                connectionText.setFont(Font.font("Arial", FontWeight.BOLD, 20));
+                connectionText.setTextAlignment(TextAlignment.CENTER);
+                boolean isConnected = gameServerConnectionTask.getValue();
+                connectionField.getChildren().clear();
+                if (isConnected){
+                    connectionText.setFill(Color.GREEN);
+                    connectionText.setText("Connected");
                 } else {
-                    connectionField.setFill(Color.RED);
-                    connectionField.setText("Not Connected");
+                    connectionText.setFill(Color.RED);
+                    connectionText.setText("Not Connected");
                 }
+                connectionField.getChildren().add(connectionText);
+            });
+            connectionButton.setOnAction(e -> {
+                connectionButton.setDisable(true);
+                connectionField.getChildren().add(progressIndicator);
+                new Thread(gameServerConnectionTask).start();
             });
 
             VBox gameServerSettings = new VBox(10, gameServerTitle, contentLabel, connectionButton, connectionField);
@@ -852,9 +874,6 @@ public class GameView {
             Text myIpTitle = new Text("Share Your IP with Friends");
             myIpTitle.setTextAlignment(TextAlignment.CENTER);
             myIpTitle.setFont(Font.font("Arial", FontWeight.BOLD, 26));
-            // Text myIpText = new Text("Get your IP and send it to your friends");
-            // myIpText.setFont(new Font(18));
-            // myIpText.setTextAlignment(TextAlignment.CENTER);
             TextField myIpField = new TextField("");
             myIpField.setDisable(true);
             myIpField.getStyleClass().add("text-field");
@@ -958,31 +977,17 @@ public class GameView {
         return settings;
     }
 
-    private void checkHostConnection() {
-        new Thread(() -> {
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-            }
+    public VBox createHostNetwordBox(boolean isGameServerError) {
+        String error = "";
+        if (isGameServerError) {
+            error = descriptions.get("game-server-error");
+        } else {
+            error = descriptions.get("host-server-error");
+        }
 
-            if (isHost) {
-                String error = null;
-                boolean connected = true;
-                // Check for connection
-                if (!HostModel.get().isGameServerConnect()) {
-                    error = descriptions.get("game-server-error");
-                    connected = false;
-                } else if (!gameViewModel.isConnected()) {
-                    error = descriptions.get("host-server-error");
-                    connected = false;
-                }
+        VBox hostNetworkAlertBox = createQuitAlertBox("Network Error", error, true);
 
-                if (!connected) {
-                    VBox networkAlertBox = createQuitAlertBox("Network Error", error, true);
-                    Platform.runLater(() -> gameController.showCustomWindow(networkAlertBox, 550, 350));
-                }
-            }
-        }).start();
+        return hostNetworkAlertBox;
     }
 
     public BorderPane createGameFlowBox() {
@@ -1334,18 +1339,17 @@ public class GameView {
             // Tiles update effect
             tileButton.getStyleClass().add("glow-button");
             PauseTransition pauseTransition = new PauseTransition(Duration.millis(300)); // 1 second
-                    pauseTransition.setOnFinished(event -> {
-                        tileButton.getStyleClass().remove("glow-button");
-                    });
+            pauseTransition.setOnFinished(event -> {
+                tileButton.getStyleClass().remove("glow-button");
+            });
 
-                    pauseTransition.play();
+            pauseTransition.play();
 
             tileButton.setOnMouseEntered(ev -> tileButton.getStyleClass().add("tile-button-hover"));
             tileButton.setOnMouseExited(ev -> tileButton.getStyleClass().remove("tile-button-hover"));
 
             // On Tile Click
             tileButton.setOnAction(event -> {
-                // Handle button click, similar to your existing code
                 boolean myTurn = gameViewModel.myTurnProperty().get();
                 if (!myTurn) {
                     gameController.showTurnAlert();
@@ -1362,8 +1366,6 @@ public class GameView {
                     resetTilesButton.setDisable(false);
                     sortTilesButton.setDisable(true);
 
-                    // tilePane.getChildren().remove(tileButton);
-
                     // Add the tile value to the word
                     gameViewModel.addToWord(letter);
 
@@ -1375,6 +1377,10 @@ public class GameView {
 
             tileButtons.add(tileButton);
         }
+    }
+
+    public void closeProgressIndicator() {
+        progressIndicator.setVisible(false);
     }
 
     private VBox createButtons() {
@@ -1437,6 +1443,7 @@ public class GameView {
         buttonBox.setAlignment(Pos.CENTER);
         VBox tileBox = new VBox(15, tileButtonsPane, buttonBox);
         tileBox.setAlignment(Pos.CENTER);
+        tileBox.setPadding(new Insets(0, 0, 40, 0));
 
         // Pass turn Button
         passTurnButton = new Button("Pass Turn");
@@ -1455,7 +1462,20 @@ public class GameView {
         challengeButton.setDisable(true);
         challengeButton.setOnAction(event -> {
             isTilePlaced = false;
-            gameViewModel.challenge();
+            challengeButton.setDisable(true);
+            passTurnButton.setDisable(true);
+            progressIndicator.setVisible(true);
+
+            Task<Void> challangeTask = new Task<Void>() {
+                @Override
+                protected Void call() throws Exception {
+                    // challange
+                    gameViewModel.challenge();
+                    return null;
+                }
+
+            };
+            new Thread(challangeTask).start();
         });
 
         // My Turn Listener
@@ -1486,15 +1506,25 @@ public class GameView {
             gameBoard.setDisable(true);
             resetTilesButton.setDisable(true);
             tryPlaceWordButton.setDisable(true);
+            progressIndicator.setVisible(true);
 
-            // try place word
-            String word = gameViewModel.getWord();
-            gameViewModel.tryPlaceWord(word);
+            Task<Void> tryPlaceWordTask = new Task<Void>() {
+                @Override
+                protected Void call() throws Exception {
+                    // try place word
+                    String word = gameViewModel.getWord();
+                    gameViewModel.tryPlaceWord(word);
+                    return null;
+                }
+
+            };
+            new Thread(tryPlaceWordTask).start();
         });
 
-        VBox playButtonsBox = new VBox(15, tryPlaceWordButton, challengeButton, passTurnButton, quitGameButton);
+        VBox playButtonsBox = new VBox(15, progressIndicator, tryPlaceWordButton, challengeButton, passTurnButton,
+                quitGameButton);
         playButtonsBox.setAlignment(Pos.CENTER);
-        playButtonsBox.setPadding(new Insets(60, 0, 20, 0));
+        // playButtonsBox.setPadding(new Insets(0, 0, 0, 0));
 
         // Round Buttons
         HBox roundButtonsBox = createRoundButtons(true);
@@ -1629,6 +1659,9 @@ public class GameView {
 
         gameViewModel.currentBoardProperty().addListener((observable, oldBoard, newBoard) -> {
             Platform.runLater(() -> {
+                if (progressIndicator.isVisible()){
+                    progressIndicator.setVisible(false);
+                }
                 gameBoard.setDisable(false);
                 updateBoard(newBoard);
             });
@@ -1660,8 +1693,6 @@ public class GameView {
     }
 
     private void updateBoard(Tile[][] board) {
-        challengeButton.getStyleClass().removeIf(s -> s.equals("challange-button-glow"));
-        passTurnButton.getStyleClass().removeIf(s -> s.equals("challange-button-glow"));
 
         if (!isTilePlaced) {
             gameController.resetWordPlacement(true);
@@ -1746,7 +1777,6 @@ public class GameView {
                     gameViewModel.setLastSelectedCellCol(lastCol);
 
                     gameController.setPlacementCells();
-
                 }
             }
         }
@@ -1993,14 +2023,12 @@ public class GameView {
         }
         if (afterChallange) {
             box = createTextAlertBox("Challange Failed",
-                    "One of these words: " + words + "\nis not found in the game books\n\nYou lost 10 points.",
+                    words + "\nOne of these words is not found in the game books\n\nYou lost 10 points.",
                     true);
         } else {
             box = createTextAlertBox(words,
                     "One of these words is not dictionary legal\nYou can try Challange or Pass turn.", true);
-            challengeButton.getStyleClass().add("challange-button-glow");
             challengeButton.setDisable(false);
-            passTurnButton.getStyleClass().add("challange-button-glow");
         }
         Node[] nodes = createCustomBox(box, "blue", "OK", "alert");
         Button okButton = (Button) nodes[1];

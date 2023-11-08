@@ -4,6 +4,7 @@ import app.model.GetMethod;
 import app.model.game.ObjectSerializer;
 import app.model.game.Tile;
 import app.model.game.Word;
+import app.model.host.HostModel;
 import app.view_model.GameViewModel;
 
 import java.io.IOException;
@@ -17,6 +18,7 @@ import javafx.scene.*;
 import javafx.scene.control.Button;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
+import javafx.concurrent.Task;
 
 public class GameController implements Observer {
     private GameViewModel gameViewModel; // Game view model
@@ -264,6 +266,50 @@ public class GameController implements Observer {
         });
     }
 
+    public void checkHostConnection(boolean isGameServer) {
+
+        // Check Game Server Connection
+        if (isGameServer) {
+            Task<Boolean> networkTask = new Task<Boolean>() {
+                @Override
+                protected Boolean call() throws Exception {
+                    return gameViewModel.isGameServerConnect();
+                }
+            };
+            networkTask.setOnSucceeded(e->{
+                boolean isGameServerConnected = networkTask.getValue();
+                if(!isGameServerConnected){
+                    Platform.runLater(()->{
+                        VBox gameServerAlertBox = gameView.createHostNetwordBox(isGameServer);
+                        showCustomWindow(gameServerAlertBox, 550, 350);
+                    });
+                }
+            });
+            new Thread(networkTask).start();
+        }
+        // Check Host Server Connection 
+        else {
+            Task<Boolean> newtworkTask = new Task<Boolean>() {
+
+                @Override
+                protected Boolean call() throws Exception {
+                    return gameViewModel.isConnected();
+                }
+                
+            };
+            newtworkTask.setOnSucceeded(e->{
+                boolean isHostServerConnected = newtworkTask.getValue();
+                if (!isHostServerConnected){
+                    Platform.runLater(()->{
+                        VBox hostServerAlertBox = gameView.createHostNetwordBox(isGameServer);
+                        showCustomWindow(hostServerAlertBox, 550, 350);
+                    });
+                }
+            });
+            new Thread(newtworkTask).start();
+        }
+    }
+
     protected void close() {
         this.customStage.close();
         if (gameRunning) {
@@ -287,7 +333,7 @@ public class GameController implements Observer {
                     gameRunning = true;
                     showGameFlowWindow();
                     String drawResault = message.split(":")[1];
-                    // showDrawTilesWindow(drawResault);
+                    showDrawTilesWindow(drawResault);
                 } else if (message.startsWith(GetMethod.tryPlaceWord)) {
                     String update = message.split(",")[1];
                     if (update.equals("notBoardLegal") || update.equals("illegal")) {
@@ -301,6 +347,7 @@ public class GameController implements Observer {
                         } catch (ClassNotFoundException | IOException e) {
                         }
                         if (res.equals("false")) {
+                            gameView.closeProgressIndicator();
                             showIllegalWordsAlert(turnWords, false);
                         } else {
                             gameView.highlightCellsForWords(turnWords, true);
