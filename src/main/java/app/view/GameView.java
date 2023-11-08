@@ -260,7 +260,7 @@ public class GameView {
         nameLabel.getStyleClass().add("login-label");
         String tempName = isHost ? "Daniel" : "Anthony";
         // myName != null ? myName : ""
-        TextField nameTextField = new TextField(tempName);
+        TextField nameTextField = new TextField(myName != null ? myName : "");
         int maxCharacters = 11; // Maximum characters in the name field
         TextFormatter<String> textFormatter = new TextFormatter<>(change -> {
             if (change.getControlNewText().length() <= maxCharacters) {
@@ -330,7 +330,7 @@ public class GameView {
             Label numOfPlayersLabel = new Label("Number of Players");
             numOfPlayersLabel.getStyleClass().add("login-label");
             ComboBox<Integer> numOfPlayersComboBox = new ComboBox<>();
-            numOfPlayersComboBox.setValue(2);
+            // numOfPlayersComboBox.setValue(2);
             numOfPlayersComboBox.getItems().addAll(2, 3, 4);
             numOfPlayersComboBox.getStyleClass().add("text-field");
             numOfPlayersComboBox.setMinWidth(105);
@@ -393,7 +393,7 @@ public class GameView {
             ipLabel.getStyleClass().add("login-label");
             TextField ipTextField = new TextField();
             ipTextField.setMaxWidth(250);
-            ipTextField.setText("localhost");
+            // ipTextField.setText("localhost");
             ipTextField.setAlignment(Pos.CENTER);
             ipTextField.getStyleClass().add("text-field");
             ipTextField.setOnMouseClicked(e -> ipTextField.getStyleClass().remove("error-field"));

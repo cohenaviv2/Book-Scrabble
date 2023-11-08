@@ -1,16 +1,18 @@
 # Book Scrabble Game
-Immerse yourself in the world of Book Scrabble with this Java-based desktop application, where the magic of words awaits your strategic play.
 
 ## Table Of Contents
-- [About The Game](#game)
-- [About The App](#app)
+- [About The Game](#about-the-game)
+- [About The App](#about-the-app)
 - [Credits](#credits)
-- [Demo Video](#video)
+- [Demo Video](#demo-video)
 
 
 ## About The Game
-BookScrabble is a classic board game where players aim to score points by creating words on a grid-based game board using letter tiles. Each tile has a specific point value, and the objective is to strategically place tiles to form words and maximize the score.
-However, the valid words in the game are not all the words in the English dictionary, but only the words that appear in the chosen books.
+Book Scrabble puts a new twist on the traditional word game by replacing the standard dictionary with a collection of books, offering players a more imaginative word pool.
+Plus, it's an online multiplayer game, so you can host or join games with friends over the internet for a sociable gaming experience.
+Use your imagination to challange the dictionary with unique words!
+
+<img src="https://i.ibb.co/7rSqx9m/screen-shot-1.jpg" alt="Game" width="700px" height="400px">
 
 ## Definitions
 ### Tile

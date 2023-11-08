@@ -46,7 +46,7 @@ public class GameController implements Observer {
         setUpStage(customStage);
         this.gameRunning = false;
         this.selectedBooks = new ArrayList<>();
-        selectedBooks.add("harry potter");
+        // selectedBooks.add("harry potter");
         this.selectedCells = new ArrayList<>();
         this.placementCelles = new Stack<>();
         this.placementTileList = new ArrayList<>();
