@@ -1,6 +1,6 @@
 # Book Scrabble Game
 
-## Table Of Contents
+### Table Of Contents
 
 - [About The Game](#about-the-game)
 - [About The App](#about-the-app)
@@ -11,14 +11,14 @@
 ## About The Game
 
 <p align="center">
-<img src="https://i.postimg.cc/DyvK6z7P/app-screen-shots.png" alt="App" width="500px" height="253px">
+<img src="https://i.postimg.cc/25Kfk1X7/app-screen-shots-2.png" alt="App" width="500px" height="253px">
 </p>
 
 Book Scrabble puts a new twist on the traditional word game by replacing the standard dictionary with a collection of books, offering players a more imaginative word pool. It's an online multiplayer game where you can play with friends by hosting or joining games over the internet, creating a social gaming experience.
 Use your imagination and challange the dictionary with unique words!
 
 <p align="center">
-  <img src="https://i.ibb.co/7rSqx9m/screen-shot-1.jpg" alt="Game" width="820px" height="406px">
+  <img src="https://i.postimg.cc/j57BRZfR/screen-shot-1.jpg" alt="Game" width="820px" height="406px">
 </p>
 
 ## About The App
@@ -47,12 +47,12 @@ The game server, hosted on Oracle Cloud via an Ubuntu 22.04 VM, is responsible f
 
 ### Windows
 
-Download the game installer for Windows:
+Download the game installer for Windows: 
 [Book Scrabble Install]()
 
 ### Other Platforms
 
-For other platforms, ensure you have Java Runtime Environment (JRE) installed. You can play the game by downloading the repository and running the JAR file:
+For other platforms, ensure you have Java Runtime Environment (JRE) installed. You can play the game by downloading the repository and running the JAR file: 
 [Book Scrabble Repository]()
 
 ## Demo link
