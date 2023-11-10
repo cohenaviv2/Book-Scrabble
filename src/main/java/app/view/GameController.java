@@ -89,7 +89,7 @@ public class GameController implements Observer {
 
     public void showLoginWindow(boolean isHost) {
         VBox formBox = gameView.createLoginBox();
-        HBox osBar = gameView.createOsBar(gameLoginStage, isHost);
+        HBox osBar = gameView.createOsBar(gameLoginStage, false);
 
         VBox root = new VBox(osBar, formBox);
         root.getStyleClass().add("wood-background");
@@ -203,11 +203,11 @@ public class GameController implements Observer {
             cell.setStyle("");
             cell.getStyleClass().add("board-cell");
         }
+        placementTileList.clear();
         // Clear All
         gameViewModel.clearWord();
 
         if (isResetCells) {
-            placementTileList.clear();
 
             // Reset Placement Cells Style
             for (Pane cell : placementCelles) {
@@ -290,23 +290,25 @@ public class GameController implements Observer {
         // Check Host Server Connection 
         else {
             Task<Boolean> newtworkTask = new Task<Boolean>() {
-
                 @Override
                 protected Boolean call() throws Exception {
+                    Thread.sleep(2000); // 2-second delay
                     return gameViewModel.isConnected();
                 }
-                
             };
-            newtworkTask.setOnSucceeded(e->{
+            
+            newtworkTask.setOnSucceeded(e -> {
                 boolean isHostServerConnected = newtworkTask.getValue();
-                if (!isHostServerConnected){
-                    Platform.runLater(()->{
+                if (!isHostServerConnected) {
+                    Platform.runLater(() -> {
                         VBox hostServerAlertBox = gameView.createHostNetwordBox(isGameServer);
                         showCustomWindow(hostServerAlertBox, 550, 350);
                     });
                 }
             });
+            
             new Thread(newtworkTask).start();
+            
         }
     }
 

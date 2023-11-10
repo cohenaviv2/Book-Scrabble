@@ -794,7 +794,7 @@ public class GameView {
             gameServerTitle.setTextAlignment(TextAlignment.CENTER);
             gameServerTitle.setFont(Font.font("Arial", FontWeight.BOLD, 26));
             Text contentLabel = new Text(
-                    "The game server is responsible for checking whether\na word is legal in terms of the book dictionary.\nGame Server is uploaded and\npowered by Oracle Cloud\nOn Ubuntu 22.04 VM");
+                    "The game server is responsible for checking whether\na word is legal in terms of the book dictionary.\nGame Server is uploaded and\npowered by Oracle Cloud\nUsing Ubuntu 22.04 VM");
             contentLabel.setFont(new Font(18));
             contentLabel.setTextAlignment(TextAlignment.CENTER);
             Button connectionButton = new Button("Check Connection");

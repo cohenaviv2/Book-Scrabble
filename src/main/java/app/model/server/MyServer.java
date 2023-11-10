@@ -19,6 +19,7 @@ public class MyServer {
     private final int port;
     private final ClientHandler ch;
     private volatile boolean stop;
+    private volatile boolean running;
     private List<Socket> clients;
     private static final int THREAD_POOL_SIZE = 3;
 
@@ -39,7 +40,7 @@ public class MyServer {
         try {
             theServer = new ServerSocket(this.port);
             theServer.setSoTimeout(1000); // 1sec
-
+            running = true;
             ExecutorService executorService = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
 
             while (!stop) {
@@ -68,13 +69,14 @@ public class MyServer {
             }
             executorService.shutdownNow();
             theServer.close();
+            running = false;
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     public boolean isRunning(){
-        return !stop;
+        return running;
     }
 
     public void sendToAll(String message) {

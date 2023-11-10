@@ -151,7 +151,7 @@
   -fx-effect: dropshadow(one-pass-box, black, 8, 0, 2, 0);
 }
 .red-button:hover {
-  -fx-background-color: linear-gradient(firebrick, grey), rgb(197, 0, 0);
+  -fx-background-color: linear-gradient(firebrick, grey), rgb(202, 4, 4);
 }
 
 .grey-button {

@@ -3,81 +3,33 @@
 ## Table Of Contents
 - [About The Game](#about-the-game)
 - [About The App](#about-the-app)
-- [Credits](#credits)
+- [Donwload](#download)
 - [Demo Video](#demo-video)
+- [Credits](#credits)
 
 
 ## About The Game
-Book Scrabble puts a new twist on the traditional word game by replacing the standard dictionary with a collection of books, offering players a more imaginative word pool.
-Plus, it's an online multiplayer game, so you can host or join games with friends over the internet for a sociable gaming experience.
-Use your imagination to challange the dictionary with unique words!
+<img src="https://i.postimg.cc/DyvK6z7P/app-screen-shots.png" alt="App" width="800px" height="404px">
 
-<img src="https://i.ibb.co/7rSqx9m/screen-shot-1.jpg" alt="Game" width="850px" height="400px">
+Book Scrabble puts a new twist on the traditional word game by replacing the standard dictionary with a collection of books, offering players a more imaginative word pool. It's an online multiplayer game where you can play with friends by hosting or joining games over the internet, creating a social gaming experience.
+Use your imagination and challange the dictionary with unique words!
 
-## Definitions
-### Tile
+<img src="https://i.ibb.co/7rSqx9m/screen-shot-1.jpg" alt="Game" width="820px" height="406px">
 
-- A small board containing a letter and its value in the game - the number of points the letter is worth.
-- In the following diagram, you can see how much each letter is worth in the game:
- 
-<img src="https://github.com/Matan-Eliyahu/BookScrabble/blob/master/Readme%20images/Tiles.png" alt="Tiles" width="500px" height="300px">
-- However, unlike the original game, there are no two blank tiles available in this version.
-
-### Bag
-
-- A bag containing 98 tiles
-- Allows players to randomly draw tiles (i.e., without seeing them beforehand).
-<img src="https://github.com/Matan-Eliyahu/BookScrabble/blob/master/Readme%20images/Bag.png" alt="Bag" width="225px" height="150px">
-
-- The number of tiles in the bag for each letter at the beginning of the game:
-
-<img src="https://github.com/Matan-Eliyahu/BookScrabble/blob/master/Readme%20images/Values.png" alt="Values" width="500px" height="60px">
-
-### The Game Board
-
-- 15x15 two-dimensional board
-- The board features several bonus slots:
-  - The central square (marked with a star) doubles the value of the word written on it.
-  - Squares that double the value of the letter on them (light blue).
-  - Squares that triple the value of the letter on them (blue).
-  - Squares that double the value of the entire word (yellow).
-  - Squares that triple the value of the entire word (red).
-- The bonus slots are distributed as shown in the following diagram:
-
-<img src="https://github.com/Matan-Eliyahu/BookScrabble/blob/master/Readme%20images/Board.png" alt="Board" width="600px" height="600px">
+## About The App
+The Book Scrabble game is a desktop application developed in Java, following the MVVM (Model-View-ViewModel) architecture to ensure a smooth experience for users and effective data handling. With its user-friendly JavaFX interface, the game provides an engaging and visually appealing environment for players.
+### The Model
 
 
-## Rules And Gameplay
 
-1. Each player randomly draws a tile from the bag.
-2. The order of the players is determined by the order of the letters drawn (from smallest to largest).
-    - If an empty tile is drawn, it is returned to the bag, and another one is drawn.
-3. All the tiles are returned to the bag.
-4. Each player randomly draws 7 tiles.
-5. The first player (the one who drew the smallest letter in the lottery) has to form a legal word that passes through the central slot (the star) on the board.
-    - Only he gets a double score for it.
-    - He replenishes his tiles from the bag to have 7 tiles again.
-6. Gradually, each player, in turn, assembles a legal word from the tiles in their possession.
-    - Like in a crossword puzzle, each word must rest on one of the tiles on the board.
-    - After writing the word, the player adds 7 tiles from the bag.
-    - Their score is accumulated based on all the words created on the board following the placement of the tiles.
-        - Tiles placed on double or triple letter squares will be doubled or tripled in value accordingly.
-        - The word then receives the sum of the tile value.
-        - This amount will be doubled or tripled for each doubling or tripling word slot that the tiles are superimposed on (e.g., it is possible to multiply by 4 or 9 if the word took two double word or triple word slots, respectively).
-        - The above calculation is true for every new word created on the board following the placement in turn.
-7. A player who cannot form a valid word forfeits their turn.
-8. The game will end after N rounds.
+## Download
+### Windows
 
-### Legal Word Criteria
+### Other Platforms
 
-A legal word must meet all the following conditions:
-- Written from left to right or from top to bottom (and not in any other way).
-- A word that appears in one of the books chosen for the game.
-- Leans on one of the existing tiles on the board.
-- Does not produce other illegal words on the board.
+## Demo link
+- 
 
 ## Credits
 - Game Development: [Aviv Cohen](https://github.com/cohenaviv2)
 
-## Demo link
-- 
