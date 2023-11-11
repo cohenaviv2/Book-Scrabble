@@ -21,6 +21,14 @@ Book Scrabble puts a new twist on the traditional word game by replacing the sta
   <img src="https://i.postimg.cc/yN46R14H/8-1.png" alt="Game" width="700px" height="362px">
 </p>
 
+<p align="center">
+Game Books
+</p>
+
+<p align="center">
+  <img src="https://i.postimg.cc/GpSJcdLw/output-onlinegiftools-1.gif" alt="Game" width="600px" height="464px">
+</p>
+
 # Development
 
 The Book Scrabble game is a desktop application developed in Java, following the MVVM (Model-View-ViewModel) architecture to ensure a smooth experience for users and effective data handling. With its user-friendly JavaFX interface, the game provides an engaging and visually appealing environment for players.
@@ -30,7 +38,7 @@ The Book Scrabble game is a desktop application developed in Java, following the
 The model in the Book Scrabble app is divided into two parts: the Host Model and the Guest Model, both implementing the game model interface. <br>The Host Model manages the game, communicates with guests through a Host Server and Guest Handler, and interacts separately with the Game Server for word legality checks.<br> The communication between the host and the guest is facilitated through a custom-defined protocol, with objects being transferred using Java's Serializable interface. <br> Meanwhile, the Guest Model connects to the Host Server using a socket and communicates via the straightforward Communication Handler. This division simplifies the game, providing specific functions through two different model implementations.
 
 <p align="center">
-  <img src="https://i.postimg.cc/6Qq8cZdn/Book-Scrabble-presentation.jpg" alt="Model" width="600px" height="424px">
+  <img src="https://i.postimg.cc/JnTKgZg8/Book-Scrabble-presentation.jpg" alt="Model" width="600px" height="505px">
 </p>
 
 
@@ -39,7 +47,7 @@ The model in the Book Scrabble app is divided into two parts: the Host Model and
 The game server, hosted on Oracle Cloud via an Ubuntu 22.04 VM, is responsible for checking the dictionary legality of words in the Book Scrabble app. <br> It manages a pool of dictionaries, each linked to a specific book, and employs a Cache Manager with two caches—one for found words and another for unfound ones. <br> The cache management uses LRU and LFU policies, alongside a space-efficient Bloom Filter to ensures rapid  query responses. <br> Players can challenge a "false" response, triggering the server to verify using an IO Searcher that scans all books and updates relevant caches, upholding the accuracy of word legality checks.
 
 <p align="center">
-  <img src="https://i.postimg.cc/G25HG3gc/3.png" alt="Model" width="600px" height="424px">
+  <img src="https://i.postimg.cc/PrFbjd2W/Book-Scrabble-presentation2.jpg" alt="Model" width="600px" height="475px">
 </p>
 
 
