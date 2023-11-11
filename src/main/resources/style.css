@@ -20,7 +20,7 @@
 }
 
 .game-flow-background {
-  -fx-background-image: url("backgrounds/game-flow.JPG");
+  -fx-background-image: url("backgrounds/game-flow.jpg");
   -fx-background-repeat: no-repeat;
   -fx-background-size: cover;
 }

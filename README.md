@@ -11,7 +11,7 @@
 # About The Game
 
 <p align="center">
-<img src="https://i.postimg.cc/fyTYh7BB/1234-1.png" alt="App" width="400px" height="189px">
+<img src="https://i.postimg.cc/fyTYh7BB/1234-1.png" alt="App" width="500px" height="236px">
 </p>
 
 Book Scrabble puts a new twist on the traditional word game by replacing the standard dictionary with a collection of books, offering players a more imaginative word pool. <br> It's an online multiplayer game where you can play with friends by hosting or joining games over the internet, creating a social gaming experience.
@@ -25,9 +25,8 @@ Book Scrabble puts a new twist on the traditional word game by replacing the sta
 Game Books
 </p>
 
-<p align="center">
-  <img src="https://i.postimg.cc/GpSJcdLw/output-onlinegiftools-1.gif" alt="Game" width="600px" height="464px">
-</p>
+![GameBooks](https://i.postimg.cc/NfLpD6hk/output-onlinegiftools-1-1.gif)
+
 
 # Development
 
@@ -56,7 +55,7 @@ The game server, hosted on Oracle Cloud via an Ubuntu 22.04 VM, is responsible f
 ### Windows
 
 Download the game installer for Windows: <br>
-
+https://github.com/cohenaviv2/Book-Scrabble/releases/download/v1.0/Book_Scrabble_Setup.exe
 
 ### Other Platforms
 
