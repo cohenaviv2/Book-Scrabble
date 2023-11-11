@@ -27,8 +27,6 @@ Game Books
 <img src="https://i.postimg.cc/8CW6zC2v/output-onlinegiftools-1.gif" width="500px" height="387">
 </p>
 
-
-
 # Development
 
 The Book Scrabble game is a desktop application developed in Java, following the MVVM (Model-View-ViewModel) architecture to ensure a smooth experience for users and effective data handling. With its user-friendly JavaFX interface, the game provides an engaging and visually appealing environment for players.
