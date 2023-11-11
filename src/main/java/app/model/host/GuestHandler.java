@@ -73,7 +73,6 @@ public class GuestHandler implements ClientHandler {
             this.myId = gameManager.connectGuestHandler(name);
             flag = myId == 0 ? true : false;
             this.quitGameString = myId + "," + GetMethod.quitGame + "," + "true"; // quit game modifier
-            // this.yourTurnString = myId + ",isMyTurn,true"; // my turn modifier
             String connectionMessage = myId + "," + GetMethod.connectMe + "," + myId; // ack & id
             out.println(connectionMessage); // send id
             flag = false;

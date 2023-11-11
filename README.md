@@ -11,7 +11,7 @@
 # About The Game
 
 <p align="center">
-<img src="https://i.postimg.cc/fyTYh7BB/1234-1.png" alt="App" width="400px" height="189px">
+<img src="https://i.postimg.cc/fyTYh7BB/1234-1.png" alt="App" width="500px" height="236px">
 </p>
 
 Book Scrabble puts a new twist on the traditional word game by replacing the standard dictionary with a collection of books, offering players a more imaginative word pool. <br> It's an online multiplayer game where you can play with friends by hosting or joining games over the internet, creating a social gaming experience.
@@ -23,9 +23,8 @@ Book Scrabble puts a new twist on the traditional word game by replacing the sta
 
 <p align="center">
 Game Books
-
-<p align="center">
-  [GameBooks](https://i.postimg.cc/GpSJcdLw/output-onlinegiftools-1.gif)
+<br> <br>
+<img src="https://i.postimg.cc/8CW6zC2v/output-onlinegiftools-1.gif" width="500px" height="387">
 </p>
 
 # Development
@@ -46,7 +45,7 @@ The model in the Book Scrabble app is divided into two parts: the Host Model and
 The game server, hosted on Oracle Cloud via an Ubuntu 22.04 VM, is responsible for checking the dictionary legality of words in the Book Scrabble app. <br> It manages a pool of dictionaries, each linked to a specific book, and employs a Cache Manager with two caches—one for found words and another for unfound ones. <br> The cache management uses LRU and LFU policies, alongside a space-efficient Bloom Filter to ensures rapid  query responses. <br> Players can challenge a "false" response, triggering the server to verify using an IO Searcher that scans all books and updates relevant caches, upholding the accuracy of word legality checks.
 
 <p align="center">
-  <img src="https://i.postimg.cc/PrFbjd2W/Book-Scrabble-presentation2.jpg" alt="Model" width="600px" height="475px">
+  <img src="https://i.postimg.cc/529Y8VXH/Book-Scrabble-presentation.jpg" alt="GameServer" width="600px" height="470px">
 </p>
 
 
@@ -55,7 +54,7 @@ The game server, hosted on Oracle Cloud via an Ubuntu 22.04 VM, is responsible f
 ### Windows
 
 Download the game installer for Windows: <br>
-
+https://github.com/cohenaviv2/Book-Scrabble/releases/download/v1.0/Book_Scrabble_Setup.exe
 
 ### Other Platforms
 

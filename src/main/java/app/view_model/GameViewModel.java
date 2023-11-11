@@ -41,7 +41,6 @@ public class GameViewModel extends Observable implements Observer {
         // Initialize the model
         if (isHost) {
             this.gameModel = HostModel.get();
-            // HostModel.get().startHostServer();
             HostModel.get().addObserver(this);
         } else {
             this.gameModel = GuestModel.get();
@@ -64,10 +63,8 @@ public class GameViewModel extends Observable implements Observer {
     @Override
     public void update(Observable o, Object arg) {
         if (o == gameModel && arg instanceof String) {
-
             Platform.runLater(() -> {
                 String message = (String) arg;
-
                 if (message.startsWith(GetMethod.updateAll)) {
                     myNameProperty.set(gameModel.getPlayerProperties().getMyName());
                     currentBoardProperty.set(gameModel.getCurrentBoard());
@@ -92,55 +89,10 @@ public class GameViewModel extends Observable implements Observer {
                     notifyObservers(message);
                 }
             });
-
         }
     }
 
-    public int getTotalPlayersNum() {
-        return totalPlayersNum;
-    }
-
-    public boolean isGameEnd() {
-        return isGameEnd;
-    }
-
-    public StringProperty myNameProperty() {
-        return myNameProperty;
-    }
-
-    public ObjectProperty<Tile[][]> currentBoardProperty() {
-        return currentBoardProperty;
-    }
-
-    public ListProperty<Tile> myTilesProperty() {
-        return myTilesProperty;
-    }
-
-    public IntegerProperty myScoreProperty() {
-        return myScoreProperty;
-    }
-
-    public ListProperty<String> myWordsProperty() {
-        return myWordsProperty;
-    }
-
-    public BooleanProperty myTurnProperty() {
-        return myTurnProperty;
-    }
-
-    public MapProperty<String, String> othersInfoProperty() {
-        return othersInfoProperty;
-    }
-
-    public SetProperty<String> gameBooksProperty() {
-        return gameBooksProperty;
-    }
-
-    public IntegerProperty bagCountProperty() {
-        return bagCountProperty;
-    }
-
-    // Methods to interact with the GameModel
+    // GameModel Methods
     public void connectMe(String name, String ip, int port) {
         gameModel.connectMe(name, ip, port);
     }
@@ -234,6 +186,52 @@ public class GameViewModel extends Observable implements Observer {
     public void quitGame() {
         gameModel.quitGame();
     }
+    
+    // Propeties
+    public StringProperty myNameProperty() {
+        return myNameProperty;
+    }
+
+    public ObjectProperty<Tile[][]> currentBoardProperty() {
+        return currentBoardProperty;
+    }
+
+    public ListProperty<Tile> myTilesProperty() {
+        return myTilesProperty;
+    }
+
+    public IntegerProperty myScoreProperty() {
+        return myScoreProperty;
+    }
+
+    public ListProperty<String> myWordsProperty() {
+        return myWordsProperty;
+    }
+
+    public BooleanProperty myTurnProperty() {
+        return myTurnProperty;
+    }
+
+    public MapProperty<String, String> othersInfoProperty() {
+        return othersInfoProperty;
+    }
+
+    public SetProperty<String> gameBooksProperty() {
+        return gameBooksProperty;
+    }
+
+    public IntegerProperty bagCountProperty() {
+        return bagCountProperty;
+    }
+
+    // Utils
+    public int getTotalPlayersNum() {
+        return totalPlayersNum;
+    }
+
+    public boolean isGameEnd() {
+        return isGameEnd;
+    }
 
     public boolean isGameServerConnect() {
         return HostModel.get().isGameServerConnect();
@@ -268,7 +266,7 @@ public class GameViewModel extends Observable implements Observer {
         return FXCollections.observableArrayList(bookList);
     }
 
-    // Try place word methods
+    // Try place Word Methods
     public String getWord() {
         return wordBuilder.toString();
     }
