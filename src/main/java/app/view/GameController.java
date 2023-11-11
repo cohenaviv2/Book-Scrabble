@@ -80,7 +80,7 @@ public class GameController implements Observer {
         VBox root = new VBox(osBar, gameModeBox);
         root.getStyleClass().add("wood-background");
 
-        Scene gameModScene = new Scene(root, 630, 505); // H: 480
+        Scene gameModScene = new Scene(root, 630, 510); // H: 480
         setUpScene(gameModScene);
 
         gameLoginStage.setScene(gameModScene);
