@@ -23,7 +23,8 @@ Book Scrabble puts a new twist on the traditional word game by replacing the sta
 
 <p align="center">
 Game Books
-![GameBooks](https://i.postimg.cc/NfLpD6hk/output-onlinegiftools-1-1.gif)
+<br> <br>
+<img src="https://i.postimg.cc/8CW6zC2v/output-onlinegiftools-1.gif" width="500px" height="387">
 </p>
 
 
