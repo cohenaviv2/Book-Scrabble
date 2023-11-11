@@ -23,10 +23,9 @@ Book Scrabble puts a new twist on the traditional word game by replacing the sta
 
 <p align="center">
 Game Books
-</p>
 
 <p align="center">
-  <img src="https://i.postimg.cc/GpSJcdLw/output-onlinegiftools-1.gif" alt="Game" width="600px" height="464px">
+  ![GameBooks]([)](https://i.postimg.cc/GpSJcdLw/output-onlinegiftools-1.gif)
 </p>
 
 # Development
