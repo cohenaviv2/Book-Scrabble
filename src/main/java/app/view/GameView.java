@@ -28,7 +28,7 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 
 public class GameView {
-    // View Model & Controller
+    // View Model & View Controller
     private GameViewModel gameViewModel;
     private GameController gameController;
     // Utils
@@ -260,7 +260,7 @@ public class GameView {
         nameLabel.getStyleClass().add("login-label");
         String tempName = isHost ? "Daniel" : "Anthony";
         // myName != null ? myName : ""
-        TextField nameTextField = new TextField(myName != null ? myName : "");
+        TextField nameTextField = new TextField(tempName);
         int maxCharacters = 11; // Maximum characters in the name field
         TextFormatter<String> textFormatter = new TextFormatter<>(change -> {
             if (change.getControlNewText().length() <= maxCharacters) {
@@ -330,7 +330,7 @@ public class GameView {
             Label numOfPlayersLabel = new Label("Number of Players");
             numOfPlayersLabel.getStyleClass().add("login-label");
             ComboBox<Integer> numOfPlayersComboBox = new ComboBox<>();
-            // numOfPlayersComboBox.setValue(2);
+            numOfPlayersComboBox.setValue(2);
             numOfPlayersComboBox.getItems().addAll(2, 3, 4);
             numOfPlayersComboBox.getStyleClass().add("text-field");
             numOfPlayersComboBox.setMinWidth(105);
@@ -393,7 +393,7 @@ public class GameView {
             ipLabel.getStyleClass().add("login-label");
             TextField ipTextField = new TextField();
             ipTextField.setMaxWidth(250);
-            // ipTextField.setText("localhost");
+            ipTextField.setText("localhost");
             ipTextField.setAlignment(Pos.CENTER);
             ipTextField.getStyleClass().add("text-field");
             ipTextField.setOnMouseClicked(e -> ipTextField.getStyleClass().remove("error-field"));
@@ -632,9 +632,6 @@ public class GameView {
         goBackButton.getStyleClass().add("green-button");
         goBackButton.setOnAction(e -> {
             gameController.close();
-            // if (isHost) {
-            // HostModel.get().stopHostServer();
-            // }
             gameController.gameLoginStage.close();
             gameController.showInitialWindow();
             isHost = false;
@@ -977,7 +974,7 @@ public class GameView {
         return settings;
     }
 
-    public VBox createHostNetwordBox(boolean isGameServerError) {
+    public VBox createHostNetworkBox(boolean isGameServerError) {
         String error = "";
         if (isGameServerError) {
             error = descriptions.get("game-server-error");
@@ -1277,8 +1274,8 @@ public class GameView {
             String name = s.split("-")[0];
             String letter = s.split("-")[1];
             Text nameText = new Text(name);
-            nameText.getStyleClass().add("little-title");
-            nameText.setFill(name.equals(firstName) ? Color.GREENYELLOW : Color.WHITE);
+            nameText.getStyleClass().add("draw-tiles-label");
+            nameText.setFill(Color.WHITE);
             nameText.setTextAlignment(TextAlignment.CENTER);
             Button tileButton = new Button();
             tileButton.setPrefSize(55, 55);
@@ -1455,7 +1452,7 @@ public class GameView {
             gameViewModel.skipTurn();
         });
 
-        // Challange Button
+        // Challenge Button
         challengeButton = new Button("Challenge");
         challengeButton.getStyleClass().add("green-button");
         challengeButton.setStyle("-fx-font-size: 25px;");
@@ -1466,16 +1463,16 @@ public class GameView {
             passTurnButton.setDisable(true);
             progressIndicator.setVisible(true);
 
-            Task<Void> challangeTask = new Task<Void>() {
+            Task<Void> challengeTask = new Task<Void>() {
                 @Override
                 protected Void call() throws Exception {
-                    // challange
+                    // challenge
                     gameViewModel.challenge();
                     return null;
                 }
 
             };
-            new Thread(challangeTask).start();
+            new Thread(challengeTask).start();
         });
 
         // My Turn Listener
@@ -2012,7 +2009,7 @@ public class GameView {
         return messageWindowBox;
     }
 
-    public VBox createChallangeBox(List<Word> illegalWords, boolean afterChallange) {
+    public VBox createChallengeBox(List<Word> illegalWords, boolean afterChallenge) {
         VBox box = null;
         String words = "";
         for (int i = 0; i < illegalWords.size(); i++) {
@@ -2021,19 +2018,19 @@ public class GameView {
                 words += ",";
             }
         }
-        if (afterChallange) {
-            box = createTextAlertBox("Challange Failed",
+        if (afterChallenge) {
+            box = createTextAlertBox("Challenge Failed",
                     words + "\nOne of these words is not found in the game books\n\nYou lost 10 points.",
                     true);
         } else {
             box = createTextAlertBox(words,
-                    "One of these words is not dictionary legal\nYou can try Challange or Pass turn.", true);
+                    "One of these words is not dictionary legal\nYou can try Challenge or Pass turn.", true);
             challengeButton.setDisable(false);
         }
         Node[] nodes = createCustomBox(box, "blue", "OK", "alert");
         Button okButton = (Button) nodes[1];
 
-        if (afterChallange) {
+        if (afterChallenge) {
             okButton.setOnAction(e -> {
                 gameController.closeCustomWindow();
                 highlightCellsForWords(illegalWords, false);
@@ -2194,6 +2191,22 @@ public class GameView {
         return endGameBox;
     }
 
+    public VBox createNewGameBox(String title, String text) {
+        VBox waitingRoomQuitBox = createTextAlertBox(title,text,true);
+        Node[] nodes = createCustomBox(waitingRoomQuitBox, "green", "New Game", "alert");
+        VBox mainBox = (VBox) nodes[0];
+        Button newGameButton = (Button) nodes[1];
+        newGameButton.setOnAction(e->{
+            gameViewModel.resetGame();
+            gameViewModel.quitGame();
+            gameController.close();
+            gameController.gameLoginStage.close();
+            gameController.showInitialWindow();
+            isHost = false;
+        });
+        return mainBox;
+    }
+    
     public Image getGameIcon() {
         return icons.get("game");
     }

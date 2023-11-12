@@ -330,18 +330,20 @@ public class GameManager extends Observable {
             return "false";
     }
 
-    public String quitGameHandler(String quitGameMod) {
-        String[] params = quitGameMod.split(",");
-        int id = Integer.parseInt(params[0]);
-        String modifier = params[1];
-        String val = params[2];
-        String name = "";
-        if (isIdExist(id) && modifier.equals(GetMethod.quitGame) && val.equals("true")) {
-            Player player = this.playersByID.get(id);
-            name = player.getName();
-            turnManager.handlePlayerQuit(player);
+    public void quitGameHandler(String quitGameMod, boolean isGameRunning) {
+        if (!isGameRunning) {
+            setChanged();
+            notifyObservers(GetMethod.quitGame+","+"-1");
+        } else {
+            String[] params = quitGameMod.split(",");
+            int id = Integer.parseInt(params[0]);
+            String modifier = params[1];
+            String val = params[2];
+            if (isIdExist(id) && modifier.equals(GetMethod.quitGame) && val.equals("true")) {
+                Player player = this.playersByID.get(id);
+                turnManager.handlePlayerQuit(player);
+            }
         }
-        return name;
     }
 
     private String tryPlaceWordHandler(int id, String moveValue) throws ClassNotFoundException, IOException {
@@ -401,7 +403,7 @@ public class GameManager extends Observable {
 
     private String challengeHandler(int playerId, String moveValue) {
         /*
-         * if Active word is NOT activated - can not try challange this word.
+         * if Active word is NOT activated - can not try challenge this word.
          * need to ask the game sever to challenge this word -
          * if server return true - need to go board.tryPlaceWord() - if all words is
          * dictionary legal need to updated all stated and add some extra points, if not
@@ -710,7 +712,7 @@ public class GameManager extends Observable {
             setChanged();
             notifyObservers(GetMethod.updateAll + "," + GetMethod.skipTurn);
 
-            if(isBagEmpty()){
+            if (isBagEmpty()) {
                 endGame(false);
             }
 
@@ -729,7 +731,7 @@ public class GameManager extends Observable {
                     return false;
                 }
             }
-            passesPerRound.forEach((p,t)->passesPerRound.replace(p, 0));
+            passesPerRound.forEach((p, t) -> passesPerRound.replace(p, 0));
             return true;
         }
 

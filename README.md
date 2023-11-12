@@ -10,20 +10,15 @@
 
 # About The Game
 
-<p align="center">
-<img src="https://i.postimg.cc/fyTYh7BB/1234-1.png" alt="App" width="500px" height="236px">
-</p>
 
+<p align="center">
+<img src="https://i.postimg.cc/fyTYh7BB/1234-1.png" alt="App" width="400px" height="189px">
+</p>
 Book Scrabble puts a new twist on the traditional word game by replacing the standard dictionary with a collection of books, offering players a more imaginative word pool. <br> It's an online multiplayer game where you can play with friends by hosting or joining games over the internet, creating a social gaming experience.
 <br>Use your imagination and challenge the game dictionary with unique words!
 
 <p align="center">
-  <img src="https://i.postimg.cc/yN46R14H/8-1.png" alt="Game" width="700px" height="362px">
-</p>
-
-<p align="center">
-Game Books
-![GameBooks](https://i.postimg.cc/NfLpD6hk/output-onlinegiftools-1-1.gif)
+  <img src="https://i.postimg.cc/8zjRS2M6/1.png" alt="Game" width="800px" height="458px">
 </p>
 
 
@@ -31,6 +26,13 @@ Game Books
 # Development
 
 The Book Scrabble game is a desktop application developed in Java, following the MVVM (Model-View-ViewModel) architecture to ensure a smooth experience for users and effective data handling. With its user-friendly JavaFX interface, the game provides an engaging and visually appealing environment for players.
+<br> <br>
+
+<p align="center">
+Architecture Overview
+<br> <br>
+<img src="https://i.postimg.cc/MTjHDZ0D/1.png" width="700px" height="289">
+</p>
 
 ### The Model
 

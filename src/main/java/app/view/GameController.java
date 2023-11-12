@@ -4,7 +4,6 @@ import app.model.GetMethod;
 import app.model.game.ObjectSerializer;
 import app.model.game.Tile;
 import app.model.game.Word;
-import app.model.host.HostModel;
 import app.view_model.GameViewModel;
 
 import java.io.IOException;
@@ -13,6 +12,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javafx.stage.*;
+import javafx.util.Duration;
+import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.scene.*;
 import javafx.scene.control.Button;
@@ -46,7 +47,7 @@ public class GameController implements Observer {
         setUpStage(customStage);
         this.gameRunning = false;
         this.selectedBooks = new ArrayList<>();
-        // selectedBooks.add("harry potter");
+        selectedBooks.add("harry potter");
         this.selectedCells = new ArrayList<>();
         this.placementCelles = new Stack<>();
         this.placementTileList = new ArrayList<>();
@@ -148,10 +149,18 @@ public class GameController implements Observer {
         showCustomWindow(turnAlertBox, 530, 290);
     }
 
-    private void showIllegalWordsAlert(List<Word> illegalWords, boolean afterChallange) {
-        VBox iligalWordsBox = gameView.createChallangeBox(illegalWords, afterChallange);
-        showCustomWindow(iligalWordsBox, 600, 300);
+    private void showIllegalWordsAlert(List<Word> illegalWords, boolean afterChallenge) {
+        VBox illegalWordsBox = gameView.createChallengeBox(illegalWords, afterChallenge);
+        showCustomWindow(illegalWordsBox, 600, 300);
+    
+        if (afterChallenge) {
+            // If afterChallenge is true, schedule the window to close after 2 seconds
+            PauseTransition pause = new PauseTransition(Duration.seconds(2));
+            pause.setOnFinished(e -> customStage.close());
+            pause.play();
+        }
     }
+    
 
     public void showCustomWindow(Node content, double width, double height) {
         // Calculate the center coordinates of the main stage
@@ -276,18 +285,18 @@ public class GameController implements Observer {
                     return gameViewModel.isGameServerConnect();
                 }
             };
-            networkTask.setOnSucceeded(e->{
+            networkTask.setOnSucceeded(e -> {
                 boolean isGameServerConnected = networkTask.getValue();
-                if(!isGameServerConnected){
-                    Platform.runLater(()->{
-                        VBox gameServerAlertBox = gameView.createHostNetwordBox(isGameServer);
+                if (!isGameServerConnected) {
+                    Platform.runLater(() -> {
+                        VBox gameServerAlertBox = gameView.createHostNetworkBox(isGameServer);
                         showCustomWindow(gameServerAlertBox, 550, 350);
                     });
                 }
             });
             new Thread(networkTask).start();
         }
-        // Check Host Server Connection 
+        // Check Host Server Connection
         else {
             Task<Boolean> newtworkTask = new Task<Boolean>() {
                 @Override
@@ -296,19 +305,19 @@ public class GameController implements Observer {
                     return gameViewModel.isConnected();
                 }
             };
-            
+
             newtworkTask.setOnSucceeded(e -> {
                 boolean isHostServerConnected = newtworkTask.getValue();
                 if (!isHostServerConnected) {
                     Platform.runLater(() -> {
-                        VBox hostServerAlertBox = gameView.createHostNetwordBox(isGameServer);
+                        VBox hostServerAlertBox = gameView.createHostNetworkBox(isGameServer);
                         showCustomWindow(hostServerAlertBox, 550, 350);
                     });
                 }
             });
-            
+
             new Thread(newtworkTask).start();
-            
+
         }
     }
 
@@ -373,9 +382,16 @@ public class GameController implements Observer {
                     }
 
                 } else if (message.startsWith(GetMethod.quitGame)) {
-                    if (gameView.isHost() && gameViewModel.othersInfoProperty().size() == 0) {
-                        VBox allQuitBox = gameView.createQuitAlertBox("Game Over", "You left alone in the game", true);
-                        showCustomWindow(allQuitBox, 550, 300);
+                    if (gameView.isHost()) {
+                        if (gameViewModel.othersInfoProperty().size() == 0) {
+                            VBox allQuitBox = gameView.createQuitAlertBox("Game Over", "You left alone in the game",
+                                    true);
+                            showCustomWindow(allQuitBox, 550, 300);
+                        }
+                        if (message.split(",").length == 2 && message.split(",")[1].endsWith("-1")) {
+                            VBox waitingRoomQuitBox = gameView.createNewGameBox("Guest Quits Waiting Room","A guest has left the waiting room.\nThe game cannot proceed,\nand you need to create a new game session");
+                            showCustomWindow(waitingRoomQuitBox, 550, 300);
+                        }
                     } else {
                         String player = message.split(":")[1];
                         VBox quitAlertBox = gameView.createClosableAlertBox("", player + " has quit the game!", true);

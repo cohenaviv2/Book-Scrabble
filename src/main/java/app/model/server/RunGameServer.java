@@ -31,7 +31,7 @@ public class RunGameServer {
             String books = "server/books/Lord of the Flies.txt,server/books/Harray Potter.txt,server/books/All's Well That Ends Well.txt,server/books/Charlie and the Chocolate Factory.txt,server/books/Alice in Wonderland.txt,server/books/Dune - Frank Herbert.txt,server/books/Moby-Dick.txt,";
             String status = "status";
             Scanner input = new Scanner(System.in);
-            System.out.println("1 - ack\n2 - status\n3 - query\n4 - challange\n0 - Exit\n");
+            System.out.println("1 - ack\n2 - status\n3 - query\n4 - challenge\n0 - Exit\n");
             String clInput;
             while (!(clInput = input.nextLine()).equals("0")) {
                 Properties properties = loadProperties();
@@ -82,7 +82,7 @@ public class RunGameServer {
                     }
                 }
                 oracle_game_server.close();
-                System.out.println("1 - ack\n2 - status\n3 - query\n4 - challange\n0 - Exit\n");
+                System.out.println("1 - ack\n2 - status\n3 - query\n4 - challenge\n0 - Exit\n");
                 
             }
             input.close();
