@@ -38,9 +38,10 @@ public class GuestHandler implements ClientHandler {
     private final GameManager gameManager;
     private BufferedReader in;
     private PrintWriter out;
-    private int myId;
-    private String quitGameString;
+    private int MY_ID;
+    private String QUIT_GAME;
     private boolean flag;
+    private boolean quitGame;
 
     public GuestHandler() {
         this.gameManager = GameManager.get();
@@ -55,7 +56,9 @@ public class GuestHandler implements ClientHandler {
             connectGuest();
             if (!flag) {
                 waitingRoom(); // Waiting for all the players to choose book and set Ready
-                startChat(); // Starts a chat with the player until quitGame string
+                if (!quitGame) {
+                    startChat(); // Starts a chat with the player until quitGame string
+                }
             } else {
                 close();
             }
@@ -70,10 +73,10 @@ public class GuestHandler implements ClientHandler {
         String[] params = message.split(",");
         if (params[0].equals("0") && params[1].equals(GetMethod.connectMe)) {
             String name = params[2];
-            this.myId = gameManager.connectGuestHandler(name);
-            flag = myId == 0 ? true : false;
-            this.quitGameString = myId + "," + GetMethod.quitGame + "," + "true"; // quit game modifier
-            String connectionMessage = myId + "," + GetMethod.connectMe + "," + myId; // ack & id
+            this.MY_ID = gameManager.connectGuestHandler(name);
+            flag = MY_ID == 0 ? true : false;
+            this.QUIT_GAME = MY_ID + "," + GetMethod.quitGame + "," + "true"; // quit game modifier
+            String connectionMessage = MY_ID + "," + GetMethod.connectMe + "," + MY_ID; // ack & id
             out.println(connectionMessage); // send id
             flag = false;
         } else {
@@ -85,32 +88,37 @@ public class GuestHandler implements ClientHandler {
 
         while (!gameManager.isReadyToPlay()) {
             String message;
+            message = in.readLine();
+            if (message.startsWith(String.valueOf(MY_ID)) && message.split(",")[1].equals(GetMethod.quitGame)) {
+                out.print(QUIT_GAME);
+                gameManager.quitGameHandler(QUIT_GAME,false);
+                quitGame = true;
+                break;
+            }
             if (!isBooksSet) {
-                message = in.readLine();
                 String[] params = message.split(",");
                 int id = Integer.parseInt(params[0]);
-                if (id == myId && params[1].equals(GetMethod.myBooksChoice)) {
+                if (id == MY_ID && params[1].equals(GetMethod.myBooksChoice)) {
                     String bookList = params[2];
                     String ans = gameManager.addBooksHandler(bookList);
                     if (ans.equals("true")) {
                         isBooksSet = true;
-                        out.println(myId + "," + GetMethod.myBooksChoice + "," + ans);
+                        out.println(MY_ID + "," + GetMethod.myBooksChoice + "," + ans);
                     } else {
-                        out.println(myId + ",myBookChoice," + ans);
+                        out.println(MY_ID + ",myBookChoice," + ans);
                     }
                 }
                 if (!ready) {
                     message = in.readLine();
                     params = message.split(",");
                     id = Integer.parseInt(params[0]);
-                    if (id == myId && params[1].equals(GetMethod.ready)) {
+                    if (id == MY_ID && params[1].equals(GetMethod.ready)) {
                         if (params[2].equals("true")) {
                             gameManager.setReady();
                         } else {
                         }
                     }
                 }
-
             } else
                 Thread.sleep(3000);
         }
@@ -119,27 +127,27 @@ public class GuestHandler implements ClientHandler {
     private void startChat() throws Exception {
         String guestMessage;
         // START CHAT
-        while (!(guestMessage = in.readLine()).equals(quitGameString)) {
+        while (!(guestMessage = in.readLine()).equals(QUIT_GAME)) {
             String[] params = guestMessage.split(",");
             int messageId = Integer.parseInt(params[0]);
             String modifier = params[1];
             String value = params[2];
 
             // Check if it's currect ID, if not drops the message
-            if (messageId == myId) {
+            if (messageId == MY_ID) {
                 // Process guest's instructions
-                String returnValue = gameManager.processPlayerInstruction(myId, modifier, value);
+                String returnValue = gameManager.processPlayerInstruction(MY_ID, modifier, value);
                 // Send response to the guest
-                String response = myId + "," + modifier + "," + returnValue;
+                String response = MY_ID + "," + modifier + "," + returnValue;
                 out.println(response);
             }
         }
         // Guest chose to quit game - chat ended
-        String playerName = this.gameManager.getPlayerByID(myId).getName();
+        String playerName = this.gameManager.getPlayerByID(MY_ID).getName();
         // Sent quit game query to the guest
-        out.println(quitGameString);
+        out.println(QUIT_GAME);
         // Handle quit in game manager
-        gameManager.quitGameHandler(quitGameString);
+        gameManager.quitGameHandler(QUIT_GAME,true);
     }
 
     @Override

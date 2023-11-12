@@ -186,7 +186,7 @@ public class GameViewModel extends Observable implements Observer {
     public void quitGame() {
         gameModel.quitGame();
     }
-    
+
     // Propeties
     public StringProperty myNameProperty() {
         return myNameProperty;
@@ -235,6 +235,10 @@ public class GameViewModel extends Observable implements Observer {
 
     public boolean isGameServerConnect() {
         return HostModel.get().isGameServerConnect();
+    }
+
+    public void resetGame() {
+        HostModel.get().resetGame();
     }
 
     public boolean isValidPort(String portText) {
@@ -319,4 +323,5 @@ public class GameViewModel extends Observable implements Observer {
         return isWordVertical() ? (getLastSelectedCellRow() - getFirstSelectedCellRow() + 1)
                 : (getLastSelectedCellCol() - getFirstSelectedCellCol() + 1);
     }
+
 }

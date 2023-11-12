@@ -146,7 +146,7 @@ public class HostModel extends Observable implements GameModel, Observer {
     public void quitGame() {
         if (this.hostServer.getNumOfClients() > 0) {
             String quitGameMod = String.valueOf(gameManager.getHostID()) + "," + GetMethod.quitGame + "," + "true";
-            this.gameManager.quitGameHandler(quitGameMod);
+            this.gameManager.quitGameHandler(quitGameMod,true);
 
             // Run the waiting logic in a background task
             Task<Void> waitingTask = new Task<Void>() {
@@ -381,17 +381,6 @@ public class HostModel extends Observable implements GameModel, Observer {
     @Override
     public void update(Observable o, Object arg) {
         if (o == gameManager) {
-            // String message = (String) arg;
-            // if(message.startsWith(GetMethod.updateAll)){
-            // hostServer.sendToAll(message);
-            // }
-            // if (message.startsWith(GetMethod.sendTo)) {
-            // checkMessage(message);
-            // } else {
-            // updateProperties();
-            // setChanged();
-            // notifyObservers(message);
-            // }
             String update = (String) arg;
             if (update.startsWith(GetMethod.updateAll)) {
                 hostServer.sendToAll(update);

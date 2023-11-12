@@ -437,6 +437,14 @@
   -fx-text-fill: white;
 }
 
+.draw-tiles-label {
+  -fx-text-alignment: center;
+  -fx-font-family: "Arial";
+  -fx-font-weight: bold;
+  -fx-font-size: 20px;
+  -fx-effect: dropshadow(gaussian, black, 5, 1, 0, 1);
+}
+
 .selected-book-image {
   -fx-effect: dropshadow(gaussian, gold, 25, 0.8, 0, 0);
 }

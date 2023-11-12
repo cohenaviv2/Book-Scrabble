@@ -2,7 +2,6 @@ package app.model.game;
 
 import java.util.ArrayList;
 
-import app.model.game.Tile.Bag;
 
 /*
  * Represents the Game Board

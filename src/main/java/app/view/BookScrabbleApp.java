@@ -11,7 +11,7 @@ public class BookScrabbleApp extends Application implements Observer {
 
     @Override
     public void start(Stage primaryStage) {
-
+        // Initial View Model and View Controller
         GameViewModel gameViewModel = new GameViewModel();
         GameController gameController = new GameController(gameViewModel);
         gameController.showInitialWindow();
