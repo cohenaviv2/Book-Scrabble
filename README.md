@@ -10,15 +10,20 @@
 
 # About The Game
 
+### Book Scrabble - Unleashing Fresh Word Challenges
 
-<p align="center">
-<img src="https://i.postimg.cc/fyTYh7BB/1234-1.png" alt="App" width="400px" height="189px">
-</p>
-Book Scrabble puts a new twist on the traditional word game by replacing the standard dictionary with a collection of books, offering players a more imaginative word pool. <br> It's an online multiplayer game where you can play with friends by hosting or joining games over the internet, creating a social gaming experience.
-<br>Use your imagination and challenge the game dictionary with unique words!
+Book Scrabble puts a new twist on the traditional word game by replacing the standard dictionary with a collection of books, offering players a more imaginative word pool. It's an online multiplayer game where you can play with friends by hosting or joining games, creating a social gaming experience.
+<br>Use your imagination and challenge the game dictionary with unique words! <br> <br>
 
 <p align="center">
   <img src="https://i.postimg.cc/8zjRS2M6/1.png" alt="Game" width="800px" height="458px">
+</p>
+
+### Connect and Play with Friends Anywhere
+Gather around and challenge your buddies to a wordy showdown. Connect with friends from anywhere in the world using IP addresses over the internet. Whether you're near or far, the joy of wordplay knows no bounds. Let the game begin!
+
+<p align="center">
+<img src="https://i.postimg.cc/fyTYh7BB/1234-1.png" alt="App" width="500px" height="236px">
 </p>
 
 

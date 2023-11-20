@@ -41,7 +41,6 @@ public class GuestHandler implements ClientHandler {
     private int MY_ID;
     private String QUIT_GAME;
     private boolean flag;
-    private boolean quitGame;
 
     public GuestHandler() {
         this.gameManager = GameManager.get();
@@ -56,8 +55,8 @@ public class GuestHandler implements ClientHandler {
             connectGuest();
             if (!flag) {
                 waitingRoom(); // Waiting for all the players to choose book and set Ready
-                if (!quitGame) {
-                    startChat(); // Starts a chat with the player until quitGame string
+                if (!flag) {
+                    startChat(); // Starts a chat with the player until QUIT_GAME string
                 }
             } else {
                 close();
@@ -88,14 +87,8 @@ public class GuestHandler implements ClientHandler {
 
         while (!gameManager.isReadyToPlay()) {
             String message;
-            message = in.readLine();
-            if (message.startsWith(String.valueOf(MY_ID)) && message.split(",")[1].equals(GetMethod.quitGame)) {
-                out.print(QUIT_GAME);
-                gameManager.quitGameHandler(QUIT_GAME,false);
-                quitGame = true;
-                break;
-            }
             if (!isBooksSet) {
+                message = in.readLine();
                 String[] params = message.split(",");
                 int id = Integer.parseInt(params[0]);
                 if (id == MY_ID && params[1].equals(GetMethod.myBooksChoice)) {
@@ -115,12 +108,15 @@ public class GuestHandler implements ClientHandler {
                     if (id == MY_ID && params[1].equals(GetMethod.ready)) {
                         if (params[2].equals("true")) {
                             gameManager.setReady();
+                            break;
                         } else {
                         }
                     }
                 }
-            } else
+
+            } else {
                 Thread.sleep(3000);
+            }
         }
     }
 
@@ -128,6 +124,7 @@ public class GuestHandler implements ClientHandler {
         String guestMessage;
         // START CHAT
         while (!(guestMessage = in.readLine()).equals(QUIT_GAME)) {
+            System.out.println(guestMessage);
             String[] params = guestMessage.split(",");
             int messageId = Integer.parseInt(params[0]);
             String modifier = params[1];
@@ -147,7 +144,7 @@ public class GuestHandler implements ClientHandler {
         // Sent quit game query to the guest
         out.println(QUIT_GAME);
         // Handle quit in game manager
-        gameManager.quitGameHandler(QUIT_GAME,true);
+        gameManager.quitGameHandler(QUIT_GAME);
     }
 
     @Override

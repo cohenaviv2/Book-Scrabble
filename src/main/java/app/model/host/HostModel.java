@@ -32,13 +32,13 @@ public class HostModel extends Observable implements GameModel, Observer {
     }
 
     // public void stopHostServer() {
-    //     hostServer.close();
+    // hostServer.close();
     // }
 
     // public void startHostServer() {
-    //     if (!hostServer.isRunning()) {
-    //         hostServer.start();
-    //     }
+    // if (!hostServer.isRunning()) {
+    // hostServer.start();
+    // }
     // }
 
     public void setNumOfPlayers(int numOftotalPlayers) {
@@ -144,11 +144,12 @@ public class HostModel extends Observable implements GameModel, Observer {
 
     @Override
     public void quitGame() {
-        if (this.hostServer.getNumOfClients() > 0) {
-            String quitGameMod = String.valueOf(gameManager.getHostID()) + "," + GetMethod.quitGame + "," + "true";
-            this.gameManager.quitGameHandler(quitGameMod,true);
+        if (hostServer.getNumOfClients() > 0) {
+            // Host Quit
+            String QUIT_GAME = String.valueOf(gameManager.getHostID()) + "," + GetMethod.quitGame + "," + "true";
+            gameManager.quitGameHandler(QUIT_GAME);
 
-            // Run the waiting logic in a background task
+            // Wait For Guests
             Task<Void> waitingTask = new Task<Void>() {
                 @Override
                 protected Void call() throws Exception {
@@ -157,7 +158,6 @@ public class HostModel extends Observable implements GameModel, Observer {
                     return null;
                 }
             };
-
             waitingTask.setOnSucceeded(event -> {
                 if (this.hostServer.getNumOfClients() == 0) {
                     this.hostServer.close();
@@ -166,7 +166,7 @@ public class HostModel extends Observable implements GameModel, Observer {
                     System.out.println("\n0 Clients - Host server is closed, and the host has quit the game");
                 } else {
                     System.out.println(
-                            "\n\n*** There are still clients connected ! ***\n\n" + hostServer.getNumOfClients());
+                            "\n\n*** There are still " + hostServer.getNumOfClients() + " clients connected ! ***");
                 }
             });
 
@@ -382,12 +382,12 @@ public class HostModel extends Observable implements GameModel, Observer {
     public void update(Observable o, Object arg) {
         if (o == gameManager) {
             String update = (String) arg;
+            System.out.println("model: "+update);
             if (update.startsWith(GetMethod.updateAll)) {
                 hostServer.sendToAll(update);
                 updateProperties();
                 setChanged();
                 notifyObservers(update);
-
             } else if (update.startsWith(GetMethod.sendTo)) {
                 hostServer.sendToAll(update);
                 String message = update.split(",")[1];
@@ -397,6 +397,9 @@ public class HostModel extends Observable implements GameModel, Observer {
             } else {
                 setChanged();
                 notifyObservers(update);
+                if (update.equals(GetMethod.waitingRoomError)) {
+                    hostServer.sendToAll(update);
+                }
             }
         }
     }

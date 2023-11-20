@@ -4,6 +4,7 @@ import app.model.GetMethod;
 import app.model.game.ObjectSerializer;
 import app.model.game.Tile;
 import app.model.game.Word;
+import app.view.GameView.HighlightOutcome;
 import app.view_model.GameViewModel;
 
 import java.io.IOException;
@@ -33,7 +34,7 @@ public class GameController implements Observer {
     // Game logic
     private List<String> selectedBooks;
     private List<Pane> selectedCells;
-    private Stack<Pane> placementCelles;
+    private Stack<Pane> placementCells;
     private List<Pane> placementTileList;
     private List<Word> turnWords;
     private boolean gameRunning;
@@ -49,7 +50,7 @@ public class GameController implements Observer {
         this.selectedBooks = new ArrayList<>();
         selectedBooks.add("harry potter");
         this.selectedCells = new ArrayList<>();
-        this.placementCelles = new Stack<>();
+        this.placementCells = new Stack<>();
         this.placementTileList = new ArrayList<>();
         this.turnWords = new ArrayList<>();
     }
@@ -152,15 +153,17 @@ public class GameController implements Observer {
     private void showIllegalWordsAlert(List<Word> illegalWords, boolean afterChallenge) {
         VBox illegalWordsBox = gameView.createChallengeBox(illegalWords, afterChallenge);
         showCustomWindow(illegalWordsBox, 600, 300);
-    
+
         if (afterChallenge) {
             // If afterChallenge is true, schedule the window to close after 2 seconds
             PauseTransition pause = new PauseTransition(Duration.seconds(2));
-            pause.setOnFinished(e -> customStage.close());
+            pause.setOnFinished(e -> {
+                customStage.close();
+                gameView.highlightCellsForWords(illegalWords, HighlightOutcome.FAILURE);
+            });
             pause.play();
         }
     }
-    
 
     public void showCustomWindow(Node content, double width, double height) {
         // Calculate the center coordinates of the main stage
@@ -210,19 +213,24 @@ public class GameController implements Observer {
         for (Pane cell : placementTileList) {
             cell.getStyleClass().removeIf(style -> style.startsWith("character-"));
             cell.setStyle("");
-            cell.getStyleClass().add("board-cell");
+            // cell.getStyleClass().add("board-cell");
         }
-        placementTileList.clear();
         // Clear All
         gameViewModel.clearWord();
+        // Push The Cells Again
+        placementCells.clear();
+        for (Pane cell : placementTileList) {
+            placementCells.add(cell);
+        }
 
         if (isResetCells) {
+            placementTileList.clear();
 
             // Reset Placement Cells Style
-            for (Pane cell : placementCelles) {
+            for (Pane cell : placementCells) {
                 cell.getStyleClass().removeIf(style -> style.startsWith("character-"));
             }
-            placementCelles.clear();
+            placementCells.clear();
             // Reset Selected Cells
             for (Pane cell : selectedCells) {
                 cell.getStyleClass().remove("selected");
@@ -242,7 +250,7 @@ public class GameController implements Observer {
             for (int i = size; i > 0; i--) {
                 if (board[lastRow][lastCol] == null) {
                     Pane cell = (Pane) gameView.getCellFromBoard(lastRow, lastCol);
-                    placementCelles.push(cell);
+                    placementCells.push(cell);
                     placementTileList.add(cell);
                 }
                 lastRow--;
@@ -251,7 +259,7 @@ public class GameController implements Observer {
             for (int i = size; i > 0; i--) {
                 if (board[lastRow][lastCol] == null) {
                     Pane cell = (Pane) gameView.getCellFromBoard(lastRow, lastCol);
-                    placementCelles.push(cell);
+                    placementCells.push(cell);
                     placementTileList.add(cell);
                 }
                 lastCol--;
@@ -276,7 +284,6 @@ public class GameController implements Observer {
     }
 
     public void checkHostConnection(boolean isGameServer) {
-
         // Check Game Server Connection
         if (isGameServer) {
             Task<Boolean> networkTask = new Task<Boolean>() {
@@ -299,6 +306,7 @@ public class GameController implements Observer {
         // Check Host Server Connection
         else {
             Task<Boolean> newtworkTask = new Task<Boolean>() {
+
                 @Override
                 protected Boolean call() throws Exception {
                     Thread.sleep(2000); // 2-second delay
@@ -307,6 +315,7 @@ public class GameController implements Observer {
             };
 
             newtworkTask.setOnSucceeded(e -> {
+
                 boolean isHostServerConnected = newtworkTask.getValue();
                 if (!isHostServerConnected) {
                     Platform.runLater(() -> {
@@ -338,13 +347,18 @@ public class GameController implements Observer {
         if (o == gameViewModel && arg instanceof String) {
             Platform.runLater(() -> {
                 String message = (String) arg;
-
+                System.out.println("view: "+message);
                 // Update All
                 if (message.startsWith(GetMethod.drawTiles)) {
                     gameRunning = true;
                     showGameFlowWindow();
                     String drawResault = message.split(":")[1];
                     showDrawTilesWindow(drawResault);
+                } else if (message.startsWith(GetMethod.waitingRoomError)) {
+                    gameViewModel.quitGame();
+                    VBox waitingRoomQuitBox = gameView.createNewGameBox("Player Quits Waiting Room",
+                            "A player has left the waiting room.\nThe game cannot proceed without all players.");
+                    showCustomWindow(waitingRoomQuitBox, 570, 350);
                 } else if (message.startsWith(GetMethod.tryPlaceWord)) {
                     String update = message.split(",")[1];
                     if (update.equals("notBoardLegal") || update.equals("illegal")) {
@@ -361,7 +375,7 @@ public class GameController implements Observer {
                             gameView.closeProgressIndicator();
                             showIllegalWordsAlert(turnWords, false);
                         } else {
-                            gameView.highlightCellsForWords(turnWords, true);
+                            gameView.highlightCellsForWords(turnWords, HighlightOutcome.SUCCESS);
                             turnWords.clear();
                         }
                     }
@@ -376,28 +390,22 @@ public class GameController implements Observer {
                     if (res.equals("false")) {
                         showIllegalWordsAlert(turnWords, true);
                     } else {
-                        gameView.highlightCellsForWords(turnWords, true);
+                        gameView.highlightCellsForWords(turnWords, HighlightOutcome.CHALLENGE_SUCCESSFUL);
                         gameView.showDoubleScoreEffect();
                         turnWords.clear();
                     }
 
                 } else if (message.startsWith(GetMethod.quitGame)) {
-                    if (gameView.isHost()) {
-                        if (gameViewModel.othersInfoProperty().size() == 0) {
-                            VBox allQuitBox = gameView.createQuitAlertBox("Game Over", "You left alone in the game",
-                                    true);
-                            showCustomWindow(allQuitBox, 550, 300);
-                        }
-                        if (message.split(",").length == 2 && message.split(",")[1].endsWith("-1")) {
-                            VBox waitingRoomQuitBox = gameView.createNewGameBox("Guest Quits Waiting Room","A guest has left the waiting room.\nThe game cannot proceed,\nand you need to create a new game session");
-                            showCustomWindow(waitingRoomQuitBox, 550, 300);
-                        }
+                    if (gameView.isHost() && gameViewModel.othersInfoProperty().size() == 0) {
+                        VBox allQuitBox = gameView.createQuitAlertBox("Game Over", "You left alone in the game",true);
+                        showCustomWindow(allQuitBox, 550, 300);
                     } else {
-                        String player = message.split(":")[1];
-                        VBox quitAlertBox = gameView.createClosableAlertBox("", player + " has quit the game!", true);
-                        showCustomWindow(quitAlertBox, 500, 260);
+                        if (gameRunning){
+                            String player = message.split(":")[1];
+                            VBox quitAlertBox = gameView.createClosableAlertBox("", player + " has quit the game!", true);
+                            showCustomWindow(quitAlertBox, 500, 260);
+                        }
                     }
-
                 } else if (message.startsWith(GetMethod.endGame)) {
                     String update = message.split(":")[1];
                     hostQuit = update.equals("HOST");
@@ -407,6 +415,7 @@ public class GameController implements Observer {
                     }
                     gameViewModel.quitGame();
                 } else if (message.equals(GetMethod.exit)) {
+
                     if (hostQuit) {
                         close();
                         System.exit(0);
@@ -434,8 +443,8 @@ public class GameController implements Observer {
         return selectedCells;
     }
 
-    public Stack<Pane> getPlacementCelles() {
-        return placementCelles;
+    public Stack<Pane> getPlacementCells() {
+        return placementCells;
     }
 
     public List<Pane> getPlacementTileList() {

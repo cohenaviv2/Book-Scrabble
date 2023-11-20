@@ -12,7 +12,6 @@ public class CommunicationHandler extends Observable {
     private Socket hostSocket;
     private BufferedReader in;
     private PrintWriter out;
-    private volatile boolean stop;
     private int myId;
     private boolean flag;
     private String MESSAGE;
@@ -26,11 +25,11 @@ public class CommunicationHandler extends Observable {
         this.out = new PrintWriter(this.hostSocket.getOutputStream(), true);
         this.executorService = Executors.newSingleThreadExecutor();
         this.playerProperties = GuestModel.get().getPlayerProperties();
-        this.stop = true;
     }
 
     public void sendMessage(String modifier, String value) {
         out.println(myId + "," + modifier + "," + value);
+
     }
 
     public void connectMe(String name) throws IOException {
@@ -39,8 +38,11 @@ public class CommunicationHandler extends Observable {
         if (!ans[2].equals("0")) {
             this.myId = Integer.parseInt(ans[2]);
             this.QUIT_GAME_QUERY = myId + "," + GetMethod.quitGame + "," + "true";
+            // Connected!");
             flag = false;
         } else {
+            // System.err.println("CommHandler - connectMe: wrong answer from Host server "
+            // + ans);
             flag = true;
             close();
         }
@@ -48,6 +50,7 @@ public class CommunicationHandler extends Observable {
 
     public void addMyBookChoice(List<String> myBooks) throws Exception {
         if (!flag) {
+
             String myBooksSerilized = ObjectSerializer.serializeObject(myBooks);
             out.println(myId + "," + GetMethod.myBooksChoice + "," + myBooksSerilized);
             String[] ans = in.readLine().split(",");
@@ -55,17 +58,26 @@ public class CommunicationHandler extends Observable {
             String modifier = ans[1];
             String value = ans[2];
             if (id == myId && modifier.equals(GetMethod.myBooksChoice) && value.equals("true")) {
+
+                // chat...");
                 startUpdateListener();
-            } 
+
+            } else {
+                // erver " + ans);
+                // throw new Exception("CommHandler - addBookHandler: wrong answer from Host
+                // server " + ans);
+
+            }
         }
+
     }
 
-    private void startUpdateListener() throws IOException, ClassNotFoundException {
+    public void startUpdateListener() throws IOException, ClassNotFoundException {
         executorService.submit(() -> {
             try {
-                stop = false;
                 String serverMessage;
                 while (!(serverMessage = in.readLine()).equals(QUIT_GAME_QUERY)) {
+                    System.out.println("com hanfler: "+serverMessage);
                     // General update message
                     if (!serverMessage.startsWith(String.valueOf(myId))) {
                         MESSAGE = serverMessage;
@@ -74,11 +86,12 @@ public class CommunicationHandler extends Observable {
                         } else if (serverMessage.startsWith(GetMethod.sendTo)) {
                             String message = serverMessage.split(",")[1];
                             checkForMessage(message);
-                        } else if (serverMessage.startsWith(GetMethod.endGame)) {
+                        } else if (serverMessage.startsWith(GetMethod.endGame)
+                                || serverMessage.equals(GetMethod.waitingRoomError)) {
                             endGameHandler(serverMessage);
                         }
-                    }
 
+                    }
                     // Private update
                     else {
                         if (serverMessage.equals(GetMethod.ready)) {
@@ -195,8 +208,8 @@ public class CommunicationHandler extends Observable {
     }
 
     private void challengeHandler(String returnedVal) {
-            setChanged();
-            notifyObservers(GetMethod.challenge + "," + returnedVal);
+        setChanged();
+        notifyObservers(GetMethod.challenge + "," + returnedVal);
     }
 
     private void tryPlaceWordHandler(String returnedVal) {

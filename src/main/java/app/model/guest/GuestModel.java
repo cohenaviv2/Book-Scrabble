@@ -108,11 +108,6 @@ public class GuestModel extends Observable implements GameModel, Observer {
             commHandler.sendMessage(GetMethod.quitGame, "true");
         }
         if (commHandler != null) {
-            // try {
-            //     Thread.sleep(2000);
-            // } catch (InterruptedException e) {
-            //     e.printStackTrace();
-            // }
             commHandler.close();
             System.out.println("\nCommunication Handler is closed.");
         }
@@ -168,6 +163,8 @@ public class GuestModel extends Observable implements GameModel, Observer {
         if (o == commHandler) {
             setChanged();
             notifyObservers(arg);
+            String update = (String) arg;
+            System.out.println("model: "+update);
         }
     }
 

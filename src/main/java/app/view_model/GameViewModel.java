@@ -79,10 +79,10 @@ public class GameViewModel extends Observable implements Observer {
                     gameBooksProperty.addAll(gameModel.getGameBooks());
                     bagCountProperty.set(gameModel.getBagCount());
 
-                    String update = message.split(",")[1];
-                    if (!update.startsWith(GetMethod.skipTurn)) {
+                    String method = message.split(",")[1];
+                    if (!method.startsWith(GetMethod.skipTurn)) {
                         setChanged();
-                        notifyObservers(update);
+                        notifyObservers(method);
                     }
                 } else {
                     setChanged();
