@@ -15,6 +15,14 @@ import javafx.application.Platform;
 import javafx.beans.property.*;
 import javafx.collections.*;
 
+/* 
+* The GameViewModel serves as the intermediary between the game model and the user interface.
+* It utilizes object properties to manage and update player information and other essential components within the application.
+* 
+* @author: Aviv Cohen
+* 
+*/
+
 public class GameViewModel extends Observable implements Observer {
     // Game model
     private GameModel gameModel;
@@ -79,10 +87,10 @@ public class GameViewModel extends Observable implements Observer {
                     gameBooksProperty.addAll(gameModel.getGameBooks());
                     bagCountProperty.set(gameModel.getBagCount());
 
-                    String update = message.split(",")[1];
-                    if (!update.startsWith(GetMethod.skipTurn)) {
+                    String method = message.split(",")[1];
+                    if (!method.startsWith(GetMethod.skipTurn)) {
                         setChanged();
-                        notifyObservers(update);
+                        notifyObservers(method);
                     }
                 } else {
                     setChanged();

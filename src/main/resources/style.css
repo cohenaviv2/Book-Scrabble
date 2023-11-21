@@ -360,8 +360,16 @@
   -fx-border-color: rgb(206, 0, 0);
   -fx-border-width: 4px;
   -fx-border-radius: 5px;
-  -fx-effect: dropshadow(gaussian, rgb(233, 58, 58), 25, 0, 0, 7);
+  -fx-effect: dropshadow(gaussian, rgb(233, 58, 58), 25, 0.1, 0, 7);
 
+}
+
+.board-cell.challenge-successful {
+  -fx-alignment: center;
+  -fx-border-color: rgb(234, 77, 255);
+  -fx-border-width: 4px;
+  -fx-border-radius: 5px;
+  -fx-effect: dropshadow(gaussian, rgb(255, 223, 77), 50, 0.15, 0, 7);
 }
 
 .title {
@@ -437,13 +445,6 @@
   -fx-text-fill: white;
 }
 
-.draw-tiles-label {
-  -fx-text-alignment: center;
-  -fx-font-family: "Arial";
-  -fx-font-weight: bold;
-  -fx-font-size: 20px;
-  -fx-effect: dropshadow(gaussian, black, 5, 1, 0, 1);
-}
 
 .selected-book-image {
   -fx-effect: dropshadow(gaussian, gold, 25, 0.8, 0, 0);

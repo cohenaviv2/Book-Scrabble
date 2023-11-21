@@ -1,28 +1,22 @@
 package app.model.guest;
 
+import app.model.*;
+import app.model.game.*;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Observable;
-import java.util.Observer;
-import java.util.Set;
+import java.util.*;
 
-import app.model.GameModel;
-import app.model.GetMethod;
-import app.model.game.ObjectSerializer;
-import app.model.game.PlayerProperties;
-import app.model.game.Tile;
-import app.model.game.Word;
+/* The GuestModel handles guest mode, connecting to the host server via sockets.
+ * It manages communication, ensuring data exchange between the guest and host.
+ * 
+ * @author: Aviv Cohen
+ * 
+ */
 
 public class GuestModel extends Observable implements GameModel, Observer {
     private static GuestModel gm = null; // Singleton
     private CommunicationHandler commHandler;
     private PlayerProperties playerProperties;
     private boolean isConnected = false;
-
-    private GuestModel() {
-    }
 
     public static GuestModel get() {
         if (gm == null)
@@ -70,7 +64,6 @@ public class GuestModel extends Observable implements GameModel, Observer {
             commHandler.sendMessage(GetMethod.ready, "true");
         } catch (Exception e) {
             e.printStackTrace();
-
         }
     }
 
@@ -83,7 +76,6 @@ public class GuestModel extends Observable implements GameModel, Observer {
                 commHandler.sendMessage(GetMethod.tryPlaceWord, word);
             } catch (IOException e) {
                 e.printStackTrace();
-
             }
         }
     }
@@ -92,14 +84,14 @@ public class GuestModel extends Observable implements GameModel, Observer {
     public void challenge() {
         if (playerProperties.isMyTurn()) {
             commHandler.sendMessage(GetMethod.challenge, "true");
-        } 
+        }
     }
 
     @Override
     public void skipTurn() {
         if (playerProperties.isMyTurn()) {
             commHandler.sendMessage(GetMethod.skipTurn, "true");
-        } 
+        }
     }
 
     @Override
@@ -108,11 +100,6 @@ public class GuestModel extends Observable implements GameModel, Observer {
             commHandler.sendMessage(GetMethod.quitGame, "true");
         }
         if (commHandler != null) {
-            // try {
-            //     Thread.sleep(2000);
-            // } catch (InterruptedException e) {
-            //     e.printStackTrace();
-            // }
             commHandler.close();
             System.out.println("\nCommunication Handler is closed.");
         }
@@ -168,6 +155,8 @@ public class GuestModel extends Observable implements GameModel, Observer {
         if (o == commHandler) {
             setChanged();
             notifyObservers(arg);
+            String update = (String) arg;
+            System.out.println("model: " + update);
         }
     }
 

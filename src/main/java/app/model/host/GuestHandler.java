@@ -7,24 +7,24 @@ import app.model.game.GameManager;
 import app.model.server.ClientHandler;
 
 /*
- * The Guest handler used to communicate between the host and the guests
- * Communication is done using strings
+ * The GuestHandler is responsible for the communication between the host and the guests.
+ * The communication is done using strings:
  * 
  * HOST:
  * receives a string from the guest
  * starting with the guests ID,
- * then Model method to active,
- * and then the value (like query word)
+ * then a model method to apply,
+ * and then the value (etc. query word).
  * All 3 parameters seperated by ","
  * 
  * e.g. - "0,connectMe,Moshe" , "0,getMyID,Moshe" , "259874,tryPlaceWord,Hello"
  * (ID is 0 for initialization)
  * 
  * GUEST:
- * gets a string from the host
+ * recieves a string from the host
  * starting with his ID,
- * then the Model methos that was activated
- * and then the returned value
+ * then the model methos that was applied
+ * and then the returned value.
  * All 3 parameters seperated by ","
  * 
  * e.g. - "0,connectMe,true" , "0,getMyID,256874" , "259874,tryPlaceWord,32"
@@ -41,7 +41,6 @@ public class GuestHandler implements ClientHandler {
     private int MY_ID;
     private String QUIT_GAME;
     private boolean flag;
-    private boolean quitGame;
 
     public GuestHandler() {
         this.gameManager = GameManager.get();
@@ -56,8 +55,8 @@ public class GuestHandler implements ClientHandler {
             connectGuest();
             if (!flag) {
                 waitingRoom(); // Waiting for all the players to choose book and set Ready
-                if (!quitGame) {
-                    startChat(); // Starts a chat with the player until quitGame string
+                if (!flag) {
+                    startChat(); // Starts a chat with the player until QUIT_GAME string
                 }
             } else {
                 close();
@@ -88,14 +87,8 @@ public class GuestHandler implements ClientHandler {
 
         while (!gameManager.isReadyToPlay()) {
             String message;
-            message = in.readLine();
-            if (message.startsWith(String.valueOf(MY_ID)) && message.split(",")[1].equals(GetMethod.quitGame)) {
-                out.print(QUIT_GAME);
-                gameManager.quitGameHandler(QUIT_GAME,false);
-                quitGame = true;
-                break;
-            }
             if (!isBooksSet) {
+                message = in.readLine();
                 String[] params = message.split(",");
                 int id = Integer.parseInt(params[0]);
                 if (id == MY_ID && params[1].equals(GetMethod.myBooksChoice)) {
@@ -115,12 +108,15 @@ public class GuestHandler implements ClientHandler {
                     if (id == MY_ID && params[1].equals(GetMethod.ready)) {
                         if (params[2].equals("true")) {
                             gameManager.setReady();
+                            break;
                         } else {
                         }
                     }
                 }
-            } else
+
+            } else {
                 Thread.sleep(3000);
+            }
         }
     }
 
@@ -128,6 +124,7 @@ public class GuestHandler implements ClientHandler {
         String guestMessage;
         // START CHAT
         while (!(guestMessage = in.readLine()).equals(QUIT_GAME)) {
+            System.out.println(guestMessage);
             String[] params = guestMessage.split(",");
             int messageId = Integer.parseInt(params[0]);
             String modifier = params[1];
@@ -147,7 +144,7 @@ public class GuestHandler implements ClientHandler {
         // Sent quit game query to the guest
         out.println(QUIT_GAME);
         // Handle quit in game manager
-        gameManager.quitGameHandler(QUIT_GAME,true);
+        gameManager.quitGameHandler(QUIT_GAME);
     }
 
     @Override

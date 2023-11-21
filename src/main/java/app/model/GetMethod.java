@@ -1,8 +1,12 @@
 package app.model;
 
-public class GetMethod {
+/* Define all game model methods
+ * 
+ * @author: Aviv Cohen
+ * 
+*/
 
-    // Define all game model methods
+public class GetMethod {
     public static final String connectMe = "connectMe";
     public static final String myBooksChoice = "myBooksChoice";
     public static final String ready = "ready";
@@ -25,4 +29,5 @@ public class GetMethod {
     public static final String endGame = "endGame";
     public static final String drawTiles = "drawTiles";
     public static final String exit = "exit";
+    public static final String waitingRoomError = "waitingRoomError";
 }

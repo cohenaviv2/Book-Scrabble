@@ -2,10 +2,8 @@ package app.model.game;
 
 import java.util.ArrayList;
 
-
 /*
- * Represents the Game Board
- * Contains 15x15 matrix of Squares
+ * Represents the game board by managing a 15x15 matrix of Squares.
  * Can operate on the board by placing a word
  * Placement is done after checking whether the word is legal in terms of the board and the dictionary
  * and calculates the score accordingly.
@@ -249,6 +247,8 @@ public class Board {
          * word completes ANOTHER GREATER WORD check:
          * (for example - on the board "SET", the given word is "SUB" output: "SUBSET")
          */
+
+        // VERTICAL
         if (word.isVertical() && ((word.getRow() > 0 && this.board[word.getRow() - 1][word.getCol()].isTile())
                 || (word.getRow() + word.getTiles().length < SIZE
                         && this.board[word.getRow() + word.getTiles().length][word.getCol()].isTile()))) {
@@ -260,7 +260,6 @@ public class Board {
             while (start >= 1 && board[start - 1][word.getCol()].isTile()) {
                 start--;
             }
-
             // Find new ending index:
             while (end <= SIZE - 2 && board[end + 1][word.getCol()].isTile()) {
                 end++;
@@ -270,9 +269,10 @@ public class Board {
             int wordLength = end - start + 1;
             int startIndex = start;
             Tile[] newTiles = new Tile[wordLength];
-            for (int i = 0, current = start; i < wordLength; i++, current++) {
+            for (int i = 0, tilesIndex = 0, current = start; i < wordLength; i++, current++) {
                 if (!board[current][word.getCol()].isTile()) {
-                    newTiles[i] = word.getTiles()[current - start];
+                    newTiles[i] = word.getTiles()[tilesIndex];
+                    tilesIndex++;
                 } else {
                     newTiles[i] = board[current][word.getCol()].getTile();
                 }
@@ -281,17 +281,13 @@ public class Board {
             Word newWord = new Word(newTiles, startIndex, word.getCol(), true);
             words.add(newWord);
 
-        } else if (!word.isVertical() && ((word.getCol() > 0 && this.board[word.getRow()][word.getCol() - 1].isTile())
+        }
+
+        // HORIZONTAL
+        else if (!word.isVertical() && ((word.getCol() > 0 && this.board[word.getRow()][word.getCol() - 1].isTile())
                 || (word.getCol() + word.getTiles().length < SIZE
                         && this.board[word.getRow()][word.getCol() + word.getTiles().length].isTile()))) {
-            // int start, end;
-            // for (start = word.getCol() - 1; this.board[word.getRow()][start].isValue() &&
-            // start >= 0; --start)
-            // ;
-            // for (end = word.getCol() + word.getTiles().length;
-            // this.board[word.getRow()][end]
-            // .isValue() && end < SIZE; ++end)
-            // ;
+
             int start = word.getCol();
             int end = word.getCol() + word.getTiles().length - 1;
 
@@ -299,18 +295,19 @@ public class Board {
             while (start >= 1 && board[word.getRow()][start - 1].isTile()) {
                 start--;
             }
-
             // Find new ending index:
             while (end <= SIZE - 2 && board[word.getRow()][end + 1].isTile()) {
                 end++;
             }
 
+            // Build the new word and add it into the array:
             int wordLength = end - start + 1;
             int startIndex = start;
             Tile[] newTiles = new Tile[wordLength];
-            for (int i = 0, current = start; i < wordLength; i++, current++) {
+            for (int i = 0, tileIndex = 0, current = start; i < wordLength; i++, current++) {
                 if (!board[word.getRow()][current].isTile()) {
-                    newTiles[i] = word.getTiles()[current - start];
+                    newTiles[i] = word.getTiles()[tileIndex];
+                    tileIndex++;
                 } else {
                     newTiles[i] = board[word.getRow()][current].getTile();
                 }
@@ -340,13 +337,10 @@ public class Board {
                     while (start >= 1 && board[i][start - 1].isTile()) {
                         start--;
                     }
-
                     // Find new ending index:
                     while (end <= SIZE - 2 && board[i][end + 1].isTile()) {
                         end++;
                     }
-
-                    System.out.println("start: "+start+"\n"+"end: "+end);
 
                     int wordLength = end - start + 1;
                     int startIndex = start;
@@ -370,7 +364,7 @@ public class Board {
                     continue;
                 if ((word.getRow() + 1 < SIZE && this.board[word.getRow() + 1][i].isTile())
                         || (word.getRow() - 1 >= 0 && this.board[word.getRow() - 1][i]
-                                .isTile())) { /************************************************ */
+                                .isTile())) { 
 
                     int start = word.getRow();
                     int end = word.getRow();
@@ -507,8 +501,6 @@ public class Board {
 
     public String wordToString(Word word) {
         Word fullword = getFullWord(word);
-        //
-        // System.out.println("full Word - "+fullword);
         String w = "";
         for (Tile t : fullword.getTiles()) {
             w += t.getLetter();

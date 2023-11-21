@@ -8,11 +8,37 @@ import java.util.concurrent.*;
 import app.model.GetMethod;
 import app.model.game.*;
 
+/*
+ * The CommunicationHandler is responsible for the communication with the host.
+ * The communication is done using strings:
+ * 
+ * HOST:
+ * receives a string from the guest
+ * starting with the guests ID,
+ * then a model method to apply,
+ * and then the value (etc. query word).
+ * All 3 parameters seperated by ","
+ * 
+ * e.g. - "0,connectMe,Moshe" , "0,getMyID,Moshe" , "259874,tryPlaceWord,Hello"
+ * (ID is 0 for initialization)
+ * 
+ * GUEST:
+ * recieves a string from the host
+ * starting with his ID,
+ * then the model methos that was applied
+ * and then the returned value.
+ * All 3 parameters seperated by ","
+ * 
+ * e.g. - "0,connectMe,true" , "0,getMyID,256874" , "259874,tryPlaceWord,32"
+ * 
+ * @author: Aviv Cohen
+ * 
+ */
+
 public class CommunicationHandler extends Observable {
     private Socket hostSocket;
     private BufferedReader in;
     private PrintWriter out;
-    private volatile boolean stop;
     private int myId;
     private boolean flag;
     private String MESSAGE;
@@ -26,11 +52,11 @@ public class CommunicationHandler extends Observable {
         this.out = new PrintWriter(this.hostSocket.getOutputStream(), true);
         this.executorService = Executors.newSingleThreadExecutor();
         this.playerProperties = GuestModel.get().getPlayerProperties();
-        this.stop = true;
     }
 
     public void sendMessage(String modifier, String value) {
         out.println(myId + "," + modifier + "," + value);
+
     }
 
     public void connectMe(String name) throws IOException {
@@ -48,6 +74,7 @@ public class CommunicationHandler extends Observable {
 
     public void addMyBookChoice(List<String> myBooks) throws Exception {
         if (!flag) {
+
             String myBooksSerilized = ObjectSerializer.serializeObject(myBooks);
             out.println(myId + "," + GetMethod.myBooksChoice + "," + myBooksSerilized);
             String[] ans = in.readLine().split(",");
@@ -55,17 +82,19 @@ public class CommunicationHandler extends Observable {
             String modifier = ans[1];
             String value = ans[2];
             if (id == myId && modifier.equals(GetMethod.myBooksChoice) && value.equals("true")) {
+                // Start communication chat
                 startUpdateListener();
             } 
         }
     }
 
-    private void startUpdateListener() throws IOException, ClassNotFoundException {
+    public void startUpdateListener() throws IOException, ClassNotFoundException {
+        // Start a communication chat in a background thread, while player's hasnt quit the game.
         executorService.submit(() -> {
             try {
-                stop = false;
                 String serverMessage;
                 while (!(serverMessage = in.readLine()).equals(QUIT_GAME_QUERY)) {
+                    System.out.println("com hanfler: "+serverMessage);
                     // General update message
                     if (!serverMessage.startsWith(String.valueOf(myId))) {
                         MESSAGE = serverMessage;
@@ -74,11 +103,11 @@ public class CommunicationHandler extends Observable {
                         } else if (serverMessage.startsWith(GetMethod.sendTo)) {
                             String message = serverMessage.split(",")[1];
                             checkForMessage(message);
-                        } else if (serverMessage.startsWith(GetMethod.endGame)) {
+                        } else if (serverMessage.startsWith(GetMethod.endGame)
+                                || serverMessage.equals(GetMethod.waitingRoomError)) {
                             endGameHandler(serverMessage);
                         }
                     }
-
                     // Private update
                     else {
                         if (serverMessage.equals(GetMethod.ready)) {
@@ -89,21 +118,20 @@ public class CommunicationHandler extends Observable {
                         String modifier = params[1];
                         String returnedVal = params[2];
 
-                        // if it's not my id, Drop maessage
+                        // If it's not my id - drop maessage
                         if (messageId == myId) {
                             handleResponse(modifier, returnedVal);
                         }
                     }
                 }
-
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
         });
-
     }
 
     private void requestProperties() {
+        // Requests all the game properties
         sendMessage(GetMethod.getCurrentBoard, "true");
         sendMessage(GetMethod.isMyTurn, "true");
         sendMessage(GetMethod.getMyWords, "true");
@@ -189,28 +217,22 @@ public class CommunicationHandler extends Observable {
             playerProperties.setMyTurn(false);
 
         } else if (returnedVal.equals("false")) {
-            // turn");
-
+          
         }
     }
 
     private void challengeHandler(String returnedVal) {
-            setChanged();
-            notifyObservers(GetMethod.challenge + "," + returnedVal);
+        setChanged();
+        notifyObservers(GetMethod.challenge + "," + returnedVal);
     }
 
     private void tryPlaceWordHandler(String returnedVal) {
-
         if (returnedVal.startsWith("notBoardLegal")) {
-
             setChanged();
             notifyObservers(GetMethod.tryPlaceWord + "," + "notBoardLegal");
-
         } else {
-
             setChanged();
             notifyObservers(GetMethod.tryPlaceWord + "," + returnedVal);
-
         }
     }
 
@@ -221,9 +243,6 @@ public class CommunicationHandler extends Observable {
         } else if (returnedVal.equals("false")) {
             playerProperties.setMyTurn(false);
 
-        } else {
-            // returnedVal);
-
         }
     }
 
@@ -233,7 +252,6 @@ public class CommunicationHandler extends Observable {
             @SuppressWarnings(value = "unchecked")
             ArrayList<Word> word = (ArrayList<Word>) ObjectSerializer.deserializeObject(returnedVal);
             playerProperties.setMyWords(word);
-
         }
     }
 

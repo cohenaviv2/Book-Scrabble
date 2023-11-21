@@ -237,7 +237,6 @@ public class GameManager extends Observable {
     }
 
     public void setReady() {
-
         if (readyToPlay.incrementAndGet() == totalPlayersNum) {
 
             gameRunning = true;
@@ -330,19 +329,19 @@ public class GameManager extends Observable {
             return "false";
     }
 
-    public void quitGameHandler(String quitGameMod, boolean isGameRunning) {
-        if (!isGameRunning) {
+    public void quitGameHandler(String quitGameMod) {
+        String[] params = quitGameMod.split(",");
+        int id = Integer.parseInt(params[0]);
+        String modifier = params[1];
+        String val = params[2];
+        if (!gameRunning && playersByName.size() > 1) {
             setChanged();
-            notifyObservers(GetMethod.quitGame+","+"-1");
-        } else {
-            String[] params = quitGameMod.split(",");
-            int id = Integer.parseInt(params[0]);
-            String modifier = params[1];
-            String val = params[2];
-            if (isIdExist(id) && modifier.equals(GetMethod.quitGame) && val.equals("true")) {
-                Player player = this.playersByID.get(id);
-                turnManager.handlePlayerQuit(player);
-            }
+            notifyObservers(GetMethod.waitingRoomError);
+            playersByName.clear();
+
+        } else if (isIdExist(id) && modifier.equals(GetMethod.quitGame) && val.equals("true")) {
+            Player player = this.playersByID.get(id);
+            turnManager.handlePlayerQuit(player);
         }
     }
 
@@ -403,7 +402,7 @@ public class GameManager extends Observable {
 
     private String challengeHandler(int playerId, String moveValue) {
         /*
-         * if Active word is NOT activated - can not try challenge this word.
+         * if Active word is NOT activated - can not try challange this word.
          * need to ask the game sever to challenge this word -
          * if server return true - need to go board.tryPlaceWord() - if all words is
          * dictionary legal need to updated all stated and add some extra points, if not
@@ -740,7 +739,7 @@ public class GameManager extends Observable {
             // Host Is Quitting
             if (quittingPlayer.getID() == hostPlayer.getID()) {
 
-                if (!gameEnd) {
+                if (!gameEnd && gameRunning) {
                     endGame(true);
                 }
 

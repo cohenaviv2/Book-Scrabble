@@ -23,7 +23,7 @@ Book Scrabble puts a new twist on the traditional word game by replacing the sta
 Gather around and challenge your buddies to a wordy showdown. Connect with friends from anywhere in the world using IP addresses over the internet. Whether you're near or far, the joy of wordplay knows no bounds. Let the game begin!
 
 <p align="center">
-<img src="https://i.postimg.cc/fyTYh7BB/1234-1.png" alt="App" width="400px" height="189px">
+<img src="https://i.postimg.cc/fyTYh7BB/1234-1.png" alt="App" width="500px" height="236px">
 </p>
 
 

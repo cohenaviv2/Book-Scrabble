@@ -68,34 +68,34 @@ not-board-legal=The word you placed is not allowed according to the game rules
 
 If you're unsure about the rules,
 click the 'Help' button to view the game instructions
-mode-host=1. My Name:
+mode-host=*My Name*
 Enter your name in the text field.
 This is how other players will know you during the game.
 
-2. Select Books:
+*Select Books*
 Choose the books that will be used in the game.
 Pick your favorites!
 
-3. Select Number of Players:
+*Select Number of Players*
 Use the 'Number of Players' dropdown to specify how many players
 will be in the game.
 
-Settings:
+*Settings*
 Allows you to get your IP address, customize the host server port,
 or check the game server connection status.
-mode-guest=1. my Name:
+mode-guest=*my Name*
 Enter your name in the text field.
 This is how other players will know you during the game.
 
-2. Select Books:
+*Select Books*
 Choose the books that will be used in the game.
 Pick your favorites!
 
-3. Host IP:
+*Host IP*
 Enter the host's IP address in the text field
 Ensure it's correct to join the game.
 
-Settings:
+*Settings*
 Allows you set a custom port if the host has chosen to change it.
 Ask the host if he changed the port, then adjust as needed.
 select-cells=Click to select the starting and ending cells for the word.
@@ -108,3 +108,5 @@ try-button=Once you're confident about your word placement,
 click the 'Try Placing a Word' button.
 place-word=When the placement is successful,
 the word will take its place on the board.
+new-game-window=Apologies, but it seems to have taken too long to start the game.
+You can start a new game or choose to quit.
