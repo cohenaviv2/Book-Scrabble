@@ -8,6 +8,33 @@ import java.util.concurrent.*;
 import app.model.GetMethod;
 import app.model.game.*;
 
+/*
+ * The CommunicationHandler is responsible for the communication with the host.
+ * The communication is done using strings:
+ * 
+ * HOST:
+ * receives a string from the guest
+ * starting with the guests ID,
+ * then a model method to apply,
+ * and then the value (etc. query word).
+ * All 3 parameters seperated by ","
+ * 
+ * e.g. - "0,connectMe,Moshe" , "0,getMyID,Moshe" , "259874,tryPlaceWord,Hello"
+ * (ID is 0 for initialization)
+ * 
+ * GUEST:
+ * recieves a string from the host
+ * starting with his ID,
+ * then the model methos that was applied
+ * and then the returned value.
+ * All 3 parameters seperated by ","
+ * 
+ * e.g. - "0,connectMe,true" , "0,getMyID,256874" , "259874,tryPlaceWord,32"
+ * 
+ * @author: Aviv Cohen
+ * 
+ */
+
 public class CommunicationHandler extends Observable {
     private Socket hostSocket;
     private BufferedReader in;
@@ -38,11 +65,8 @@ public class CommunicationHandler extends Observable {
         if (!ans[2].equals("0")) {
             this.myId = Integer.parseInt(ans[2]);
             this.QUIT_GAME_QUERY = myId + "," + GetMethod.quitGame + "," + "true";
-            // Connected!");
             flag = false;
         } else {
-            // System.err.println("CommHandler - connectMe: wrong answer from Host server "
-            // + ans);
             flag = true;
             close();
         }
@@ -58,21 +82,14 @@ public class CommunicationHandler extends Observable {
             String modifier = ans[1];
             String value = ans[2];
             if (id == myId && modifier.equals(GetMethod.myBooksChoice) && value.equals("true")) {
-
-                // chat...");
+                // Start communication chat
                 startUpdateListener();
-
-            } else {
-                // erver " + ans);
-                // throw new Exception("CommHandler - addBookHandler: wrong answer from Host
-                // server " + ans);
-
-            }
+            } 
         }
-
     }
 
     public void startUpdateListener() throws IOException, ClassNotFoundException {
+        // Start a communication chat in a background thread, while player's hasnt quit the game.
         executorService.submit(() -> {
             try {
                 String serverMessage;
@@ -90,7 +107,6 @@ public class CommunicationHandler extends Observable {
                                 || serverMessage.equals(GetMethod.waitingRoomError)) {
                             endGameHandler(serverMessage);
                         }
-
                     }
                     // Private update
                     else {
@@ -102,21 +118,20 @@ public class CommunicationHandler extends Observable {
                         String modifier = params[1];
                         String returnedVal = params[2];
 
-                        // if it's not my id, Drop maessage
+                        // If it's not my id - drop maessage
                         if (messageId == myId) {
                             handleResponse(modifier, returnedVal);
                         }
                     }
                 }
-
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
         });
-
     }
 
     private void requestProperties() {
+        // Requests all the game properties
         sendMessage(GetMethod.getCurrentBoard, "true");
         sendMessage(GetMethod.isMyTurn, "true");
         sendMessage(GetMethod.getMyWords, "true");
@@ -202,8 +217,7 @@ public class CommunicationHandler extends Observable {
             playerProperties.setMyTurn(false);
 
         } else if (returnedVal.equals("false")) {
-            // turn");
-
+          
         }
     }
 
@@ -213,17 +227,12 @@ public class CommunicationHandler extends Observable {
     }
 
     private void tryPlaceWordHandler(String returnedVal) {
-
         if (returnedVal.startsWith("notBoardLegal")) {
-
             setChanged();
             notifyObservers(GetMethod.tryPlaceWord + "," + "notBoardLegal");
-
         } else {
-
             setChanged();
             notifyObservers(GetMethod.tryPlaceWord + "," + returnedVal);
-
         }
     }
 
@@ -234,9 +243,6 @@ public class CommunicationHandler extends Observable {
         } else if (returnedVal.equals("false")) {
             playerProperties.setMyTurn(false);
 
-        } else {
-            // returnedVal);
-
         }
     }
 
@@ -246,7 +252,6 @@ public class CommunicationHandler extends Observable {
             @SuppressWarnings(value = "unchecked")
             ArrayList<Word> word = (ArrayList<Word>) ObjectSerializer.deserializeObject(returnedVal);
             playerProperties.setMyWords(word);
-
         }
     }
 

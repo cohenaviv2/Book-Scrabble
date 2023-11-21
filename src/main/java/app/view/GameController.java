@@ -1,17 +1,13 @@
 package app.view;
 
 import app.model.GetMethod;
-import app.model.game.ObjectSerializer;
-import app.model.game.Tile;
-import app.model.game.Word;
+import app.model.game.*;
 import app.view.GameView.HighlightOutcome;
 import app.view_model.GameViewModel;
-
 import java.io.IOException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javafx.stage.*;
 import javafx.util.Duration;
 import javafx.animation.PauseTransition;
@@ -21,6 +17,15 @@ import javafx.scene.control.Button;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.concurrent.Task;
+
+/*
+ * The GameController is responsible for creating, handling, and presenting windows, stages, and scenes.
+ * It collaborates with the GameView class to generate JavaFX components and set them within windows.
+ * It is also manages the interaction between the user interface and game logic.
+ * 
+ * @author: Aviv Cohen
+ * 
+ */
 
 public class GameController implements Observer {
     private GameViewModel gameViewModel; // Game view model
@@ -347,7 +352,7 @@ public class GameController implements Observer {
         if (o == gameViewModel && arg instanceof String) {
             Platform.runLater(() -> {
                 String message = (String) arg;
-                System.out.println("view: "+message);
+                System.out.println("view: " + message);
                 // Update All
                 if (message.startsWith(GetMethod.drawTiles)) {
                     gameRunning = true;
@@ -397,12 +402,13 @@ public class GameController implements Observer {
 
                 } else if (message.startsWith(GetMethod.quitGame)) {
                     if (gameView.isHost() && gameViewModel.othersInfoProperty().size() == 0) {
-                        VBox allQuitBox = gameView.createQuitAlertBox("Game Over", "You left alone in the game",true);
+                        VBox allQuitBox = gameView.createQuitAlertBox("Game Over", "You left alone in the game", true);
                         showCustomWindow(allQuitBox, 550, 300);
                     } else {
-                        if (gameRunning){
+                        if (gameRunning) {
                             String player = message.split(":")[1];
-                            VBox quitAlertBox = gameView.createClosableAlertBox("", player + " has quit the game!", true);
+                            VBox quitAlertBox = gameView.createClosableAlertBox("", player + " has quit the game!",
+                                    true);
                             showCustomWindow(quitAlertBox, 500, 260);
                         }
                     }

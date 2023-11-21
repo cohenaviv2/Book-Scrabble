@@ -7,12 +7,9 @@ import java.util.*;
 import app.model.game.Tile;
 import app.model.game.Word;
 import app.model.host.HostModel;
-import app.view.GameView.HighlightOutcome;
 import app.view_model.GameViewModel;
 import javafx.animation.FadeTransition;
-import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
-import javafx.animation.KeyValue;
 import javafx.animation.PauseTransition;
 import javafx.animation.ScaleTransition;
 import javafx.animation.Timeline;
@@ -33,6 +30,13 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.*;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+
+/* GameView creates the visual components of the game using JavaFX, managing the game board, player details,
+* and other interactive elements for a user-friendly interface.
+* 
+* @author: Aviv Cohen
+*
+*/
 
 public class GameView {
     // View Model & View Controller

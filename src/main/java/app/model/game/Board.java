@@ -2,11 +2,8 @@ package app.model.game;
 
 import java.util.ArrayList;
 
-import app.model.game.Tile.Bag;
-
 /*
- * Represents the Game Board
- * Contains 15x15 matrix of Squares
+ * Represents the game board by managing a 15x15 matrix of Squares.
  * Can operate on the board by placing a word
  * Placement is done after checking whether the word is legal in terms of the board and the dictionary
  * and calculates the score accordingly.

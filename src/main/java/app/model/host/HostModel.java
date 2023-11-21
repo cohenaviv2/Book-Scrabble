@@ -9,6 +9,16 @@ import app.model.game.*;
 import app.model.server.*;
 import javafx.concurrent.Task;
 
+/*
+ * The HostModel takes on the responsibilities of game logic management and communication.
+ * It maintains a host server for guest connections and communication,
+ * a 'GameManager' to handle the game logic (board, tiles, words, turn management),
+ * and communication with the game server, ensuring dictionary legality checks for words played during the game.
+ * 
+ * @author: Aviv Cohen
+ * 
+ */
+
 public class HostModel extends Observable implements GameModel, Observer {
 
     private static HostModel hm = null; // Instance
@@ -30,16 +40,6 @@ public class HostModel extends Observable implements GameModel, Observer {
         }
         return hm;
     }
-
-    // public void stopHostServer() {
-    // hostServer.close();
-    // }
-
-    // public void startHostServer() {
-    // if (!hostServer.isRunning()) {
-    // hostServer.start();
-    // }
-    // }
 
     public void setNumOfPlayers(int numOftotalPlayers) {
         /*
@@ -91,6 +91,7 @@ public class HostModel extends Observable implements GameModel, Observer {
 
     @Override
     public void ready() {
+        /* Set 'ready to play' state */
         gameManager.setReady();
     }
 
@@ -382,7 +383,7 @@ public class HostModel extends Observable implements GameModel, Observer {
     public void update(Observable o, Object arg) {
         if (o == gameManager) {
             String update = (String) arg;
-            System.out.println("model: "+update);
+            System.out.println("model: " + update);
             if (update.startsWith(GetMethod.updateAll)) {
                 hostServer.sendToAll(update);
                 updateProperties();
@@ -405,6 +406,7 @@ public class HostModel extends Observable implements GameModel, Observer {
     }
 
     private void checkForMessage(String update) {
+        /* Checking if certain messages were received for me */
         if (update.startsWith(playerProperties.getMyName()) || update.startsWith("All")) {
             setChanged();
             notifyObservers(update);
@@ -413,6 +415,7 @@ public class HostModel extends Observable implements GameModel, Observer {
 
     @Override
     public boolean isConnected() {
+        /* Return the state of host server and game server connection */
         if (!hostServer.isRunning()) {
             return false;
         } else if (!isGameServerConnect()) {
@@ -423,11 +426,13 @@ public class HostModel extends Observable implements GameModel, Observer {
 
     @Override
     public void sendTo(String name, String message) {
+        /* Sends a private message to a specific player */
         hostServer.sendToAll(GetMethod.sendTo + "," + name + ":" + message + ":" + playerProperties.getMyName());
     }
 
     @Override
     public void sendToAll(String message) {
+        /* Sends a message to all the player in the game */
         hostServer.sendToAll(GetMethod.sendToAll + "," + "All" + ":" + message + ":" + playerProperties.getMyName());
     }
 

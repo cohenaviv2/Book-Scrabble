@@ -7,24 +7,24 @@ import app.model.game.GameManager;
 import app.model.server.ClientHandler;
 
 /*
- * The Guest handler used to communicate between the host and the guests
- * Communication is done using strings
+ * The GuestHandler is responsible for the communication between the host and the guests.
+ * The communication is done using strings:
  * 
  * HOST:
  * receives a string from the guest
  * starting with the guests ID,
- * then Model method to active,
- * and then the value (like query word)
+ * then a model method to apply,
+ * and then the value (etc. query word).
  * All 3 parameters seperated by ","
  * 
  * e.g. - "0,connectMe,Moshe" , "0,getMyID,Moshe" , "259874,tryPlaceWord,Hello"
  * (ID is 0 for initialization)
  * 
  * GUEST:
- * gets a string from the host
+ * recieves a string from the host
  * starting with his ID,
- * then the Model methos that was activated
- * and then the returned value
+ * then the model methos that was applied
+ * and then the returned value.
  * All 3 parameters seperated by ","
  * 
  * e.g. - "0,connectMe,true" , "0,getMyID,256874" , "259874,tryPlaceWord,32"
