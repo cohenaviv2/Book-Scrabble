@@ -53,7 +53,6 @@ public class GameController implements Observer {
         setUpStage(customStage);
         this.gameRunning = false;
         this.selectedBooks = new ArrayList<>();
-        selectedBooks.add("harry potter");
         this.selectedCells = new ArrayList<>();
         this.placementCells = new Stack<>();
         this.placementTileList = new ArrayList<>();
@@ -69,7 +68,6 @@ public class GameController implements Observer {
             customStage.initOwner(getCurrentStage()); // Set the main stage as the owner
             customStage.initModality(Modality.APPLICATION_MODAL); // Set modality to NONE
         }
-
     }
 
     private void setUpScene(Scene scene) {
@@ -87,7 +85,7 @@ public class GameController implements Observer {
         VBox root = new VBox(osBar, gameModeBox);
         root.getStyleClass().add("wood-background");
 
-        Scene gameModScene = new Scene(root, 630, 510); // H: 480
+        Scene gameModScene = new Scene(root, 630, 525); // H: 480
         setUpScene(gameModScene);
 
         gameLoginStage.setScene(gameModScene);
@@ -101,7 +99,7 @@ public class GameController implements Observer {
         VBox root = new VBox(osBar, formBox);
         root.getStyleClass().add("wood-background");
 
-        Scene gameSetupScene = new Scene(root, 400, 600);
+        Scene gameSetupScene = new Scene(root, 400, 620);
         setUpScene(gameSetupScene);
 
         gameLoginStage.setScene(gameSetupScene);
@@ -352,7 +350,6 @@ public class GameController implements Observer {
         if (o == gameViewModel && arg instanceof String) {
             Platform.runLater(() -> {
                 String message = (String) arg;
-                System.out.println("view: " + message);
                 // Update All
                 if (message.startsWith(GetMethod.drawTiles)) {
                     gameRunning = true;
@@ -471,7 +468,7 @@ public class GameController implements Observer {
         Pattern pattern = Pattern.compile(firstNameRegex);
         Matcher matcher = pattern.matcher(input);
 
-        return matcher.matches();
+        return matcher.matches() && input.length() > 1;
     }
 
 }

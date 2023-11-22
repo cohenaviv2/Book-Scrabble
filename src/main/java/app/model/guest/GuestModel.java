@@ -156,7 +156,6 @@ public class GuestModel extends Observable implements GameModel, Observer {
             setChanged();
             notifyObservers(arg);
             String update = (String) arg;
-            System.out.println("model: " + update);
         }
     }
 
