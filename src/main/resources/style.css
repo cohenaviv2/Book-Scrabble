@@ -358,7 +358,7 @@
 .board-cell.failed {
   -fx-alignment: center;
   -fx-border-color: rgb(206, 0, 0);
-  -fx-border-width: 4px;
+  -fx-border-width: 3px;
   -fx-border-radius: 5px;
   -fx-effect: dropshadow(gaussian, rgb(233, 58, 58), 25, 0.1, 0, 7);
 
@@ -366,10 +366,10 @@
 
 .board-cell.challenge-successful {
   -fx-alignment: center;
-  -fx-border-color: rgb(234, 77, 255);
-  -fx-border-width: 4px;
+  -fx-border-color: rgb(225, 15, 253);
+  -fx-border-width: 3px;
   -fx-border-radius: 5px;
-  -fx-effect: dropshadow(gaussian, rgb(255, 223, 77), 50, 0.15, 0, 7);
+  -fx-effect: dropshadow(gaussian, rgb(248, 132, 238), 50, 0.3, 0, 7);
 }
 
 .title {

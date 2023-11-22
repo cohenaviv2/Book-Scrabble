@@ -94,7 +94,6 @@ public class CommunicationHandler extends Observable {
             try {
                 String serverMessage;
                 while (!(serverMessage = in.readLine()).equals(QUIT_GAME_QUERY)) {
-                    System.out.println("com hanfler: "+serverMessage);
                     // General update message
                     if (!serverMessage.startsWith(String.valueOf(myId))) {
                         MESSAGE = serverMessage;

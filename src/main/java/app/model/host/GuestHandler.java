@@ -124,7 +124,6 @@ public class GuestHandler implements ClientHandler {
         String guestMessage;
         // START CHAT
         while (!(guestMessage = in.readLine()).equals(QUIT_GAME)) {
-            System.out.println(guestMessage);
             String[] params = guestMessage.split(",");
             int messageId = Integer.parseInt(params[0]);
             String modifier = params[1];

@@ -383,7 +383,6 @@ public class HostModel extends Observable implements GameModel, Observer {
     public void update(Observable o, Object arg) {
         if (o == gameManager) {
             String update = (String) arg;
-            System.out.println("model: " + update);
             if (update.startsWith(GetMethod.updateAll)) {
                 hostServer.sendToAll(update);
                 updateProperties();

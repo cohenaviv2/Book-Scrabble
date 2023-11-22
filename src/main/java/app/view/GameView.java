@@ -169,11 +169,11 @@ public class GameView {
         headerLabel.getStyleClass().add("book-scrabble-header");
 
         ImageView logoImage = new ImageView(new Image("backgrounds/logo-main.png"));
-        logoImage.setFitWidth(610);
-        // logoImage.setFitHeight(249);
+        // logoImage.setFitWidth(610);
+        // logoImage.setFitHeight(270);
         HBox headerBox = new HBox(logoImage);
         headerBox.setAlignment(Pos.CENTER);
-        headerBox.setPadding(new Insets(5, 0, -30, 0));
+        headerBox.setPadding(new Insets(0, 0, -30, 0));
 
         // Game mode label
         Label modeLabel = new Label("Choose Game Mode");
@@ -272,7 +272,7 @@ public class GameView {
         nameLabel.getStyleClass().add("login-label");
         String tempName = isHost ? "Daniel" : "Anthony";
         // myName != null ? myName : ""
-        TextField nameTextField = new TextField(tempName);
+        TextField nameTextField = new TextField(myName != null ? myName : "");
         int maxCharacters = 11; // Maximum characters in the name field
         TextFormatter<String> textFormatter = new TextFormatter<>(change -> {
             if (change.getControlNewText().length() <= maxCharacters) {
@@ -329,7 +329,7 @@ public class GameView {
         modeExp.setAlignment(Pos.CENTER);
         Node[] helpNodes = createCustomBox(modeExp, "red", symbols.get("exit"), "help");
         VBox helpBox = (VBox) helpNodes[0];
-        helpButton.setOnAction(e -> gameController.showCustomWindow(helpBox, 600, 550));
+        helpButton.setOnAction(e -> gameController.showCustomWindow(helpBox, 600, 580));
         Button settingsButton = (Button) roundButtonsPane.getChildren().get(1);
         HBox settings = createSettingBox();
         Node[] settingBoxNodes = createCustomBox(settings, "red", symbols.get("exit"), "settings");
@@ -394,6 +394,8 @@ public class GameView {
                         osBar.setDisable(true);
 
                         gameController.showCustomWindow(fullWaitingBox, 500, 350);
+                        // Set up a timer for 10 seconds
+                        setupTimer();
                     }
                 }
             });
@@ -405,7 +407,7 @@ public class GameView {
             ipLabel.getStyleClass().add("login-label");
             TextField ipTextField = new TextField();
             ipTextField.setMaxWidth(250);
-            ipTextField.setText("localhost");
+            // ipTextField.setText("localhost");
             ipTextField.setAlignment(Pos.CENTER);
             ipTextField.getStyleClass().add("text-field");
             ipTextField.setOnMouseClicked(e -> ipTextField.getStyleClass().remove("error-field"));
@@ -495,6 +497,8 @@ public class GameView {
                                 // Waiting Window
                                 progressIndicator.setVisible(false);
                                 gameController.showCustomWindow(fullWaitingBox, 500, 350);
+                                // Set up a timer for 10 seconds
+                                setupTimer();
                             }
                         });
 
@@ -734,9 +738,6 @@ public class GameView {
         progressIndicator.getStyleClass().add("progress-indicator");
         VBox waitingBox = new VBox(10, waitingText, progressIndicator);
         waitingBox.setAlignment(Pos.CENTER);
-
-        // Set up a timer for 10 seconds
-        setupTimer();
 
         return waitingBox;
     }
