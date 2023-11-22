@@ -62,12 +62,12 @@ The game server, hosted on Oracle Cloud via an Ubuntu 22.04 VM, is responsible f
 ### Windows
 
 Download the game installer for Windows: <br>
-https://github.com/cohenaviv2/Book-Scrabble/releases/download/v1.0/Book_Scrabble_Setup.exe
+https://github.com/cohenaviv2/Book-Scrabble/releases/download/v1.1/Book_Scrabble_Setup.exe
 
 ### Other Platforms
 
 For other platforms, ensure you have Java Runtime Environment (JRE) installed. <br> You can play the game by downloading the repository and running the JAR file: <br>
-https://github.com/cohenaviv2/Book-Scrabble/archive/main.zip
+https://github.com/cohenaviv2/Book-Scrabble/archive/refs/tags/v1.1.zip
 
 # Demo Video
 
